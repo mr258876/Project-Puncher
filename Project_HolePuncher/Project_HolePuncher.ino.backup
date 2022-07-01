@@ -10,6 +10,8 @@
 #include "PuncherScheduler.h"
 #include "SerialCommand.h"
 
+#include "lang_def.h"
+
 //----------------------------------------电机控制用常量
 #define MOTOR_STEPS 200
 #define MICROSTEPS 8
@@ -45,7 +47,7 @@ SemaphoreHandle_t PuncherBinary = xSemaphoreCreateBinary(); // 打孔机信号�
 AS5600 encoderZ;
 int lastAngle = -1;
 long rotatedAngle = 0;
-bool encoderDisabled = false;
+bool encoderDisabled = true;
 
 //----------------------------------------电机控制变量
 #define xenablePin 23 // x使能控制引脚
@@ -98,7 +100,7 @@ char progressCA[9];
 // 运行函数
 // ----------------------------------------
 void setup()
-{   
+{
     Serial.begin(115200);
     Serial.println("Hole puncher booting...");
 
@@ -107,8 +109,8 @@ void setup()
     Wire.setClock(400000);
 
     // 初始化tcMenu
-    gfx.enableUTF8Print();      // 启用UTF-8以支持多语言
-    gfx.setFontPosBaseline();   // 设置字体基线(虽然这里应该没啥用)
+    gfx.enableUTF8Print();    // 启用UTF-8以支持多语言
+    gfx.setFontPosBaseline(); // 设置字体基线(虽然这里应该没啥用)
     setupMenu();
     installTheme();
     menuProgress.setTextValue("idle");
@@ -143,43 +145,13 @@ void setup()
     DRIVER_SERIAL.begin(115200);    // 启动串口
     driverX.begin();                // x方向驱动板开始通讯
     driverX.microsteps(MICROSTEPS); // x方向驱动板设置微步大小
-//    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
+                                    //    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
     driverY.begin();                // y方向驱动板开始通讯
     driverY.microsteps(MICROSTEPS); // y方向驱动板设置微步大小
-//    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
+                                    //    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
     driverZ.begin();                // z方向驱动板开始通讯
     driverZ.microsteps(MICROSTEPS); // z方向驱动板设置微步大小
-//    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
-
-    // 检测编码器状态
-    Wire.beginTransmission(AS5600_I2C_ADDR);
-    switch (Wire.endTransmission())
-    {
-        case 0:
-            if (getMagnetStatus() == 1)
-            {   
-                Serial.println("Endocer detected and enabled.");
-                //------------------------------创建磁编码器任务
-                xTaskCreate(runEncoder,           //任务函数
-                            "runEncoder",         //任务名称
-                            4096,                //任务堆栈大小
-                            NULL,                //任务参数
-                            1,                   //任务优先级
-                            &runEncoder_Handler); //任务句柄
-            }
-            else
-            {   
-                Serial.println("Magnet Error! Endocer Disabled!");
-                Serial.print("Error code: ");
-                Serial.println(getMagnetStatus());
-                encoderDisabled = true;
-            }
-            break;
-        default:
-            Serial.println("Encoder Not Deceted and Disabled!");
-            encoderDisabled = true;
-            break;
-    }
+                                    //    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
@@ -216,20 +188,54 @@ void setup()
     //                         NULL,             //任务句柄
     //                         1);               //执行任务核心
 
-//    vTaskStartScheduler(); //开启任务调度
+    //    vTaskStartScheduler(); //开启任务调度
 
     xSemaphoreGive(XaxisBinary);   //释放X轴同步信号量
     xSemaphoreGive(YaxisBinary);   //释放Y轴同步信号量
     xSemaphoreGive(ZaxisBinary);   //释放Z轴同步信号量
     xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
 
+    //--------------------检测编码器状态并启用编码器--------------------
+    if (menuUseEncoder.getCurrentValue())
+    {
+        Wire.beginTransmission(AS5600_I2C_ADDR);
+        switch (Wire.endTransmission())
+        {
+        case 0:
+            if (getMagnetStatus() == 1)
+            {   
+                encoderDisabled = false;
+                // Serial.println("Endocer detected and enabled.");
+                //------------------------------创建磁编码器任务
+                xTaskCreate(runEncoder,           //任务函数
+                            "runEncoder",         //任务名称
+                            4096,                 //任务堆栈大小
+                            NULL,                 //任务参数
+                            1,                    //任务优先级
+                            &runEncoder_Handler); //任务句柄
+            }
+            else
+            {
+                // Serial.println("Magnet Error! Endocer Disabled!");
+                // Serial.print("Error code: ");
+                // Serial.println(getMagnetStatus());
+                openDialog(TEXT_ERROR, TEXT_MAGNET_NOT_DETECTED, TEXT_ENCODER_NOW_DISABLED);
+            }
+            break;
+        default:
+            // Serial.println("Encoder Not Deceted and Disabled!");
+            openDialog(TEXT_ERROR, TEXT_ENCODER_NOT_DECETED, TEXT_ENCODER_NOW_DISABLED);
+            break;
+        }
+    }
+
     Serial.println("Puncher booted.");
 }
 
 // 电机运行及调度现由loop函数处理 DEV.20220528
 void loop()
-{   
-//    Serial.println(encoderZ.getAngle());
+{
+    //    Serial.println(encoderZ.getAngle());
     if (!isPunching && puncherStatus == 0x11 && holeList.size() > 0) // 当状态为正在打孔且打孔队列有孔时才进行调度
     {
         isPunching = true;
@@ -277,7 +283,7 @@ void loop()
             {
                 Yenabled = false;
                 isPunching = false;
-                
+
                 holeFinished += 1;
             }
         }
@@ -296,20 +302,20 @@ void installTheme()
 
 //------------------------------TcMenu 主进程循环函数
 void runTcMenu(void *pvParameters)
-{   
+{
     Serial.println();
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(10));
         if (xSemaphoreTake(I2CMutex, portMAX_DELAY) == pdTRUE)
-        {   
+        {
             taskManager.runLoop();
             xSemaphoreGive(I2CMutex);
         }
 
         if (punchStartTime > 0)
         {
-            menuDuration.setTime(secToTime((int)(millis()-punchStartTime)/1000));
+            menuDuration.setTime(secToTime((int)(millis() - punchStartTime) / 1000));
             menuDuration.setChanged(true);
         }
     }
@@ -339,30 +345,29 @@ void serialCommand(void *pvParameters)
 void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
 {
     if (!Xenabled && !Zenabled)
-    {   
+    {
         vTaskDelay(pdMS_TO_TICKS(100));
-        if (abs(rotatedAngle/4096.0*MOTOR_STEPS*MICROSTEPS + zLastMove) < 1 || encoderDisabled)
-        {   
+        if (abs(rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1 || encoderDisabled)
+        {
             moveYto(4);
             Ydown = true;
         }
         else
-        {   
+        {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle/4096.0*MOTOR_STEPS*MICROSTEPS));
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS));
         }
-        
     }
 }
 
 void moveZ(float mm)
 {
     Zenabled = true;
-//     driverZ.rms_current(zOptiCurr);
+    //     driverZ.rms_current(zOptiCurr);
     long toMove = (long)(-mm * 25.852579588531222053828834659495);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
-//     driverZ.rms_current(zStbyCurr);
+    //     driverZ.rms_current(zStbyCurr);
 }
 
 void moveXpos(int pos)
@@ -380,22 +385,22 @@ void moveXpos(int pos)
 void moveXto(float mm)
 {
     Xenabled = true;
-//    driverX.rms_current(xOptiCurr);
+    //    driverX.rms_current(xOptiCurr);
     long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
-//    driverX.rms_current(xStbyCurr);
+    //    driverX.rms_current(xStbyCurr);
     xPosition = steps;
 }
 
 void moveYto(float mm)
 {
     Yenabled = true;
-//    driverY.rms_current(yOptiCurr);
+    //    driverY.rms_current(yOptiCurr);
     long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
-//    driverY.rms_current(yStbyCurr);
+    //    driverY.rms_current(yStbyCurr);
     yPosition = steps;
 }
 
@@ -430,19 +435,19 @@ uint8_t getMagnetStatus()
 void runEncoder(void *pvParameters)
 {
     while (1)
-    {   
+    {
         if (xSemaphoreTake(I2CMutex, portMAX_DELAY) == pdTRUE)
-        {   
+        {
             int v = encoderZ.getAngle();
             if (lastAngle != -1)
-            {   
-                if (abs(v-lastAngle)>2047)
+            {
+                if (abs(v - lastAngle) > 2047)
                 {
-                    rotatedAngle += v>2048? v-lastAngle-4096 : v-lastAngle+4096;
+                    rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
                 }
                 else
                 {
-                    rotatedAngle += v-lastAngle;
+                    rotatedAngle += v - lastAngle;
                 }
             }
             lastAngle = v;
@@ -452,9 +457,9 @@ void runEncoder(void *pvParameters)
     }
 }
 
-
-void CALLBACK_FUNCTION changeYes(int id) {
-    // TODO - your menu change code
+// 编码器校准
+void encoderCalibrate()
+{
 }
 
 //----------------------------------------
@@ -463,11 +468,5 @@ void CALLBACK_FUNCTION changeYes(int id) {
 // 秒数转时间
 TimeStorage secToTime(int sec)
 {
-    return(TimeStorage{sec/3600, sec%3600/60, sec%60, 0}); 
-}
-
-
-
-void CALLBACK_FUNCTION updateLanguage(int id) {
-    // TODO - your menu change code
+    return (TimeStorage{sec / 3600, sec % 3600 / 60, sec % 60, 0});
 }

@@ -6,8 +6,8 @@ const PROGMEM char* enUS[] = {
     "Notice",
     "Warning",
     "Error",
-    "Confirm",
-    "Cancel",
+    "Continue",
+    "Back",
     "Progress",
     "Remaining",
     "Duration",
@@ -16,9 +16,24 @@ const PROGMEM char* enUS[] = {
     "Proj.Holepuncer",
     "@mr258876",
     "version",
-    "DEV20220600",
+    "DEV20220700",
     "Settings",
-    "Language"
+    "Language",
+    "X axis",
+    "Y axis",
+    "Z axis",
+    "Perimeter",
+    "Running Speed",
+    "Vitural Endstop",
+    "Endstop Threshold",
+    "Running Curreng",
+    "Encoder Enabled",
+    "Reverse Encoder",
+    "encoder now disable.",
+    "Magnet not detected,",
+    "No encoder, ",
+    "Calibrating encoder",
+    "Please wait..."
 };
 
 #endif

@@ -27,33 +27,61 @@ extern GraphicsDeviceRenderer renderer;
 
 
 // Global Menu Item exports
-extern TextMenuItem menuAbout3;
-extern TextMenuItem menuAbout2;
-extern TextMenuItem menuAbout1;
-extern BackMenuItem menuBackAbout;
-extern SubMenuItem menuAbout;
-extern EnumMenuItem menuLanguage;
-extern BackMenuItem menuBackSettings;
-extern SubMenuItem menuSettings;
-extern BackMenuItem menuBackMenu;
-extern SubMenuItem menuMenu;
-extern TimeFormattedMenuItem menuDuration;
-extern TimeFormattedMenuItem menuETA;
-extern TextMenuItem menuProgress;
 extern ActionMenuItem menuInfoNo;
 extern ActionMenuItem menuInfoYes;
 extern TextMenuItem menuInfo2;
 extern TextMenuItem menuInfo1;
 extern BackMenuItem menuBackInfoView;
 extern SubMenuItem menuInfoView;
+extern TextMenuItem menuAbout3;
+extern TextMenuItem menuAbout2;
+extern TextMenuItem menuAbout1;
+extern BackMenuItem menuBackAbout;
+extern SubMenuItem menuAbout;
+extern BooleanMenuItem menuReversedEncoderZ;
+extern BooleanMenuItem menuUseEncoderZ;
+extern AnalogMenuItem menuRunningCurrentZ;
+extern AnalogMenuItem menuRunningSpeedZ;
+extern AnalogMenuItem menuPerimeterZ;
+extern BackMenuItem menuBackZAxis;
+extern SubMenuItem menuZAxis;
+extern AnalogMenuItem menuRunningCurrentY;
+extern AnalogMenuItem menuEndstopThresholdY;
+extern BooleanMenuItem menuVirtualEndstopY;
+extern AnalogMenuItem menuRunningSpeedY;
+extern AnalogMenuItem menuPerimeterY;
+extern BackMenuItem menuBackYAxis;
+extern SubMenuItem menuYAxis;
+extern AnalogMenuItem menuRunningCurrentX;
+extern AnalogMenuItem menuEndstopThresholdX;
+extern BooleanMenuItem menuVitrualEndstopX;
+extern AnalogMenuItem menuRunningSpeedX;
+extern AnalogMenuItem menuPerimeterX;
+extern BackMenuItem menuBackXAxis;
+extern SubMenuItem menuXAxis;
+extern EnumMenuItem menuLanguage;
+extern BackMenuItem menuBackSettings;
+extern SubMenuItem menuSettings;
+extern ListRuntimeMenuItem menuOpenFile;
+extern BackMenuItem menuBackMenu;
+extern SubMenuItem menuMenu;
+extern TimeFormattedMenuItem menuDuration;
+extern TimeFormattedMenuItem menuETA;
+extern TextMenuItem menuProgress;
 
 // Provide a wrapper to get hold of the root menu item and export setupMenu
-inline MenuItem& rootMenuItem() { return menuInfoView; }
+inline MenuItem& rootMenuItem() { return menuProgress; }
 void setupMenu();
 
 // Callback functions must always include CALLBACK_FUNCTION after the return type
 #define CALLBACK_FUNCTION
 
+int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
 void CALLBACK_FUNCTION updateLanguage(int id);
+
+void openDialog(int title, int info1, int info2);
+void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback);
+void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback, MenuCallbackFn cancel_callback);
+void openConfirmDialog(int title, int info1, int info2, int confirm, int cancel, bool show_confirm, bool show_cancel, MenuCallbackFn confirm_callback, MenuCallbackFn cancel_callback);
 
 #endif // MENU_GENERATED_CODE_H

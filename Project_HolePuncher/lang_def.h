@@ -33,5 +33,23 @@
 // 设置
 #define TEXT_SETTINGS           15
 #define TEXT_LANGUAGE           16
+#define TEXT_X_AXIS             17
+#define TEXT_Y_AXIS             18
+#define TEXT_Z_AXIS             19
+#define TEXT_PERIMETER          20
+#define TEXT_RUNNING_SPEED      21
+#define TEXT_VIRTUAL_ENDSTOP    22
+#define TEXT_ENDSTOP_THRESHOLD  23
+#define TEXT_RUNNING_CURRENT    24
+#define TEXT_USE_ENCODER        25
+#define TEXT_REVERSED_ENCODER   26
+
+// 编码器相关文本
+#define TEXT_ENCODER_NOW_DISABLED   27
+#define TEXT_MAGNET_NOT_DETECTED    28
+#define TEXT_ENCODER_NOT_DECETED    29
+#define TEXT_CALIBRATING_ENCODER    30
+
+#define TEXT_PLEASE_WAIT        31
 
 #endif

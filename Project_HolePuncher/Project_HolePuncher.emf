@@ -1,8 +1,458 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "Mr258876",
+  "author": "mr258876",
   "items": [
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "item": {
+        "textLength": 9,
+        "itemType": "PLAIN_TEXT",
+        "name": "Progress",
+        "variableName": "Progress",
+        "id": 6,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "TIME_24H",
+        "name": "Remaining",
+        "variableName": "ETA",
+        "id": 7,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "TIME_DURATION_SECONDS",
+        "name": "Duration",
+        "variableName": "Duration",
+        "id": 8,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 0,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Menu",
+        "variableName": "Menu",
+        "id": 9,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 9,
+      "type": "runtimeList",
+      "item": {
+        "initialRows": 0,
+        "name": "Open File",
+        "variableName": "OpenFile",
+        "id": 34,
+        "eepromAddress": -1,
+        "functionName": "",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 9,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Settings",
+        "variableName": "Settings",
+        "id": 10,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "enumItem",
+      "item": {
+        "enumEntries": [
+          "ENG",
+          "CHS"
+        ],
+        "name": "Language",
+        "variableName": "Language",
+        "id": 15,
+        "eepromAddress": 4,
+        "functionName": "updateLanguage",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "X axis",
+        "variableName": "XAxis",
+        "id": 16,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mm",
+        "name": "PerimeterX",
+        "variableName": "PerimeterX",
+        "id": 21,
+        "eepromAddress": 9,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 600,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mStp",
+        "name": "Running SpeedX",
+        "variableName": "RunningSpeedX",
+        "id": 22,
+        "eepromAddress": 11,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Vitrual EndstopX",
+        "variableName": "VitrualEndstopX",
+        "id": 19,
+        "eepromAddress": 6,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "name": "Endstop ThresholdX",
+        "variableName": "EndstopThresholdX",
+        "id": 20,
+        "eepromAddress": 7,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 1023,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "mA",
+        "name": "Running CurrentX",
+        "variableName": "RunningCurrentX",
+        "id": 23,
+        "eepromAddress": 13,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Y axis",
+        "variableName": "YAxis",
+        "id": 17,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mm",
+        "name": "PerimeterY",
+        "variableName": "PerimeterY",
+        "id": 26,
+        "eepromAddress": 18,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 600,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mStp",
+        "name": "Running SpeedY",
+        "variableName": "RunningSpeedY",
+        "id": 27,
+        "eepromAddress": 20,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Virtual EndstopY",
+        "variableName": "VirtualEndstopY",
+        "id": 24,
+        "eepromAddress": 15,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "name": "Endstop ThresholdY",
+        "variableName": "EndstopThresholdY",
+        "id": 25,
+        "eepromAddress": 16,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 1023,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "mA",
+        "name": "Running CurrentY",
+        "variableName": "RunningCurrentY",
+        "id": 28,
+        "eepromAddress": 22,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Z axis",
+        "variableName": "ZAxis",
+        "id": 18,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mm",
+        "name": "PerimeterZ",
+        "variableName": "PerimeterZ",
+        "id": 31,
+        "eepromAddress": 26,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 600,
+        "offset": 1,
+        "divisor": 1,
+        "unitName": "mStp",
+        "name": "Running SpeedZ",
+        "variableName": "RunningSpeedZ",
+        "id": 32,
+        "eepromAddress": 28,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "mA",
+        "name": "Running CurrentZ",
+        "variableName": "RunningCurrentZ",
+        "id": 33,
+        "eepromAddress": 30,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Use EncoderZ",
+        "variableName": "UseEncoderZ",
+        "id": 29,
+        "eepromAddress": 24,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Reversed EncoderZ",
+        "variableName": "ReversedEncoderZ",
+        "id": 30,
+        "eepromAddress": 25,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 9,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "About",
+        "variableName": "About",
+        "id": 11,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 11,
+      "type": "textItem",
+      "item": {
+        "textLength": 1,
+        "itemType": "PLAIN_TEXT",
+        "name": "About1",
+        "variableName": "About1",
+        "id": 12,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 11,
+      "type": "textItem",
+      "item": {
+        "textLength": 1,
+        "itemType": "PLAIN_TEXT",
+        "name": "About2",
+        "variableName": "About2",
+        "id": 13,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 11,
+      "type": "textItem",
+      "item": {
+        "textLength": 1,
+        "itemType": "PLAIN_TEXT",
+        "name": "About3",
+        "variableName": "About3",
+        "id": 14,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
     {
       "parentId": 0,
       "type": "subMenu",
@@ -72,156 +522,6 @@
         "localOnly": false,
         "visible": true
       }
-    },
-    {
-      "parentId": 0,
-      "type": "textItem",
-      "item": {
-        "textLength": 9,
-        "itemType": "PLAIN_TEXT",
-        "name": "Progress",
-        "variableName": "Progress",
-        "id": 6,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "textItem",
-      "item": {
-        "textLength": 5,
-        "itemType": "TIME_24H",
-        "name": "Remaining",
-        "variableName": "ETA",
-        "id": 7,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "textItem",
-      "item": {
-        "textLength": 5,
-        "itemType": "TIME_DURATION_SECONDS",
-        "name": "Duration",
-        "variableName": "Duration",
-        "id": 8,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 0,
-      "type": "subMenu",
-      "item": {
-        "secured": false,
-        "name": "Menu",
-        "variableName": "Menu",
-        "id": 9,
-        "eepromAddress": -1,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 9,
-      "type": "subMenu",
-      "item": {
-        "secured": false,
-        "name": "Settings",
-        "variableName": "Settings",
-        "id": 10,
-        "eepromAddress": -1,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 10,
-      "type": "enumItem",
-      "item": {
-        "enumEntries": [
-          "English",
-          "中文"
-        ],
-        "name": "Language",
-        "variableName": "Language",
-        "id": 15,
-        "eepromAddress": 4,
-        "functionName": "updateLanguage",
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 9,
-      "type": "subMenu",
-      "item": {
-        "secured": false,
-        "name": "About",
-        "variableName": "About",
-        "id": 11,
-        "eepromAddress": -1,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 11,
-      "type": "textItem",
-      "item": {
-        "textLength": 1,
-        "itemType": "PLAIN_TEXT",
-        "name": "About1",
-        "variableName": "About1",
-        "id": 12,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 11,
-      "type": "textItem",
-      "item": {
-        "textLength": 1,
-        "itemType": "PLAIN_TEXT",
-        "name": "About2",
-        "variableName": "About2",
-        "id": 13,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 11,
-      "type": "textItem",
-      "item": {
-        "textLength": 1,
-        "itemType": "PLAIN_TEXT",
-        "name": "About3",
-        "variableName": "About3",
-        "id": 14,
-        "eepromAddress": -1,
-        "readOnly": true,
-        "localOnly": false,
-        "visible": true
-      }
     }
   ],
   "codeOptions": {
@@ -287,8 +587,13 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "SW_POLLING_MODE",
-        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "INTERRUPT_SWITCHES",
+        "latestValue": "false",
         "subsystem": "INPUT"
       },
       {
@@ -319,11 +624,6 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -364,10 +664,6 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ],
-    "menuInMenuCollection": {
-      "menuDefinitions": []
-    },
-    "packageNamespace": ""
+    ]
   }
 }

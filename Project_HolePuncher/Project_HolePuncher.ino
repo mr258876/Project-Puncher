@@ -10,6 +10,8 @@
 #include "PuncherScheduler.h"
 #include "SerialCommand.h"
 
+#include "lang_def.h"
+
 //----------------------------------------电机控制用常量
 #define MOTOR_STEPS 200
 #define MICROSTEPS 8
@@ -45,7 +47,7 @@ SemaphoreHandle_t PuncherBinary = xSemaphoreCreateBinary(); // 打孔机信号�
 AS5600 encoderZ;
 int lastAngle = -1;
 long rotatedAngle = 0;
-bool encoderDisabled = false;
+bool encoderDisabled = true;
 
 //----------------------------------------电机控制变量
 #define xenablePin 23 // x使能控制引脚
@@ -143,43 +145,13 @@ void setup()
     DRIVER_SERIAL.begin(115200);    // 启动串口
     driverX.begin();                // x方向驱动板开始通讯
     driverX.microsteps(MICROSTEPS); // x方向驱动板设置微步大小
-//    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
+                                    //    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
     driverY.begin();                // y方向驱动板开始通讯
     driverY.microsteps(MICROSTEPS); // y方向驱动板设置微步大小
-//    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
+                                    //    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
     driverZ.begin();                // z方向驱动板开始通讯
     driverZ.microsteps(MICROSTEPS); // z方向驱动板设置微步大小
-//    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
-
-    // 检测编码器状态
-    Wire.beginTransmission(AS5600_I2C_ADDR);
-    switch (Wire.endTransmission())
-    {
-    case 0:
-        if (getMagnetStatus() == 1)
-        {
-            Serial.println("Endocer detected and enabled.");
-            //------------------------------创建磁编码器任务
-            xTaskCreate(runEncoder,           //任务函数
-                        "runEncoder",         //任务名称
-                        4096,                 //任务堆栈大小
-                        NULL,                 //任务参数
-                        1,                    //任务优先级
-                        &runEncoder_Handler); //任务句柄
-        }
-        else
-        {
-            Serial.println("Magnet Error! Endocer Disabled!");
-            Serial.print("Error code: ");
-            Serial.println(getMagnetStatus());
-            encoderDisabled = true;
-        }
-        break;
-    default:
-        Serial.println("Encoder Not Deceted and Disabled!");
-        encoderDisabled = true;
-        break;
-    }
+                                    //    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
@@ -222,6 +194,41 @@ void setup()
     xSemaphoreGive(YaxisBinary);   //释放Y轴同步信号量
     xSemaphoreGive(ZaxisBinary);   //释放Z轴同步信号量
     xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
+
+    //--------------------检测编码器状态并启用编码器--------------------
+    if (menuUseEncoderZ.getCurrentValue())
+    {
+        Wire.beginTransmission(AS5600_I2C_ADDR);
+        switch (Wire.endTransmission())
+        {
+        case 0:
+            if (getMagnetStatus() == 1)
+            {   
+                encoderDisabled = false;
+                // Serial.println("Endocer detected and enabled.");
+                //------------------------------创建磁编码器任务
+                xTaskCreate(runEncoder,           //任务函数
+                            "runEncoder",         //任务名称
+                            4096,                 //任务堆栈大小
+                            NULL,                 //任务参数
+                            1,                    //任务优先级
+                            &runEncoder_Handler); //任务句柄
+                
+            }
+            else
+            {
+                // Serial.println("Magnet Error! Endocer Disabled!");
+                // Serial.print("Error code: ");
+                // Serial.println(getMagnetStatus());
+                openDialog(TEXT_ERROR, TEXT_MAGNET_NOT_DETECTED, TEXT_ENCODER_NOW_DISABLED);
+            }
+            break;
+        default:
+            // Serial.println("Encoder Not Deceted and Disabled!");
+            openDialog(TEXT_ERROR, TEXT_ENCODER_NOT_DECETED, TEXT_ENCODER_NOW_DISABLED);
+            break;
+        }
+    }
 
     Serial.println("Puncher booted.");
 }
@@ -449,6 +456,13 @@ void runEncoder(void *pvParameters)
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+}
+
+// 编码器校准
+void encoderCalibrate()
+{
+    rotatedAngle = 0;
+
 }
 
 //----------------------------------------
