@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "mr258876",
+  "author": "Mr258876",
   "items": [
     {
       "parentId": 0,
@@ -147,7 +147,7 @@
         "maxValue": 600,
         "offset": 1,
         "divisor": 1,
-        "unitName": "mStp",
+        "unitName": "mm",
         "name": "Running SpeedX",
         "variableName": "RunningSpeedX",
         "id": 22,
@@ -243,7 +243,7 @@
         "maxValue": 600,
         "offset": 1,
         "divisor": 1,
-        "unitName": "mStp",
+        "unitName": "mm",
         "name": "Running SpeedY",
         "variableName": "RunningSpeedY",
         "id": 27,
@@ -339,7 +339,7 @@
         "maxValue": 600,
         "offset": 1,
         "divisor": 1,
-        "unitName": "mStp",
+        "unitName": "mm",
         "name": "Running SpeedZ",
         "variableName": "RunningSpeedZ",
         "id": 32,
@@ -392,6 +392,106 @@
         "readOnly": false,
         "localOnly": false,
         "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Calibrate EncoderZ",
+        "variableName": "CalibrateEncoderZ",
+        "id": 35,
+        "eepromAddress": 32,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Wireless",
+        "variableName": "Wireless",
+        "id": 36,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 10,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Reset Settings",
+        "variableName": "ResetSettings",
+        "id": 37,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 37,
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "ResetWarn1",
+        "variableName": "ResetWarn1",
+        "id": 38,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 37,
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "ResetWarn2",
+        "variableName": "ResetWarn2",
+        "id": 39,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 37,
+      "type": "actionMenu",
+      "item": {
+        "name": "ResetConfirm",
+        "variableName": "ResetConfirm",
+        "id": 40,
+        "eepromAddress": -1,
+        "functionName": "resetSettings",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 37,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "ResetStatus",
+        "variableName": "ResetStatus",
+        "id": 41,
+        "eepromAddress": 3,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": false
       }
     },
     {
@@ -477,7 +577,7 @@
         "variableName": "Info1",
         "id": 2,
         "eepromAddress": -1,
-        "readOnly": false,
+        "readOnly": true,
         "localOnly": false,
         "visible": true
       }
@@ -492,7 +592,7 @@
         "variableName": "Info2",
         "id": 3,
         "eepromAddress": -1,
-        "readOnly": false,
+        "readOnly": true,
         "localOnly": false,
         "visible": true
       }
@@ -587,13 +687,8 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "INTERRUPT_SWITCHES",
-        "latestValue": "false",
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
         "subsystem": "INPUT"
       },
       {
@@ -624,6 +719,11 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -664,6 +764,11 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ]
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false
   }
 }

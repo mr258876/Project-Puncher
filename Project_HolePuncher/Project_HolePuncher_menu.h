@@ -38,6 +38,15 @@ extern TextMenuItem menuAbout2;
 extern TextMenuItem menuAbout1;
 extern BackMenuItem menuBackAbout;
 extern SubMenuItem menuAbout;
+extern BooleanMenuItem menuResetStatus;
+extern ActionMenuItem menuResetConfirm;
+extern TextMenuItem menuResetWarn2;
+extern TextMenuItem menuResetWarn1;
+extern BackMenuItem menuBackResetSettings;
+extern SubMenuItem menuResetSettings;
+extern BackMenuItem menuBackWireless;
+extern SubMenuItem menuWireless;
+extern BooleanMenuItem menuCalibrateEncoderZ;
 extern BooleanMenuItem menuReversedEncoderZ;
 extern BooleanMenuItem menuUseEncoderZ;
 extern AnalogMenuItem menuRunningCurrentZ;
@@ -77,6 +86,7 @@ void setupMenu();
 #define CALLBACK_FUNCTION
 
 int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
+void CALLBACK_FUNCTION resetSettings(int id);
 void CALLBACK_FUNCTION updateLanguage(int id);
 
 void openDialog(int title, int info1, int info2);

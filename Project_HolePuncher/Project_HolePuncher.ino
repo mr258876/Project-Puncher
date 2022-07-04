@@ -213,7 +213,6 @@ void setup()
                             NULL,                 //任务参数
                             1,                    //任务优先级
                             &runEncoder_Handler); //任务句柄
-                
             }
             else
             {
@@ -230,7 +229,7 @@ void setup()
         }
     }
 
-    Serial.println("Puncher booted.");
+    // Serial.println("Puncher booted.");
 }
 
 // 电机运行及调度现由loop函数处理 DEV.20220528

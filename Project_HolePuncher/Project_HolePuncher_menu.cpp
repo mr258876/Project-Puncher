@@ -13,6 +13,7 @@
 #include "Project_HolePuncher_menu.h"
 #include "ThemeMonoInverse.h"
 #include "multiLanguage.h"
+#include "MenuItems.h"
 
 // Global variable declarations
 const PROGMEM ConnectorLocalInfo applicationInfo = {"Proj.HolePuncher", "88eacbfd-af3c-4e0a-bee7-b7e9e9827f97"};
@@ -38,7 +39,7 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnInfo2RtCall, textItemRenderFn, lang[language
 TextMenuItem menuInfo2(fnInfo2RtCall, 3, 1, &menuInfoYes);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnInfo1RtCall, textItemRenderFn, lang[language][dialogInfo1], -1, NO_CALLBACK)
 TextMenuItem menuInfo1(fnInfo1RtCall, 2, 1, &menuInfo2);
-RENDERING_CALLBACK_NAME_INVOKE_ML(fnInfoViewRtCall, backSubItemRenderFn, lang[language][dialogTitle], -1, NO_CALLBACK)
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnInfoViewRtCall, textItemRenderFn, lang[language][dialogTitle], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoInfoView(lang[language][TEXT_ATTENTION], 1, 0xffff, 0, NO_CALLBACK);
 BackMenuItem menuBackInfoView(fnInfoViewRtCall, &menuInfo1);
 SubMenuItem menuInfoView(&minfoInfoView, &menuBackInfoView, NULL);
@@ -52,8 +53,26 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnAboutRtCall, backSubItemRenderFn, lang[langu
 SubMenuInfo_ML minfoAbout(lang[language][TEXT_ABOUT], 11, 0xffff, 0, NO_CALLBACK);
 BackMenuItem menuBackAbout(fnAboutRtCall, &menuAbout1);
 SubMenuItem menuAbout(&minfoAbout, &menuBackAbout, NULL);
+BooleanMenuInfo_ML minfoResetStatus = { lang[language][TEXT_RESET_STATUS], 41, 3, 1, NO_CALLBACK, NAMING_TRUE_FALSE };
+BooleanMenuItem menuResetStatus(&minfoResetStatus, false, NULL);
+AnyMenuInfo_ML minfoResetConfirm = { lang[language][TEXT_CONFIRM], 40, 0xffff, 0, resetSettings };
+ActionMenuItem menuResetConfirm(&minfoResetConfirm, &menuResetStatus);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnResetWarn2RtCall, textItemRenderFn, lang[language][TEXT_RESET_WARN_2], -1, NO_CALLBACK)
+TextMenuItem menuResetWarn2(fnResetWarn2RtCall, 39, 5, &menuResetConfirm);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnResetWarn1RtCall, textItemRenderFn, lang[language][TEXT_RESET_WARN_1], -1, NO_CALLBACK)
+TextMenuItem menuResetWarn1(fnResetWarn1RtCall, 38, 5, &menuResetWarn2);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnResetSettingsRtCall, backSubItemRenderFn, lang[language][TEXT_RESET_ALL], -1, NO_CALLBACK)
+SubMenuInfo_ML minfoResetSettings = { lang[language][TEXT_RESET_ALL], 37, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackResetSettings(fnResetSettingsRtCall, &menuResetWarn1);
+SubMenuItem menuResetSettings(&minfoResetSettings, &menuBackResetSettings, NULL);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[language][TEXT_WIRELESS], -1, NO_CALLBACK)
+SubMenuInfo_ML minfoWireless = { lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackWireless(fnWirelessRtCall, NULL);
+SubMenuItem menuWireless(&minfoWireless, &menuBackWireless, &menuResetSettings);
+BooleanMenuInfo_ML minfoCalibrateEncoderZ = { lang[language][TEXT_CALIBRATE_ENCODER], 35, 32, 1, NO_CALLBACK, NAMING_TRUE_FALSE };
+BooleanMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, false, NULL);
 BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER], 30, 25, 1, NO_CALLBACK, NAMING_TRUE_FALSE};
-BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, NULL);
+BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, &menuCalibrateEncoderZ);
 BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, NO_CALLBACK, NAMING_TRUE_FALSE};
 BooleanMenuItem menuUseEncoderZ(&minfoUseEncoderZ, false, &menuReversedEncoderZ);
 AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 33, 30, 255, NO_CALLBACK, 0, 1, "mA"};
@@ -65,7 +84,7 @@ AnalogMenuItem menuPerimeterZ(&minfoPerimeterZ, 0, &menuRunningSpeedZ);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnZAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Z_AXIS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoZAxis = {lang[language][TEXT_Z_AXIS], 18, 0xffff, 0, NO_CALLBACK};
 BackMenuItem menuBackZAxis(fnZAxisRtCall, &menuPerimeterZ);
-SubMenuItem menuZAxis(&minfoZAxis, &menuBackZAxis, NULL);
+SubMenuItem menuZAxis(&minfoZAxis, &menuBackZAxis, &menuWireless);
 AnalogMenuInfo_ML minfoRunningCurrentY = {lang[language][TEXT_RUNNING_CURRENT], 28, 22, 1023, NO_CALLBACK, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentY(&minfoRunningCurrentY, 0, NULL);
 AnalogMenuInfo_ML minfoEndstopThresholdY = {lang[language][TEXT_ENDSTOP_THRESHOLD], 25, 16, 255, NO_CALLBACK, 0, 1, ""};
@@ -98,7 +117,7 @@ const char enumStrLanguage_0[] PROGMEM = "ENG";
 const char enumStrLanguage_1[] PROGMEM = "CHS";
 const char *const enumStrLanguage[] PROGMEM = {enumStrLanguage_0, enumStrLanguage_1};
 EnumMenuInfo_ML minfoLanguage = {lang[language][TEXT_LANGUAGE], 15, 4, 1, updateLanguage, enumStrLanguage};
-EnumMenuItem menuLanguage(&minfoLanguage, 0, NULL);
+EnumMenuItem menuLanguage(&minfoLanguage, 0, &menuXAxis);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnSettingsRtCall, backSubItemRenderFn, lang[language][TEXT_SETTINGS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoSettings(lang[language][TEXT_SETTINGS], 10, 0xffff, 0, NO_CALLBACK);
 BackMenuItem menuBackSettings(fnSettingsRtCall, &menuLanguage);
@@ -106,7 +125,7 @@ SubMenuItem menuSettings(&minfoSettings, &menuBackSettings, &menuAbout);
 ListRuntimeMenuItem menuOpenFile(34, 0, fnOpenFileRtCall, &menuSettings);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnMenuRtCall, backSubItemRenderFn, lang[language][TEXT_MENU], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoMenu(lang[language][TEXT_MENU], 9, 0xffff, 0, NO_CALLBACK);
-BackMenuItem menuBackMenu(fnMenuRtCall, &menuSettings);
+BackMenuItem menuBackMenu(fnMenuRtCall, &menuOpenFile);
 SubMenuItem menuMenu(&minfoMenu, &menuBackMenu, NULL);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnDurationRtCall, timeItemRenderFn, lang[language][TEXT_DURATION], -1, NO_CALLBACK)
 TimeFormattedMenuItem menuDuration(fnDurationRtCall, 8, (MultiEditWireType)6, &menuMenu);
@@ -115,25 +134,30 @@ TimeFormattedMenuItem menuETA(fnETARtCall, 7, (MultiEditWireType)2, &menuDuratio
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnProgressRtCall, textItemRenderFn, lang[language][TEXT_PROGRESS], -1, NO_CALLBACK)
 TextMenuItem menuProgress(fnProgressRtCall, 6, 9, &menuETA);
 
-void setupMenu()
-{
+void setupMenu() {
     // First we set up eeprom and authentication (if needed).
     EEPROM.begin(512);
     menuMgr.setEepromRef(&glArduinoEeprom);
 
     // Now add any readonly, non-remote and visible flags.
-    menuAbout1.setReadOnly(true);
-    menuAbout2.setReadOnly(true);
-    menuAbout3.setReadOnly(true);
     menuProgress.setReadOnly(true);
     menuETA.setReadOnly(true);
     menuDuration.setReadOnly(true);
+    menuInfo1.setReadOnly(true);
+    menuInfo2.setReadOnly(true);
+    menuAbout1.setReadOnly(true);
+    menuAbout2.setReadOnly(true);
+    menuAbout3.setReadOnly(true);
+    menuResetWarn1.setReadOnly(true);
+    menuResetWarn2.setReadOnly(true);
+
     menuInfoView.setVisible(false);
+    menuResetStatus.setVisible(false);
 
     // Code generated by plugins.
     gfx.begin();
     renderer.setUpdatesPerSecond(10);
-    switches.initialise(internalDigitalIo(), true);
+    switches.init(internalDigitalIo(), SWITCHES_POLL_EVERYTHING, true);
     menuMgr.initForEncoder(&renderer, &menuProgress, 32, 34, 35);
     renderer.setTitleMode(BaseGraphicalRenderer::TITLE_FIRST_ROW);
     renderer.setUseSliderForAnalog(false);
@@ -164,6 +188,7 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoRunningSpeedZ.name, lang[language][TEXT_RUNNING_SPEED]);
     strcpy(minfoPerimeterZ.name, lang[language][TEXT_PERIMETER]);
     strcpy(minfoZAxis.name, lang[language][TEXT_Z_AXIS]);
+    strcpy(minfoCalibrateEncoderZ.name, lang[language][TEXT_CALIBRATE_ENCODER]);
 
     // Y轴菜单
     strcpy(minfoVirtualEndstopY.name, lang[language][TEXT_VIRTUAL_ENDSTOP]);
@@ -181,6 +206,14 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoPerimeterX.name, lang[language][TEXT_PERIMETER]);
     strcpy(minfoXAxis.name, lang[language][TEXT_X_AXIS]);
 
+    // 重置菜单
+    strcpy(minfoResetSettings.name, lang[language][TEXT_RESET_ALL]);
+    strcpy(minfoResetConfirm.name, lang[language][TEXT_CONFIRM]);
+    strcpy(minfoResetStatus.name, lang[language][TEXT_RESET_STATUS]);
+
+    // 无线设置菜单
+    strcpy(minfoWireless.name, lang[language][TEXT_WIRELESS]);
+
     menuMgr.save();
     EEPROM.commit();
 }
@@ -195,17 +228,22 @@ int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, Rende
         return true;
     case RENDERFN_NAME:
         // TODO - each row has it's own name - 0xff is the parent item
+        if (row == 0)
+        {
+            strcpy(buffer, "Open File");
+        }
+        
         ltoaClrBuff(buffer, row, 3, NOT_PADDED, bufferSize);
         return true;
     case RENDERFN_VALUE:
         // TODO - each row can has its own value - 0xff is the parent item
-        buffer[0] = 'V';
-        buffer[1] = 0;
+        strcpy(buffer, ">> ");
         fastltoa(buffer, row, 3, NOT_PADDED, bufferSize);
         return true;
     case RENDERFN_EEPROM_POS:
         return 0xffff; // lists are generally not saved to EEPROM
     default:
+        // return parent(item, row, mode, buffer, bufferSize);
         return false;
     }
 }
@@ -233,19 +271,7 @@ void openDialog(int title, int info1, int info2)
 
 void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback)
 {
-    lastMenu = menuMgr.getCurrentMenu();
-
-    dialogTitle = title;
-    dialogInfo1 = info1;
-    dialogInfo2 = info2;
-
-    menuInfoNo.setVisible(true);
-    menuInfoYes.setVisible(true);
-
-    minfoInfoNo.callback = toLastMenu;
-    minfoInfoYes.callback = confirm_callback;
-
-    menuMgr.navigateToMenu(menuInfoView.getChild());
+    openConfirmDialog(title, info1, info2, confirm_callback, toLastMenu);
 }
 
 void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback, MenuCallbackFn cancel_callback)
@@ -287,4 +313,13 @@ void openConfirmDialog(int title, int info1, int info2, int confirm, int cancel,
     minfoInfoYes.callback = confirm_callback;
 
     menuMgr.navigateToMenu(menuInfoView.getChild());
+}
+
+void CALLBACK_FUNCTION resetSettings(int id) {
+    menuResetStatus.setBoolean(false);
+
+    menuMgr.save();
+    EEPROM.commit();
+
+    ESP.restart();
 }

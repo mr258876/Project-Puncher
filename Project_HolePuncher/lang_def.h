@@ -49,7 +49,16 @@
 #define TEXT_MAGNET_NOT_DETECTED    28
 #define TEXT_ENCODER_NOT_DECETED    29
 #define TEXT_CALIBRATING_ENCODER    30
+#define TEXT_CALIBRATE_ENCODER      31
+#define TEXT_PLEASE_WAIT        32
 
-#define TEXT_PLEASE_WAIT        31
+// 重置设置相关
+#define TEXT_RESET_ALL          33
+#define TEXT_RESET_WARN_1       34
+#define TEXT_RESET_WARN_2       35
+#define TEXT_RESET_STATUS       36
+
+// 无线设置
+#define TEXT_WIRELESS           37
 
 #endif

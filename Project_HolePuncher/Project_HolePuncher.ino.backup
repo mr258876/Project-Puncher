@@ -196,7 +196,7 @@ void setup()
     xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
 
     //--------------------检测编码器状态并启用编码器--------------------
-    if (menuUseEncoder.getCurrentValue())
+    if (menuUseEncoderZ.getCurrentValue())
     {
         Wire.beginTransmission(AS5600_I2C_ADDR);
         switch (Wire.endTransmission())
@@ -229,7 +229,7 @@ void setup()
         }
     }
 
-    Serial.println("Puncher booted.");
+    // Serial.println("Puncher booted.");
 }
 
 // 电机运行及调度现由loop函数处理 DEV.20220528
@@ -460,6 +460,8 @@ void runEncoder(void *pvParameters)
 // 编码器校准
 void encoderCalibrate()
 {
+    rotatedAngle = 0;
+
 }
 
 //----------------------------------------
