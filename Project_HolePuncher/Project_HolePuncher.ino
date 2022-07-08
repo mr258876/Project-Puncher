@@ -211,7 +211,7 @@ void setup()
                             "runEncoder",         //任务名称
                             4096,                 //任务堆栈大小
                             NULL,                 //任务参数
-                            1,                    //任务优先级
+                            3,                    //任务优先级
                             &runEncoder_Handler); //任务句柄
             }
             else
@@ -346,7 +346,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
 {
     if (!Xenabled && !Zenabled)
     {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(50));
         if (abs(rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1 || encoderDisabled)
         {
             moveYto(4);
@@ -453,13 +453,51 @@ void runEncoder(void *pvParameters)
             lastAngle = v;
             xSemaphoreGive(I2CMutex);
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 
 // 编码器校准
 void encoderCalibrate()
-{
+{   
+    if (encoderDisabled)
+    {   
+        // openDialog();
+        return;
+    }
+    
+    if (puncherStatus == 0x10)
+    {   
+        // 暂停编码器任务
+        vTaskSuspend(runEncoder_Handler);
+
+        uint16_t angleReading[MOTOR_STEPS*2];
+        uint16_t lastAngle = encoderZ.getAngle();
+        // 正反转各一圈获取读数
+        for (int i = 0; i < MOTOR_STEPS; i++)
+        {   
+            angleReading[i] = encoderZ.getAngle();
+            stepperZ.move(MICROSTEPS);
+
+            Serial.println(angleReading[i] - lastAngle);
+            lastAngle = angleReading[i];
+        }
+        for (int i = 0; i < MOTOR_STEPS; i++)
+        {   
+            angleReading[MOTOR_STEPS+i] = encoderZ.getAngle();
+            stepperZ.move(-MICROSTEPS);
+        }
+        
+
+        // 重启编码器任务
+        vTaskResume(runEncoder_Handler);
+    }
+    else
+    {
+        // openDialog("puncher busy");
+    }
+    
+    
     rotatedAngle = 0;
 
 }
@@ -471,4 +509,28 @@ void encoderCalibrate()
 TimeStorage secToTime(int sec)
 {
     return (TimeStorage{sec / 3600, sec % 3600 / 60, sec % 60, 0});
+}
+
+// see tcMenu list documentation on thecoderscorner.com
+int CALLBACK_FUNCTION fnAllNetworksRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize) {
+   switch(mode) {
+    case RENDERFN_INVOKE:
+        // TODO - your code to invoke goes here - row is the index of the item
+        return true;
+    case RENDERFN_NAME:
+        // TODO - each row has it's own name - 0xff is the parent item
+        ltoaClrBuff(buffer, row, 3, NOT_PADDED, bufferSize);
+        return true;
+    case RENDERFN_VALUE:
+        // TODO - each row can has its own value - 0xff is the parent item
+        buffer[0] = 'V'; buffer[1]=0;
+        fastltoa(buffer, row, 3, NOT_PADDED, bufferSize);
+        return true;
+    case RENDERFN_EEPROM_POS: return 0xffff; // lists are generally not saved to EEPROM
+    default: return false;
+    }
+}
+
+void CALLBACK_FUNCTION onWifiSwitch(int id) {
+    // TODO - your menu change code
 }

@@ -44,9 +44,18 @@ extern TextMenuItem menuResetWarn2;
 extern TextMenuItem menuResetWarn1;
 extern BackMenuItem menuBackResetSettings;
 extern SubMenuItem menuResetSettings;
+extern ActionMenuItem menuConnect;
+extern TextMenuItem menuPwd;
+extern TextMenuItem menuSSIDToConnect;
+extern BackMenuItem menuBackConnectTo;
+extern SubMenuItem menuConnectTo;
+extern ListRuntimeMenuItem menuAllNetworks;
+extern IpAddressMenuItem menuIP;
+extern TextMenuItem menuSSID;
+extern BooleanMenuItem menuWifi;
 extern BackMenuItem menuBackWireless;
 extern SubMenuItem menuWireless;
-extern BooleanMenuItem menuCalibrateEncoderZ;
+extern ActionMenuItem menuCalibrateEncoderZ;
 extern BooleanMenuItem menuReversedEncoderZ;
 extern BooleanMenuItem menuUseEncoderZ;
 extern AnalogMenuItem menuRunningCurrentZ;
@@ -85,7 +94,9 @@ void setupMenu();
 // Callback functions must always include CALLBACK_FUNCTION after the return type
 #define CALLBACK_FUNCTION
 
+int fnAllNetworksRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
 int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
+void CALLBACK_FUNCTION onWifiSwitch(int id);
 void CALLBACK_FUNCTION resetSettings(int id);
 void CALLBACK_FUNCTION updateLanguage(int id);
 

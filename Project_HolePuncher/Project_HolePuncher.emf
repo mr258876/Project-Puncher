@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "Mr258876",
+  "author": "mr258876",
   "items": [
     {
       "parentId": 0,
@@ -396,13 +396,12 @@
     },
     {
       "parentId": 18,
-      "type": "boolItem",
+      "type": "actionMenu",
       "item": {
-        "naming": "TRUE_FALSE",
         "name": "Calibrate EncoderZ",
         "variableName": "CalibrateEncoderZ",
-        "id": 35,
-        "eepromAddress": 32,
+        "id": 50,
+        "eepromAddress": -1,
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -416,6 +415,123 @@
         "name": "Wireless",
         "variableName": "Wireless",
         "id": 36,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "boolItem",
+      "item": {
+        "naming": "ON_OFF",
+        "name": "Wifi",
+        "variableName": "Wifi",
+        "id": 42,
+        "eepromAddress": -1,
+        "functionName": "onWifiSwitch",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "textItem",
+      "item": {
+        "textLength": 10,
+        "itemType": "PLAIN_TEXT",
+        "name": "SSID",
+        "variableName": "SSID",
+        "id": 43,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "textItem",
+      "item": {
+        "textLength": 15,
+        "itemType": "IP_ADDRESS",
+        "name": "IP",
+        "variableName": "IP",
+        "id": 44,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "runtimeList",
+      "item": {
+        "initialRows": 0,
+        "name": "All Networks",
+        "variableName": "AllNetworks",
+        "id": 45,
+        "eepromAddress": -1,
+        "functionName": "",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Connect To",
+        "variableName": "ConnectTo",
+        "id": 46,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": false
+      }
+    },
+    {
+      "parentId": 46,
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "PLAIN_TEXT",
+        "name": "SSID",
+        "variableName": "SSIDToConnect",
+        "id": 47,
+        "eepromAddress": -1,
+        "readOnly": true,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 46,
+      "type": "textItem",
+      "item": {
+        "textLength": 16,
+        "itemType": "PLAIN_TEXT",
+        "name": "Pwd",
+        "variableName": "Pwd",
+        "id": 48,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 46,
+      "type": "actionMenu",
+      "item": {
+        "name": "Connect",
+        "variableName": "Connect",
+        "id": 49,
         "eepromAddress": -1,
         "readOnly": false,
         "localOnly": false,
@@ -687,8 +803,13 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "SW_POLLING_MODE",
-        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "INTERRUPT_SWITCHES",
+        "latestValue": "false",
         "subsystem": "INPUT"
       },
       {
@@ -719,11 +840,6 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -764,11 +880,6 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ],
-    "menuInMenuCollection": {
-      "menuDefinitions": []
-    },
-    "packageNamespace": "",
-    "appIsModular": false
+    ]
   }
 }
