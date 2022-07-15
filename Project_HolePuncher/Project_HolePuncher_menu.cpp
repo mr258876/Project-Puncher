@@ -65,22 +65,22 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnResetSettingsRtCall, backSubItemRenderFn, la
 SubMenuInfo_ML minfoResetSettings = { lang[language][TEXT_RESET_ALL], 37, 0xffff, 0, NO_CALLBACK };
 BackMenuItem menuBackResetSettings(fnResetSettingsRtCall, &menuResetWarn1);
 SubMenuItem menuResetSettings(&minfoResetSettings, &menuBackResetSettings, NULL);
-const PROGMEM AnyMenuInfo minfoConnect = { "Connect", 49, 0xffff, 0, NO_CALLBACK };
+AnyMenuInfo_ML minfoConnect = { lang[language][TEXT_CONNECT], 49, 0xffff, 0, NO_CALLBACK };
 ActionMenuItem menuConnect(&minfoConnect, NULL);
-RENDERING_CALLBACK_NAME_INVOKE(fnPwdRtCall, textItemRenderFn, "Pwd", -1, NO_CALLBACK)
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnPwdRtCall, textItemRenderFn, lang[language][TEXT_PASSWORD], -1, NO_CALLBACK)
 TextMenuItem menuPwd(fnPwdRtCall, 48, 16, &menuConnect);
-RENDERING_CALLBACK_NAME_INVOKE(fnSSIDToConnectRtCall, textItemRenderFn, "SSID", -1, NO_CALLBACK)
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnSSIDToConnectRtCall, textItemRenderFn, lang[language][TEXT_SSID], -1, NO_CALLBACK)
 TextMenuItem menuSSIDToConnect(fnSSIDToConnectRtCall, 47, 5, &menuPwd);
-RENDERING_CALLBACK_NAME_INVOKE(fnConnectToRtCall, backSubItemRenderFn, "Connect To", -1, NO_CALLBACK)
-const PROGMEM SubMenuInfo minfoConnectTo = { "Connect To", 46, 0xffff, 0, NO_CALLBACK };
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnConnectToRtCall, backSubItemRenderFn, lang[language][TEXT_CONNECT_TO], -1, NO_CALLBACK)
+SubMenuInfo_ML minfoConnectTo = { lang[language][TEXT_CONNECT_TO], 46, 0xffff, 0, NO_CALLBACK };
 BackMenuItem menuBackConnectTo(fnConnectToRtCall, &menuSSIDToConnect);
 SubMenuItem menuConnectTo(&minfoConnectTo, &menuBackConnectTo, NULL);
 ListRuntimeMenuItem menuAllNetworks(45, 0, fnAllNetworksRtCall, &menuConnectTo);
-RENDERING_CALLBACK_NAME_INVOKE(fnIPRtCall, ipAddressRenderFn, "IP", -1, NO_CALLBACK)
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnIPRtCall, ipAddressRenderFn, lang[language][TEXT_IP_ADDRESS], -1, NO_CALLBACK)
 IpAddressMenuItem menuIP(fnIPRtCall, 44, &menuAllNetworks);
-RENDERING_CALLBACK_NAME_INVOKE(fnSSIDRtCall, textItemRenderFn, "SSID", -1, NO_CALLBACK)
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnSSIDRtCall, textItemRenderFn, lang[language][TEXT_SSID], -1, NO_CALLBACK)
 TextMenuItem menuSSID(fnSSIDRtCall, 43, 10, &menuIP);
-const PROGMEM BooleanMenuInfo minfoWifi = { "Wifi", 42, 0xffff, 1, onWifiSwitch, NAMING_ON_OFF };
+BooleanMenuInfo_ML minfoWifi = { lang[language][TEXT_WIRELESS],, 42, 0xffff, 1, onWifiSwitch, NAMING_ON_OFF };
 BooleanMenuItem menuWifi(&minfoWifi, false, &menuSSID);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[language][TEXT_WIRELESS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoWireless = { lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK };
@@ -231,6 +231,9 @@ void CALLBACK_FUNCTION updateLanguage(int id)
 
     // 无线设置菜单
     strcpy(minfoWireless.name, lang[language][TEXT_WIRELESS]);
+    strcpy(minfoConnect.name, lang[language][TEXT_CONNECT]);
+    strcpy(minfoConnectTo.name, lang[language][TEXT_CONNECT_TO]);
+    strcpy(minfoWifi.name, lang[language][TEXT_WIRELESS]);
 
     menuMgr.save();
     EEPROM.commit();

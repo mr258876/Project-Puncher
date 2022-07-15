@@ -60,5 +60,10 @@
 
 // 无线设置
 #define TEXT_WIRELESS           37
+#define TEXT_CONNECT            38
+#define TEXT_CONNECT_TO         39
+#define TEXT_SSID               40
+#define TEXT_PASSWORD           41
+#define TEXT_IP_ADDRESS         42
 
 #endif

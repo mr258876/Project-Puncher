@@ -229,6 +229,41 @@ void setup()
         }
     }
 
+    //--------------------X/Y轴归零--------------------
+    if (menuVirtualEndstopX.getCurrentValue())
+    {   
+        // 中断方式
+        // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
+        // attachInterrupt(digitalPinToInterrupt(diagXPin), FUNCTION_PTR, MODE);
+        uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
+
+        stepperX.startMove(99999);
+        while (1)
+        {
+            stepperX.nextAction();
+            if (driverX.SGTHRS() > sgThrs)
+            {
+                break;
+            }
+        }
+    }
+
+    if (menuVirtualEndStopY.getCurrentValue())
+    {
+        uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
+
+        stepperY.startMove(99999);
+        while (1)
+        {
+            stepperY.nextAction();
+            if (driverY.SGTHRS() > sgThrs)
+            {
+                break;
+            }
+        }
+        moveYto(8);
+    }
+
     // Serial.println("Puncher booted.");
 }
 

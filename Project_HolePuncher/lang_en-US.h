@@ -39,7 +39,12 @@ const PROGMEM char* enUS[] = {
     "Reset all settings?",
     "",
     "Is reseted",
-    "Wifi"
+    "Wifi",
+    "Connect"
+    "Conn To",
+    "SSID",
+    "Pwd.",
+    "IP"
 };
 
 #endif
