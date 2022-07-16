@@ -6,7 +6,7 @@
 #define LANG_ZH_HANS            1
 
 // 项目名称
-#define TEXT_PROJECT_PUNCHER    0
+#define TEXT_EMPTY              0
 
 // 对话框
 #define TEXT_ATTENTION          1
@@ -65,5 +65,18 @@
 #define TEXT_SSID               40
 #define TEXT_PASSWORD           41
 #define TEXT_IP_ADDRESS         42
+#define TEXT_ALL_NETWORKS       43
+#define TEXT_WIFI_STATUS        44
+#define TEXT_CONNECTED          45
+#define TEXT_DISCONNECTED       46
+#define TEXT_WIFI_CONN_FAIL_1   47
+#define TEXT_WIFI_CONN_FAIL_2   48
+#define TEXT_CONNECTING         49
+#define TEXT_AUTO_CONNECT       50
+
+// 归零
+#define TEXT_ZEROING            51
+#define TEXT_ZEROING_FAILED     52
+#define TEXT_CHECK_SETTINGS     53
 
 #endif

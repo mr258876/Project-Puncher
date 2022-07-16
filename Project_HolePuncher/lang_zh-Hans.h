@@ -2,7 +2,7 @@
 #define _PROJECT_PUNCHER_TEXT_ZH_HANS_
 
 const PROGMEM char *zhHans[] = {
-    "Proj.Holepuncher",
+    "",
     "注意",
     "警告",
     "错误",
@@ -40,11 +40,22 @@ const PROGMEM char *zhHans[] = {
     "设定值将恢复默认",
     "是否已重置",
     "无线网络",
-    "连接"
+    "连接",
     "连接至",
     "SSID",
     "密码",
-    "IP"
+    "IP",
+    "无线网络列表",
+    "连接状态",
+    "已连接",
+    "未连接",
+    "无线网络连接失败",
+    "",
+    "正在尝试连接...",
+    "自动连接",
+    "正在归零...",
+    "归零失败!",
+    "请检查设置"
 };
 
 #endif

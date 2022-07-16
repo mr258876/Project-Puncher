@@ -3,6 +3,9 @@
 #include "AS5600.h"
 #include <TMCStepper.h>
 
+#include <WiFi.h>
+#include <EEPROM.h>
+
 #include "Project_HolePuncher_menu.h"
 #include <PlatformDetermination.h>
 #include <TaskManagerIO.h>
@@ -32,6 +35,8 @@ void runEncoder(void *pvParameters);
 TaskHandle_t runTcMenu_Handler;
 TaskHandle_t serialCommand_Handler;
 TaskHandle_t runEncoder_Handler;
+TaskHandle_t wifiConnect_Handler;
+TaskHandle_t wifiCommand_Handler;
 
 //----------------------------------------资源锁
 SemaphoreHandle_t I2CMutex = xSemaphoreCreateMutex();       // I2C互斥量
@@ -114,7 +119,7 @@ void setup()
     setupMenu();
     installTheme();
     menuProgress.setTextValue("idle");
-    menuMgr.navigateToMenu(menuInfoView.getChild());
+    // menuMgr.navigateToMenu(menuInfoView.getChild());
 
     // 初始化电机
     pinMode(xstepPin, OUTPUT);
@@ -170,30 +175,22 @@ void setup()
                 tskIDLE_PRIORITY,        //任务优先级
                 &serialCommand_Handler); //任务句柄
 
-    //------------------------------创建打孔调度任务
-    // xTaskCreatePinnedToCore(punchSchedule,           //任务函数
-    //                         "punchSchedule",         //任务名称
-    //                         8192,                    //任务堆栈大小
-    //                         NULL,                    //任务参数
-    //                         1,                       //任务优先级
-    //                         NULL, //任务句柄
-    //                         0);                      //执行任务核心
-
-    //------------------------------创建电机控制任务
-    // xTaskCreatePinnedToCore(runStepper,       //任务函数
-    //                         "runStepper",     //任务名称
-    //                         8192,             //任务堆栈大小
-    //                         NULL,             //任务参数
-    //                         tskIDLE_PRIORITY, //任务优先级
-    //                         NULL,             //任务句柄
-    //                         1);               //执行任务核心
-
-    //    vTaskStartScheduler(); //开启任务调度
-
     xSemaphoreGive(XaxisBinary);   //释放X轴同步信号量
     xSemaphoreGive(YaxisBinary);   //释放Y轴同步信号量
     xSemaphoreGive(ZaxisBinary);   //释放Z轴同步信号量
     xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
+
+    //--------------------连接Wifi--------------------
+    if (menuWifi.getCurrentValue() == true)
+    {
+        //------------------------------创建连接Wifi任务
+        xTaskCreate(wifiConnect,           //任务函数
+                    "wifiConnect",         //任务名称
+                    8192,                    //任务堆栈大小
+                    NULL,                    //任务参数
+                    tskIDLE_PRIORITY,        //任务优先级
+                    &wifiConnect_Handler);   //任务句柄
+    }
 
     //--------------------检测编码器状态并启用编码器--------------------
     if (menuUseEncoderZ.getCurrentValue())
@@ -227,6 +224,45 @@ void setup()
             openDialog(TEXT_ERROR, TEXT_ENCODER_NOT_DECETED, TEXT_ENCODER_NOW_DISABLED);
             break;
         }
+    }
+
+    //--------------------X/Y轴归零--------------------
+    if (menuVirtualEndstopX.getCurrentValue())
+    {   
+        // 中断方式
+        // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
+        // attachInterrupt(digitalPinToInterrupt(diagXPin), FUNCTION_PTR, MODE);
+        uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
+
+        openDialogNoButton(TEXT_ATTENTION, TEXT_X_AXIS, TEXT_ZEROING);
+
+        stepperX.startMove(99999);
+        while (1)
+        {
+            stepperX.nextAction();
+            if (driverX.SGTHRS() > sgThrs)
+            {
+                break;
+            }
+        }
+    }
+
+    if (menuVirtualEndstopY.getCurrentValue())
+    {
+        uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
+
+        openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
+
+        stepperY.startMove(99999);
+        while (1)
+        {
+            stepperY.nextAction();
+            if (driverY.SGTHRS() > sgThrs)
+            {
+                break;
+            }
+        }
+        moveYto(8);
     }
 
     // Serial.println("Puncher booted.");
@@ -503,10 +539,87 @@ void encoderCalibrate()
 }
 
 //----------------------------------------
+// Wifi 相关
+//----------------------------------------
+void wifiConnect(void *pvParameters)
+{
+    
+}
+
+//----------------------------------------
 // 工具函数
 //----------------------------------------
 // 秒数转时间
 TimeStorage secToTime(int sec)
 {
     return (TimeStorage{sec / 3600, sec % 3600 / 60, sec % 60, 0});
+}
+
+// EEPROM中读取字符串
+String getStringEEPROM(int start_pos)
+{
+    String s = "";
+    for (int i = 1; i < EEPROM.read(start_pos); i++)
+    {
+        s += char(EEPROM.read(start_pos + i));
+    }
+    return s;
+}
+
+// 保存字符串至EEPROM
+void writeStringEEPROM(int start_pos, int data_size, String str)
+{
+    EEPROM.write(start_pos, str.length()>data_size-1?data_size-1:str.length());
+    for (int i = 0; i <= min((int)str.length(), data_size-1); i++)
+    {
+        EEPROM.write(start_pos + i + 1, str[i]);
+    }
+    EEPROM.commit();
+}
+
+//----------------------------------------
+// 回调函数
+//----------------------------------------
+// 无线网络选择处理函数
+int CALLBACK_FUNCTION fnAllNetworksRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize) {
+   switch(mode) {
+    case RENDERFN_INVOKE:
+        // TODO - your code to invoke goes here - row is the index of the item
+        return true;
+    case RENDERFN_NAME:
+        // TODO - each row has it's own name - 0xff is the parent item
+        ltoaClrBuff(buffer, row, 3, NOT_PADDED, bufferSize);
+        return true;
+    case RENDERFN_VALUE:
+        // TODO - each row can has its own value - 0xff is the parent item
+        buffer[0] = 'V'; buffer[1]=0;
+        fastltoa(buffer, row, 3, NOT_PADDED, bufferSize);
+        return true;
+    case RENDERFN_EEPROM_POS: return 0xffff; // lists are generally not saved to EEPROM
+    default: return false;
+    }
+}
+
+void CALLBACK_FUNCTION onWifiSwitch(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeCurrent(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangeSpeed(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION onChangePerimeter(int id) {
+    // TODO - your menu change code
+}
+
+
+void CALLBACK_FUNCTION calibrateEncoder(int id) {
+    // TODO - your menu change code
 }

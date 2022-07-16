@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "mr258876",
+  "author": "Mr258876",
   "items": [
     {
       "parentId": 0,
@@ -135,6 +135,7 @@
         "variableName": "PerimeterX",
         "id": 21,
         "eepromAddress": 9,
+        "functionName": "onChangePerimeter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -152,37 +153,7 @@
         "variableName": "RunningSpeedX",
         "id": 22,
         "eepromAddress": 11,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 16,
-      "type": "boolItem",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "Vitrual EndstopX",
-        "variableName": "VitrualEndstopX",
-        "id": 19,
-        "eepromAddress": 6,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 16,
-      "type": "analogItem",
-      "item": {
-        "maxValue": 255,
-        "offset": 0,
-        "divisor": 1,
-        "unitName": "",
-        "name": "Endstop ThresholdX",
-        "variableName": "EndstopThresholdX",
-        "id": 20,
-        "eepromAddress": 7,
+        "functionName": "onChangeSpeed",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -200,6 +171,40 @@
         "variableName": "RunningCurrentX",
         "id": 23,
         "eepromAddress": 13,
+        "functionName": "onChangeCurrent",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Virtual EndstopX",
+        "variableName": "VirtualEndstopX",
+        "id": 19,
+        "eepromAddress": 6,
+        "functionName": "saveValues",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "name": "Endstop ThresholdX",
+        "variableName": "EndstopThresholdX",
+        "id": 20,
+        "eepromAddress": 7,
+        "functionName": "saveValues",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -231,6 +236,7 @@
         "variableName": "PerimeterY",
         "id": 26,
         "eepromAddress": 18,
+        "functionName": "onChangePerimeter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -248,37 +254,7 @@
         "variableName": "RunningSpeedY",
         "id": 27,
         "eepromAddress": 20,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 17,
-      "type": "boolItem",
-      "item": {
-        "naming": "TRUE_FALSE",
-        "name": "Virtual EndstopY",
-        "variableName": "VirtualEndstopY",
-        "id": 24,
-        "eepromAddress": 15,
-        "readOnly": false,
-        "localOnly": false,
-        "visible": true
-      }
-    },
-    {
-      "parentId": 17,
-      "type": "analogItem",
-      "item": {
-        "maxValue": 255,
-        "offset": 0,
-        "divisor": 1,
-        "unitName": "",
-        "name": "Endstop ThresholdY",
-        "variableName": "EndstopThresholdY",
-        "id": 25,
-        "eepromAddress": 16,
+        "functionName": "onChangeSpeed",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -296,6 +272,40 @@
         "variableName": "RunningCurrentY",
         "id": 28,
         "eepromAddress": 22,
+        "functionName": "onChangeCurrent",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Virtual EndstopY",
+        "variableName": "VirtualEndstopY",
+        "id": 24,
+        "eepromAddress": 15,
+        "functionName": "saveValues",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 255,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "",
+        "name": "Endstop ThresholdY",
+        "variableName": "EndstopThresholdY",
+        "id": 25,
+        "eepromAddress": 16,
+        "functionName": "saveValues",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -327,6 +337,7 @@
         "variableName": "PerimeterZ",
         "id": 31,
         "eepromAddress": 26,
+        "functionName": "onChangePerimeter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -344,6 +355,7 @@
         "variableName": "RunningSpeedZ",
         "id": 32,
         "eepromAddress": 28,
+        "functionName": "onChangeSpeed",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -361,6 +373,7 @@
         "variableName": "RunningCurrentZ",
         "id": 33,
         "eepromAddress": 30,
+        "functionName": "onChangeCurrent",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -375,6 +388,7 @@
         "variableName": "UseEncoderZ",
         "id": 29,
         "eepromAddress": 24,
+        "functionName": "saveValues",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -389,6 +403,7 @@
         "variableName": "ReversedEncoderZ",
         "id": 30,
         "eepromAddress": 25,
+        "functionName": "saveValues",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -402,6 +417,7 @@
         "variableName": "CalibrateEncoderZ",
         "id": 50,
         "eepromAddress": -1,
+        "functionName": "calibrateEncoder",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -429,7 +445,7 @@
         "name": "Wifi",
         "variableName": "Wifi",
         "id": 42,
-        "eepromAddress": -1,
+        "eepromAddress": 32,
         "functionName": "onWifiSwitch",
         "readOnly": false,
         "localOnly": false,
@@ -441,6 +457,21 @@
       "type": "textItem",
       "item": {
         "textLength": 10,
+        "itemType": "PLAIN_TEXT",
+        "name": "Wifi Status",
+        "variableName": "WifiStatus",
+        "id": 51,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 36,
+      "type": "textItem",
+      "item": {
+        "textLength": 16,
         "itemType": "PLAIN_TEXT",
         "name": "SSID",
         "variableName": "SSID",
@@ -499,7 +530,7 @@
       "parentId": 46,
       "type": "textItem",
       "item": {
-        "textLength": 5,
+        "textLength": 16,
         "itemType": "PLAIN_TEXT",
         "name": "SSID",
         "variableName": "SSIDToConnect",
@@ -533,6 +564,7 @@
         "variableName": "Connect",
         "id": 49,
         "eepromAddress": -1,
+        "functionName": "wifiConnectAttempt",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -803,13 +835,8 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "INTERRUPT_SWITCHES",
-        "latestValue": "false",
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
         "subsystem": "INPUT"
       },
       {
@@ -840,6 +867,11 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -880,6 +912,11 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ]
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false
   }
 }

@@ -52,6 +52,7 @@ extern SubMenuItem menuConnectTo;
 extern ListRuntimeMenuItem menuAllNetworks;
 extern IpAddressMenuItem menuIP;
 extern TextMenuItem menuSSID;
+extern TextMenuItem menuWifiStatus;
 extern BooleanMenuItem menuWifi;
 extern BackMenuItem menuBackWireless;
 extern SubMenuItem menuWireless;
@@ -63,16 +64,16 @@ extern AnalogMenuItem menuRunningSpeedZ;
 extern AnalogMenuItem menuPerimeterZ;
 extern BackMenuItem menuBackZAxis;
 extern SubMenuItem menuZAxis;
-extern AnalogMenuItem menuRunningCurrentY;
 extern AnalogMenuItem menuEndstopThresholdY;
 extern BooleanMenuItem menuVirtualEndstopY;
+extern AnalogMenuItem menuRunningCurrentY;
 extern AnalogMenuItem menuRunningSpeedY;
 extern AnalogMenuItem menuPerimeterY;
 extern BackMenuItem menuBackYAxis;
 extern SubMenuItem menuYAxis;
-extern AnalogMenuItem menuRunningCurrentX;
 extern AnalogMenuItem menuEndstopThresholdX;
-extern BooleanMenuItem menuVitrualEndstopX;
+extern BooleanMenuItem menuVirtualEndstopX;
+extern AnalogMenuItem menuRunningCurrentX;
 extern AnalogMenuItem menuRunningSpeedX;
 extern AnalogMenuItem menuPerimeterX;
 extern BackMenuItem menuBackXAxis;
@@ -87,6 +88,9 @@ extern TimeFormattedMenuItem menuDuration;
 extern TimeFormattedMenuItem menuETA;
 extern TextMenuItem menuProgress;
 
+extern int language;
+extern MenuItem *lastMenu;
+
 // Provide a wrapper to get hold of the root menu item and export setupMenu
 inline MenuItem& rootMenuItem() { return menuProgress; }
 void setupMenu();
@@ -94,15 +98,23 @@ void setupMenu();
 // Callback functions must always include CALLBACK_FUNCTION after the return type
 #define CALLBACK_FUNCTION
 
+void CALLBACK_FUNCTION calibrateEncoder(int id);
 int fnAllNetworksRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
 int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
+void CALLBACK_FUNCTION onChangeCurrent(int id);
+void CALLBACK_FUNCTION onChangePerimeter(int id);
+void CALLBACK_FUNCTION onChangeSpeed(int id);
 void CALLBACK_FUNCTION onWifiSwitch(int id);
 void CALLBACK_FUNCTION resetSettings(int id);
+void CALLBACK_FUNCTION saveValues(int id);
 void CALLBACK_FUNCTION updateLanguage(int id);
+void CALLBACK_FUNCTION wifiConnectAttempt(int id);
 
 void openDialog(int title, int info1, int info2);
+void openDialogNoButton(int title, int info1, int info2);
 void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback);
 void openConfirmDialog(int title, int info1, int info2, MenuCallbackFn confirm_callback, MenuCallbackFn cancel_callback);
 void openConfirmDialog(int title, int info1, int info2, int confirm, int cancel, bool show_confirm, bool show_cancel, MenuCallbackFn confirm_callback, MenuCallbackFn cancel_callback);
+void closeDialog();
 
 #endif // MENU_GENERATED_CODE_H

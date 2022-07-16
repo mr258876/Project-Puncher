@@ -16,7 +16,7 @@ const PROGMEM char* enUS[] = {
     "Proj.Holepuncer",
     "@mr258876",
     "version",
-    "DEV20220700",
+    "DEV20220715",
     "Settings",
     "Language",
     "X axis",
@@ -31,7 +31,7 @@ const PROGMEM char* enUS[] = {
     "Reverse Enc.",
     "encoder now disable.",
     "Magnet not detected,",
-    "No encoder, ",
+    "Communication fail,",
     "Calibrating encoder",
     "Calibrate enc.",
     "Please wait...",
@@ -40,11 +40,22 @@ const PROGMEM char* enUS[] = {
     "",
     "Is reseted",
     "Wifi",
-    "Connect"
+    "Connect",
     "Conn To",
     "SSID",
     "Pwd.",
-    "IP"
+    "IP",
+    "All Networks",
+    "Status",
+    "Connected",
+    "No conn.",
+    "Could not connect",
+    "to your wifi.",
+    "Connecting...",
+    "Auto Connect",
+    "Zeroing...",
+    "Zreoing Failed.",
+    "Check Settings."
 };
 
 #endif
