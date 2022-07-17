@@ -253,42 +253,6 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     saveValues(0);
 }
 
-// see tcMenu list documentation on thecoderscorner.com
-int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, RenderFnMode mode, char *buffer, int bufferSize)
-{
-    switch (mode)
-    {
-    case RENDERFN_INVOKE:
-        // TODO - your code to invoke goes here - row is the index of the item
-        return true;
-    case RENDERFN_NAME:
-        // TODO - each row has it's own name - 0xff is the parent item
-        // 254 and 255 are reserved for title and back, this is what is rendered in the back item text and also
-        // as the list name / title on the parent menu.
-        if (row > 253)
-        {
-            strncpy(buffer, "Open File", bufferSize);
-        }
-        else
-        {
-            strncpy(buffer, "Default", bufferSize);
-        }
-        return true;
-    case RENDERFN_VALUE:
-        // TODO - each row can has its own value - 0xff is the parent item
-        // Set number of rows with .setNumberOfRows(int);
-        if (row < 254)
-        {
-            strcpy(buffer, ">> ");
-            fastltoa(buffer, row, 3, NOT_PADDED, bufferSize);
-        }
-        return true;
-    case RENDERFN_EEPROM_POS:
-        return 0xffff; // lists are generally not saved to EEPROM
-    default:
-        return false;
-    }
-}
 
 void CALLBACK_FUNCTION toLastMenu(int id)
 {

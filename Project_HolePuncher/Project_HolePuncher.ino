@@ -55,7 +55,10 @@ long rotatedAngle = 0;
 bool encoderDisabled = true;
 
 //----------------------------------------无线网络
+#define WIFI_CONTROL_PORT 22576
+
 int SSIDCount = 0;
+WiFiServer server(80);
 
 //----------------------------------------电机控制变量
 #define xenablePin 23 // x使能控制引脚
@@ -77,10 +80,6 @@ bool Ydown = false;
 bool isPunching = false;
 
 unsigned stepper_to_wait;
-
-int xRPM = 60; // 电机X速度
-int yRPM = 30; // 电机Y速度
-int zRPM = 45; // 电机Z速度
 
 int xOptiCurr = 500; // 电机x工作电流
 int xStbyCurr = 50;  // 电机x待机电流
@@ -140,11 +139,11 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    stepperX.begin(xRPM, MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getCurrentValue()*60/menuPerimeterX.getCurrentValue(), MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(yRPM, MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getCurrentValue()*60/menuPerimeterY.getCurrentValue(), MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(zRPM, MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getCurrentValue()*60/menuPerimeterZ.getCurrentValue(), MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -187,6 +186,8 @@ void setup()
     WiFi.mode(WIFI_STA);
     SSIDCount = WiFi.scanNetworks();
     menuAllNetworks.setNumberOfRows(SSIDCount);
+    menuSSID.setTextValue("N/A");
+    menuIP.setIpAddress("127.0.0.1");
     if (menuWifi.getCurrentValue() == true)
     {
         //------------------------------创建连接Wifi任务
@@ -589,7 +590,7 @@ void wifiConnect(void *pvParameters)
     
 //    Serial.println("Wifi Connect Success!");
     menuWifiStatus.setTextValue("Connected");
-    menuSSID.setTextValue(wifiSSID);
+    menuSSID.setTextValue(WiFi.SSID());
     menuIP.setIpAddress(WiFi.localIP().toString().c_str());
 
     delete []wifiSSID;
@@ -597,17 +598,30 @@ void wifiConnect(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void wifiSetConnection(int row)
+//------------------------------扫描Wifi信号
+void scanWifi()
+{
+    SSIDCount = WiFi.scanNetworks();
+    menuAllNetworks.setNumberOfRows(SSIDCount);
+}
+
+//------------------------------Wifi指令监听函数
+void wifiCommand(void *pvParameters)
 {   
-    char buf[16];
-    WiFi.SSID(row).toCharArray(buf, 16);
-    menuSSIDToConnect.setTextValue(buf);
-    if (WiFi.encryptionType(row) == 7)
+    WiFiClient client = server.available();
+    byte serBuf[8] = {};
+    if (client)
     {
-        menuPwd.setTextValue("");
-        menuPwd.setVisible(false);
+        while (client.connected())
+        {
+            if (client.available())
+            {
+                /* code */
+            }
+            
+        }
+        
     }
-    menuMgr.navigateToMenu(menuConnectTo.getChild());
 }
 
 //----------------------------------------
@@ -652,7 +666,7 @@ void writeStringEEPROM(int start_pos, int data_size, char* s)
 //----------------------------------------
 // 回调函数
 //----------------------------------------
-// 无线网络选择处理函数
+// 无线网络列表处理函数
 int CALLBACK_FUNCTION fnAllNetworksRtCall(RuntimeMenuItem *item, uint8_t row, RenderFnMode mode, char *buffer, int bufferSize)
 {
     switch (mode)
@@ -661,6 +675,10 @@ int CALLBACK_FUNCTION fnAllNetworksRtCall(RuntimeMenuItem *item, uint8_t row, Re
         if (row < SSIDCount)
         {
             wifiSetConnection(row);
+        }
+        else if (row > 253)
+        {
+            scanWifi();
         }
         return true;
     case RENDERFN_NAME:
@@ -687,26 +705,63 @@ int CALLBACK_FUNCTION fnAllNetworksRtCall(RuntimeMenuItem *item, uint8_t row, Re
     }
 }
 
+// 文件列表处理函数
+int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, RenderFnMode mode, char *buffer, int bufferSize)
+{
+    switch (mode)
+    {
+    case RENDERFN_INVOKE:
+        // TODO - your code to invoke goes here - row is the index of the item
+        return true;
+    case RENDERFN_NAME:
+        // TODO - each row has it's own name - 0xff is the parent item
+        // 254 and 255 are reserved for title and back, this is what is rendered in the back item text and also
+        // as the list name / title on the parent menu.
+        if (row > 253)
+        {
+            strncpy(buffer, "Open File", bufferSize);
+        }
+        else
+        {
+            strncpy(buffer, "Default", bufferSize);
+        }
+        return true;
+    case RENDERFN_VALUE:
+        // TODO - each row can has its own value - 0xff is the parent item
+        // Set number of rows with .setNumberOfRows(int);
+        if (row < 254)
+        {
+            strcpy(buffer, ">> ");
+            fastltoa(buffer, row, 3, NOT_PADDED, bufferSize);
+        }
+        return true;
+    case RENDERFN_EEPROM_POS:
+        return 0xffff; // lists are generally not saved to EEPROM
+    default:
+        return false;
+    }
+}
+
 void CALLBACK_FUNCTION onWifiSwitch(int id)
 {
     saveValues(id);
 }
 
 void CALLBACK_FUNCTION onChangeCurrent(int id)
-{
-    // TODO - your menu change code
+{   
     saveValues(id);
 }
 
 void CALLBACK_FUNCTION onChangeSpeed(int id)
 {
-    // TODO - your menu change code
+    stepperX.setRPM(menuRunningSpeedX.getCurrentValue()*60/menuPerimeterX.getCurrentValue());
+    stepperY.setRPM(menuRunningSpeedY.getCurrentValue()*60/menuPerimeterY.getCurrentValue());
+    stepperZ.setRPM(menuRunningSpeedZ.getCurrentValue()*60/menuPerimeterZ.getCurrentValue());
     saveValues(id);
 }
 
 void CALLBACK_FUNCTION onChangePerimeter(int id)
 {
-    // TODO - your menu change code
     saveValues(id);
 }
 
@@ -715,6 +770,22 @@ void CALLBACK_FUNCTION calibrateEncoder(int id)
     // TODO - your menu change code
 }
 
+
+// 设置网络菜单回调
+void wifiSetConnection(int row)
+{   
+    char buf[16];
+    WiFi.SSID(row).toCharArray(buf, 16);
+    menuSSIDToConnect.setTextValue(buf);
+    if (WiFi.encryptionType(row) == 7)
+    {
+        menuPwd.setTextValue("");
+        menuPwd.setVisible(false);
+    }
+    menuMgr.navigateToMenu(menuConnectTo.getChild());
+}
+
+// 尝试连接网络（设置后第一次连接）
 void CALLBACK_FUNCTION wifiConnectAttempt(int id)
 {
     openDialogNoButton(TEXT_ATTENTION, TEXT_CONNECTING, TEXT_PLEASE_WAIT);
