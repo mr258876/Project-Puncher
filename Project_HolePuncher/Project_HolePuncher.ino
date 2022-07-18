@@ -32,11 +32,12 @@ void runStepper(void *pvParameters);
 void runEncoder(void *pvParameters);
 
 //----------------------------------------任务句柄
-TaskHandle_t runTcMenu_Handler;
-TaskHandle_t serialCommand_Handler;
-TaskHandle_t runEncoder_Handler;
-TaskHandle_t wifiConnect_Handler;
-TaskHandle_t wifiCommand_Handler;
+TaskHandle_t runTcMenu_Handle;
+TaskHandle_t serialCommand_Handle;
+TaskHandle_t runEncoder_Handle;
+TaskHandle_t wifiConnect_Handle;
+TaskHandle_t wifiCommand_Handle;
+TaskHandle_t punchSchedule_Handle;
 
 //----------------------------------------资源锁
 SemaphoreHandle_t I2CMutex = xSemaphoreCreateMutex();       // I2C互斥量
@@ -79,7 +80,9 @@ bool Zenabled = false;
 bool Ydown = false;
 bool isPunching = false;
 
-unsigned stepper_to_wait;
+unsigned stepperX_to_wait;
+unsigned stepperY_to_wait;
+unsigned stepperZ_to_wait;
 
 int xOptiCurr = 500; // 电机x工作电流
 int xStbyCurr = 50;  // 电机x待机电流
@@ -139,11 +142,11 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    stepperX.begin(menuRunningSpeedX.getCurrentValue()*60/menuPerimeterX.getCurrentValue(), MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue(), MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getCurrentValue()*60/menuPerimeterY.getCurrentValue(), MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue(), MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getCurrentValue()*60/menuPerimeterZ.getCurrentValue(), MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue(), MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -162,20 +165,28 @@ void setup()
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
-    xTaskCreate(runTcMenu,           //任务函数
-                "runTcMenu",         //任务名称
-                8192,                //任务堆栈大小
-                NULL,                //任务参数
-                2,                   //任务优先级
-                &runTcMenu_Handler); //任务句柄
+    xTaskCreate(runTcMenu,          //任务函数
+                "runTcMenu",        //任务名称
+                8192,               //任务堆栈大小
+                NULL,               //任务参数
+                2,                  //任务优先级
+                &runTcMenu_Handle); //任务句柄
 
     //------------------------------创建串口命令监听任务
-    xTaskCreate(serialCommand,           //任务函数
-                "serialCommand",         //任务名称
-                8192,                    //任务堆栈大小
-                NULL,                    //任务参数
-                tskIDLE_PRIORITY,        //任务优先级
-                &serialCommand_Handler); //任务句柄
+    xTaskCreate(serialCommand,          //任务函数
+                "serialCommand",        //任务名称
+                8192,                   //任务堆栈大小
+                NULL,                   //任务参数
+                tskIDLE_PRIORITY,       //任务优先级
+                &serialCommand_Handle); //任务句柄
+
+    //------------------------------创建调度任务
+    xTaskCreate(punchSchedule,          //任务函数
+                "punchSchedule",        //任务名称
+                8192,                   //任务堆栈大小
+                NULL,                   //任务参数
+                tskIDLE_PRIORITY,       //任务优先级
+                &punchSchedule_Handle); //任务句柄
 
     xSemaphoreGive(XaxisBinary);   //释放X轴同步信号量
     xSemaphoreGive(YaxisBinary);   //释放Y轴同步信号量
@@ -191,12 +202,12 @@ void setup()
     if (menuWifi.getCurrentValue() == true)
     {
         //------------------------------创建连接Wifi任务
-        xTaskCreate(wifiConnect,           //任务函数
-                    "wifiConnect",         //任务名称
-                    8192,                  //任务堆栈大小
-                    NULL,                  //任务参数
-                    tskIDLE_PRIORITY,      //任务优先级
-                    &wifiConnect_Handler); //任务句柄
+        xTaskCreate(wifiConnect,          //任务函数
+                    "wifiConnect",        //任务名称
+                    8192,                 //任务堆栈大小
+                    NULL,                 //任务参数
+                    tskIDLE_PRIORITY,     //任务优先级
+                    &wifiConnect_Handle); //任务句柄
     }
 
     //--------------------检测编码器状态并启用编码器--------------------
@@ -211,12 +222,12 @@ void setup()
                 encoderDisabled = false;
                 // Serial.println("Endocer detected and enabled.");
                 //------------------------------创建磁编码器任务
-                xTaskCreate(runEncoder,           //任务函数
-                            "runEncoder",         //任务名称
-                            4096,                 //任务堆栈大小
-                            NULL,                 //任务参数
-                            3,                    //任务优先级
-                            &runEncoder_Handler); //任务句柄
+                xTaskCreate(runEncoder,          //任务函数
+                            "runEncoder",        //任务名称
+                            4096,                //任务堆栈大小
+                            NULL,                //任务参数
+                            3,                   //任务优先级
+                            &runEncoder_Handle); //任务句柄
             }
             else
             {
@@ -275,62 +286,12 @@ void setup()
     // Serial.println("Puncher booted.");
 }
 
-// 电机运行及调度现由loop函数处理 DEV.20220528
+// 电机运行现由loop函数处理 DEV.20220718
 void loop()
 {
-    //    Serial.println(encoderZ.getAngle());
-    if (!isPunching && puncherStatus == 0x11 && holeList.size() > 0) // 当状态为正在打孔且打孔队列有孔时才进行调度
-    {
-        isPunching = true;
-        Hole h = holeList.shift(); // 获取一个孔
-        moveXpos(h.x);             // 移动X轴
-        moveZ(h.z);                // 移动Z轴
-
-        (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
-        menuProgress.setTextValue(progressCA);
-        menuETA.setTime(secToTime(calcETA(xRPM, yRPM, zRPM)));
-        menuETA.setChanged(true);
-    }
-
-    if (Xenabled)
-    {
-        stepper_to_wait = stepperX.nextAction();
-        if (stepper_to_wait <= 0)
-        {
-            Xenabled = false;
-            startYaxis();
-        }
-    }
-
-    if (Zenabled)
-    {
-        stepper_to_wait = stepperZ.nextAction();
-        if (stepper_to_wait <= 0)
-        {
-            Zenabled = false;
-            startYaxis();
-        }
-    }
-
-    if (Yenabled)
-    {
-        stepper_to_wait = stepperY.nextAction();
-        if (stepper_to_wait <= 0)
-        {
-            if (Ydown)
-            {
-                moveYto(0); // 若Y轴已移动至下方则回到初始位置
-                Ydown = false;
-            }
-            else
-            {
-                Yenabled = false;
-                isPunching = false;
-
-                holeFinished += 1;
-            }
-        }
-    }
+    stepperX_to_wait = stepperX.nextAction();
+    stepperY_to_wait = stepperY.nextAction();
+    stepperZ_to_wait = stepperZ.nextAction();
 }
 
 // TcMenu 主题设置
@@ -378,6 +339,66 @@ void serialCommand(void *pvParameters)
                 handleSerialCommand(serBuf, 8);
             }
             xSemaphoreGive(Serial0Mutex);
+        }
+    }
+}
+
+//-----------------------------------------
+// 打孔调度函数
+// ----------------------------------------
+void punchSchedule(void *pvParameters)
+{
+    while (1)
+    {
+        //    Serial.println(encoderZ.getAngle());
+        if (!isPunching && puncherStatus == 0x11 && holeList.size() > 0) // 当状态为正在打孔且打孔队列有孔时才进行调度
+        {
+            isPunching = true;
+            Hole h = holeList.shift(); // 获取一个孔
+            moveXpos(h.x);             // 移动X轴
+            moveZ(h.z);                // 移动Z轴
+
+            (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
+            menuProgress.setTextValue(progressCA);
+            menuETA.setTime(secToTime(calcETA(xRPM, yRPM, zRPM)));
+            menuETA.setChanged(true);
+        }
+
+        if (Xenabled)
+        {
+            if (stepperX_to_wait <= 0)
+            {
+                Xenabled = false;
+                startYaxis();
+            }
+        }
+
+        if (Zenabled)
+        {
+            if (stepperZ_to_wait <= 0)
+            {
+                Zenabled = false;
+                startYaxis();
+            }
+        }
+
+        if (Yenabled)
+        {
+            if (stepperY_to_wait <= 0)
+            {
+                if (Ydown)
+                {
+                    moveYto(0); // 若Y轴已移动至下方则回到初始位置
+                    Ydown = false;
+                }
+                else
+                {
+                    Yenabled = false;
+                    isPunching = false;
+
+                    holeFinished += 1;
+                }
+            }
         }
     }
 }
@@ -501,45 +522,51 @@ void runEncoder(void *pvParameters)
 }
 
 // 编码器校准
-void encoderCalibrate()
+void calibrateEncoder(void *pvParameters)
 {
-    if (encoderDisabled)
-    {
-        // openDialog();
-        return;
-    }
-
     if (puncherStatus == 0x10)
     {
-        // 暂停编码器任务
-        vTaskSuspend(runEncoder_Handler);
+        vTaskSuspend(runEncoder_Handle);    // 暂停编码器任务
+        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
 
         uint16_t angleReading[MOTOR_STEPS * 2];
         uint16_t lastAngle = encoderZ.getAngle();
         // 正反转各一圈获取读数
         for (int i = 0; i < MOTOR_STEPS; i++)
         {
+            stepperZ.startMove(MICROSTEPS);
+            while (stepperZ_to_wait > 0)
+            {
+            }
             angleReading[i] = encoderZ.getAngle();
-            stepperZ.move(MICROSTEPS);
+            vTaskDelay(pdMS_TO_TICKS(100));
 
             Serial.println(angleReading[i] - lastAngle);
             lastAngle = angleReading[i];
         }
         for (int i = 0; i < MOTOR_STEPS; i++)
         {
+            stepperZ.startMove(-MICROSTEPS);
+            while (stepperZ_to_wait > 0)
+            {
+            }
             angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
-            stepperZ.move(-MICROSTEPS);
+            vTaskDelay(pdMS_TO_TICKS(100));
+
+            Serial.println(angleReading[i] - lastAngle);
+            lastAngle = angleReading[i];
         }
+        rotatedAngle = 0;
 
         // 重启编码器任务
-        vTaskResume(runEncoder_Handler);
+        vTaskResume(runEncoder_Handle);
     }
     else
     {
-        // openDialog("puncher busy");
+        openDialog(TEXT_ERROR, TEXT_PUNCHER_BUSY, TEXT_EMPTY);
     }
 
-    rotatedAngle = 0;
+    vTaskDelete(NULL);
 }
 
 //----------------------------------------
@@ -547,54 +574,54 @@ void encoderCalibrate()
 //----------------------------------------
 // 自动连接至网络
 void wifiConnect(void *pvParameters)
-{   
+{
     menuWifiStatus.setTextValue("Connecting");
     menuSSID.setTextValue("N/A");
     menuIP.setIpAddress("127.0.0.1");
-    
-    const char* wifiSSID = getStringEEPROM(301);
-    const char* wifiPswd = getStringEEPROM(331);
+
+    const char *wifiSSID = getStringEEPROM(301);
+    const char *wifiPswd = getStringEEPROM(331);
     switch (EEPROM.read(300))
     {
     case 0x01:
-//        Serial.println("wifi type 1");
+        // Serial.println("Open wifi");
         WiFi.begin(wifiSSID);
         break;
     case 0x02:
-//        Serial.println("wifi type 2");
-//        Serial.println(wifiSSID);
-//        Serial.println(wifiPswd);
+        // Serial.println("WPA wifi");
+        // Serial.println(wifiSSID);
+        // Serial.println(wifiPswd);
         WiFi.begin(wifiSSID, wifiPswd);
         break;
     default:
         return;
     }
 
-    Serial.print("try to connect");
+    // Serial.print("try to connect");
     unsigned long t = millis();
     while (WiFi.status() != WL_CONNECTED)
-    {   
-//        Serial.print(".");
+    {
+        // Serial.print(".");
         vTaskDelay(pdMS_TO_TICKS(500));
         if (millis() - t > 20000)
-        {   
-            Serial.println("Wifi Connect Fail!");
+        {
+            // Serial.println("Wifi Connect Fail!");
             menuWifiStatus.setTextValue("UnConnect");
             openDialog(TEXT_ERROR, TEXT_WIFI_CONN_FAIL_1, TEXT_WIFI_CONN_FAIL_2);
 
-            delete []wifiSSID;
-            delete []wifiPswd;
+            delete[] wifiSSID;
+            delete[] wifiPswd;
             vTaskDelete(NULL);
         }
     }
-    
-//    Serial.println("Wifi Connect Success!");
+
+    // Serial.println("Wifi Connect Success!");
     menuWifiStatus.setTextValue("Connected");
     menuSSID.setTextValue(WiFi.SSID());
     menuIP.setIpAddress(WiFi.localIP().toString().c_str());
 
-    delete []wifiSSID;
-    delete []wifiPswd;
+    delete[] wifiSSID;
+    delete[] wifiPswd;
     vTaskDelete(NULL);
 }
 
@@ -607,7 +634,7 @@ void scanWifi()
 
 //------------------------------Wifi指令监听函数
 void wifiCommand(void *pvParameters)
-{   
+{
     WiFiClient client = server.available();
     byte serBuf[8] = {};
     if (client)
@@ -618,9 +645,7 @@ void wifiCommand(void *pvParameters)
             {
                 /* code */
             }
-            
         }
-        
     }
 }
 
@@ -634,30 +659,30 @@ TimeStorage secToTime(int sec)
 }
 
 // EEPROM中读取字符串
-char* getStringEEPROM(int start_pos)
+char *getStringEEPROM(int start_pos)
 {
-    char* s = new char[EEPROM.read(start_pos)+1];
+    char *s = new char[EEPROM.read(start_pos) + 1];
     s[EEPROM.read(start_pos)] = '\0';
-//    Serial.print("Read Length:");
-//    Serial.println(EEPROM.read(start_pos));
+    //    Serial.print("Read Length:");
+    //    Serial.println(EEPROM.read(start_pos));
     for (int i = 0; i < EEPROM.read(start_pos); i++)
     {
         s[i] = char(EEPROM.read(start_pos + i + 1));
     }
-//    Serial.println(s);
+    //    Serial.println(s);
     return s;
 }
 
 // 保存字符串至EEPROM
-void writeStringEEPROM(int start_pos, int data_size, char* s)
-{   
+void writeStringEEPROM(int start_pos, int data_size, char *s)
+{
     Serial.println("length:");
     Serial.println(strlen(s));
     EEPROM.write(start_pos, data_size);
     for (int i = 0; i < data_size; i++)
-    {   
-//        Serial.println(start_pos + i + 1);
-//        Serial.println(s[i]);
+    {
+        //        Serial.println(start_pos + i + 1);
+        //        Serial.println(s[i]);
         EEPROM.write(start_pos + i + 1, s[i]);
     }
     EEPROM.commit();
@@ -748,15 +773,15 @@ void CALLBACK_FUNCTION onWifiSwitch(int id)
 }
 
 void CALLBACK_FUNCTION onChangeCurrent(int id)
-{   
+{
     saveValues(id);
 }
 
 void CALLBACK_FUNCTION onChangeSpeed(int id)
 {
-    stepperX.setRPM(menuRunningSpeedX.getCurrentValue()*60/menuPerimeterX.getCurrentValue());
-    stepperY.setRPM(menuRunningSpeedY.getCurrentValue()*60/menuPerimeterY.getCurrentValue());
-    stepperZ.setRPM(menuRunningSpeedZ.getCurrentValue()*60/menuPerimeterZ.getCurrentValue());
+    stepperX.setRPM(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue());
+    stepperY.setRPM(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue());
+    stepperZ.setRPM(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue());
     saveValues(id);
 }
 
@@ -765,15 +790,39 @@ void CALLBACK_FUNCTION onChangePerimeter(int id)
     saveValues(id);
 }
 
-void CALLBACK_FUNCTION calibrateEncoder(int id)
+void CALLBACK_FUNCTION onChangeUseEncoder(int id)
 {
-    // TODO - your menu change code
+    if (menuUseEncoderZ.getCurrentValue() == true)
+    {
+        xTaskCreate(calibrateEncoder,   //任务函数
+                    "calibrateEncoder", //任务名称
+                    8192,               //任务堆栈大小
+                    NULL,               //任务参数
+                    tskIDLE_PRIORITY,   //任务优先级
+                    NULL);              //任务句柄
+    }
+    else
+    {
+        openDialog(TEXT_ERROR, TEXT_ENCODER_DISABLED, TEXT_EMPTY);
+    }
 }
 
+void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
+{
+    vTaskSuspend(runEncoder_Handle);
+    stepperZ.startMove(200 * MICROSTEPS);
+}
+
+void CALLBACK_FUNCTION resetSettings(int id)
+{
+    menuResetStatus.setBoolean(false);
+    saveValues(id);
+    ESP.restart();
+}
 
 // 设置网络菜单回调
 void wifiSetConnection(int row)
-{   
+{
     char buf[16];
     WiFi.SSID(row).toCharArray(buf, 16);
     menuSSIDToConnect.setTextValue(buf);
@@ -797,7 +846,7 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
     }
     EEPROM.commit();
 
-    writeStringEEPROM(301, (int)strlen(menuSSIDToConnect.getTextValue()), (char*)menuSSIDToConnect.getTextValue());
+    writeStringEEPROM(301, (int)strlen(menuSSIDToConnect.getTextValue()), (char *)menuSSIDToConnect.getTextValue());
     if (strlen(menuPwd.getTextValue()) == 0)
     {
         EEPROM.write(300, 1);
@@ -805,18 +854,18 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
     else
     {
         EEPROM.write(300, 2);
-        writeStringEEPROM(331, (int)strlen(menuPwd.getTextValue()), (char*)menuPwd.getTextValue());
+        writeStringEEPROM(331, (int)strlen(menuPwd.getTextValue()), (char *)menuPwd.getTextValue());
     }
 
     EEPROM.commit();
 
     //------------------------------重新创建连接Wifi任务
-    Serial.print(eTaskGetState(&wifiConnect_Handler));
+    Serial.print(eTaskGetState(&wifiConnect_Handle));
 
-    xTaskCreate(wifiConnect,           //任务函数
-                "wifiConnect",         //任务名称
-                8192,                  //任务堆栈大小
-                NULL,                  //任务参数
-                tskIDLE_PRIORITY,      //任务优先级
-                &wifiConnect_Handler); //任务句柄
+    xTaskCreate(wifiConnect,          //任务函数
+                "wifiConnect",        //任务名称
+                8192,                 //任务堆栈大小
+                NULL,                 //任务参数
+                tskIDLE_PRIORITY,     //任务优先级
+                &wifiConnect_Handle); //任务句柄
 }

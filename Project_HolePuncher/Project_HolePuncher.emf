@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "Mr258876",
+  "author": "mr258876",
   "items": [
     {
       "parentId": 0,
@@ -388,7 +388,7 @@
         "variableName": "UseEncoderZ",
         "id": 29,
         "eepromAddress": 24,
-        "functionName": "saveValues",
+        "functionName": "onChangeUseEncoder",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -417,7 +417,7 @@
         "variableName": "CalibrateEncoderZ",
         "id": 50,
         "eepromAddress": -1,
-        "functionName": "calibrateEncoder",
+        "functionName": "calibrateEncoderCallback",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -912,11 +912,6 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ],
-    "menuInMenuCollection": {
-      "menuDefinitions": []
-    },
-    "packageNamespace": "",
-    "appIsModular": false
+    ]
   }
 }

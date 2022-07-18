@@ -92,7 +92,7 @@ AnyMenuInfo_ML minfoCalibrateEncoderZ = {lang[language][TEXT_CALIBRATE_ENCODER],
 ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, NULL);
 BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER], 30, 25, 1, saveValues, NAMING_TRUE_FALSE};
 BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, &menuCalibrateEncoderZ);
-BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, saveValues, NAMING_TRUE_FALSE};
+BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, onChangeUseEncoder, NAMING_TRUE_FALSE};
 BooleanMenuItem menuUseEncoderZ(&minfoUseEncoderZ, false, &menuReversedEncoderZ);
 AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 33, 30, 255, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentZ(&minfoRunningCurrentZ, 0, &menuUseEncoderZ);
@@ -308,13 +308,4 @@ void openConfirmDialog(int title, int info1, int info2, int confirm, int cancel,
 void closeDialog()
 {
     menuMgr.navigateToMenu(lastMenu);
-}
-
-void CALLBACK_FUNCTION resetSettings(int id)
-{
-    menuResetStatus.setBoolean(false);
-
-    saveValues(0);
-
-    ESP.restart();
 }

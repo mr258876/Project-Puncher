@@ -32,5 +32,9 @@ void handle_DataReceive(byte *buffer, int len);
 void handle_DataTransDisabled();
 void handle_StartPunch();
 
+extern bool wifiCommandEnabled;
+extern bool serialCommandEnabled;
+
+extern char* response;
 
 #endif

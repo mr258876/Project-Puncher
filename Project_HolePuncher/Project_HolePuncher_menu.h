@@ -98,7 +98,7 @@ void setupMenu();
 // Callback functions must always include CALLBACK_FUNCTION after the return type
 #define CALLBACK_FUNCTION
 
-void CALLBACK_FUNCTION calibrateEncoder(int id);
+void CALLBACK_FUNCTION calibrateEncoderCallback(int id);
 int fnAllNetworksRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
 int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char* buffer, int bufferSize);
 void CALLBACK_FUNCTION onChangeCurrent(int id);
@@ -109,6 +109,7 @@ void CALLBACK_FUNCTION resetSettings(int id);
 void CALLBACK_FUNCTION saveValues(int id);
 void CALLBACK_FUNCTION updateLanguage(int id);
 void CALLBACK_FUNCTION wifiConnectAttempt(int id);
+void CALLBACK_FUNCTION onChangeUseEncoder(int id);
 
 void openDialog(int title, int info1, int info2);
 void openDialogNoButton(int title, int info1, int info2);
