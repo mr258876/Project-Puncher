@@ -123,6 +123,9 @@ void setup()
     gfx.setFontPosBaseline(); // 设置字体基线(虽然这里应该没啥用)
     setupMenu();
     installTheme();
+
+    checkReset();             // 检查是否需要设置初始值
+    
     menuProgress.setTextValue("idle");
     // menuMgr.navigateToMenu(menuInfoView.getChild());
 
@@ -304,6 +307,34 @@ void installTheme()
     menuDuration.setTime(secToTime(0));
 }
 
+void checkReset()
+{
+    if (!menuResetStatus.getCurrentValue())
+    {   
+        menuPerimeterX.setCurrentValue(8);
+        menuPerimeterY.setCurrentValue(8);
+        menuPerimeterZ.setCurrentValue(20);
+
+        menuRunningSpeedX.setCurrentValue(8);
+        menuRunningSpeedX.setCurrentValue(8);
+        menuRunningSpeedX.setCurrentValue(20);
+
+        menuRunningCurrentX.setCurrentValue(500);
+        menuRunningCurrentY.setCurrentValue(800);
+        menuRunningCurrentZ.setCurrentValue(500);
+        
+        menuVirtualEndstopX.setBoolean(false);
+        menuVirtualEndstopY.setBoolean(false);
+        
+        menuUseEncoderZ.setBoolean(false);
+
+        menuWifi.setBoolean(false);
+
+        menuResetStatus.setBoolean(true);
+        saveValues(0);
+    }
+}
+
 //------------------------------TcMenu 主进程循环函数
 void runTcMenu(void *pvParameters)
 {
@@ -360,7 +391,7 @@ void punchSchedule(void *pvParameters)
 
             (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
             menuProgress.setTextValue(progressCA);
-            menuETA.setTime(secToTime(calcETA(xRPM, yRPM, zRPM)));
+            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue(), menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue(), menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue())));
             menuETA.setChanged(true);
         }
 
@@ -541,7 +572,7 @@ void calibrateEncoder(void *pvParameters)
             angleReading[i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            Serial.println(angleReading[i] - lastAngle);
+//            Serial.println(angleReading[i] - lastAngle);
             lastAngle = angleReading[i];
         }
         for (int i = 0; i < MOTOR_STEPS; i++)
@@ -553,10 +584,12 @@ void calibrateEncoder(void *pvParameters)
             angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            Serial.println(angleReading[i] - lastAngle);
+//            Serial.println(angleReading[i] - lastAngle);
             lastAngle = angleReading[i];
         }
         rotatedAngle = 0;
+        
+        
 
         // 重启编码器任务
         vTaskResume(runEncoder_Handle);
@@ -617,7 +650,7 @@ void wifiConnect(void *pvParameters)
 
     // Serial.println("Wifi Connect Success!");
     menuWifiStatus.setTextValue("Connected");
-    menuSSID.setTextValue(WiFi.SSID());
+    menuSSID.setTextValue(WiFi.SSID().c_str());
     menuIP.setIpAddress(WiFi.localIP().toString().c_str());
 
     delete[] wifiSSID;
@@ -792,7 +825,13 @@ void CALLBACK_FUNCTION onChangePerimeter(int id)
 
 void CALLBACK_FUNCTION onChangeUseEncoder(int id)
 {
-    if (menuUseEncoderZ.getCurrentValue() == true)
+    saveValues(id);
+    ESP.restart();
+}
+
+void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
+{
+        if (menuUseEncoderZ.getCurrentValue() == true)
     {
         xTaskCreate(calibrateEncoder,   //任务函数
                     "calibrateEncoder", //任务名称
@@ -805,12 +844,6 @@ void CALLBACK_FUNCTION onChangeUseEncoder(int id)
     {
         openDialog(TEXT_ERROR, TEXT_ENCODER_DISABLED, TEXT_EMPTY);
     }
-}
-
-void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
-{
-    vTaskSuspend(runEncoder_Handle);
-    stepperZ.startMove(200 * MICROSTEPS);
 }
 
 void CALLBACK_FUNCTION resetSettings(int id)
