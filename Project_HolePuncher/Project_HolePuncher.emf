@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "Mr258876",
+  "author": "mr258876",
   "items": [
     {
       "parentId": 0,
@@ -127,9 +127,9 @@
       "parentId": 16,
       "type": "analogItem",
       "item": {
-        "maxValue": 255,
+        "maxValue": 1000,
         "offset": 0,
-        "divisor": 1,
+        "divisor": 10,
         "unitName": "mm",
         "name": "PerimeterX",
         "variableName": "PerimeterX",
@@ -145,9 +145,9 @@
       "parentId": 16,
       "type": "analogItem",
       "item": {
-        "maxValue": 600,
+        "maxValue": 1000,
         "offset": 0,
-        "divisor": 1,
+        "divisor": 10,
         "unitName": "mm",
         "name": "Running SpeedX",
         "variableName": "RunningSpeedX",
@@ -228,7 +228,7 @@
       "parentId": 17,
       "type": "analogItem",
       "item": {
-        "maxValue": 255,
+        "maxValue": 1000,
         "offset": 0,
         "divisor": 1,
         "unitName": "mm",
@@ -246,9 +246,9 @@
       "parentId": 17,
       "type": "analogItem",
       "item": {
-        "maxValue": 600,
+        "maxValue": 1000,
         "offset": 0,
-        "divisor": 1,
+        "divisor": 10,
         "unitName": "mm",
         "name": "Running SpeedY",
         "variableName": "RunningSpeedY",
@@ -329,9 +329,9 @@
       "parentId": 18,
       "type": "analogItem",
       "item": {
-        "maxValue": 255,
-        "offset": 1,
-        "divisor": 1,
+        "maxValue": 1000,
+        "offset": 0,
+        "divisor": 10,
         "unitName": "mm",
         "name": "PerimeterZ",
         "variableName": "PerimeterZ",
@@ -347,9 +347,9 @@
       "parentId": 18,
       "type": "analogItem",
       "item": {
-        "maxValue": 600,
-        "offset": 1,
-        "divisor": 1,
+        "maxValue": 1000,
+        "offset": 0,
+        "divisor": 10,
         "unitName": "mm",
         "name": "Running SpeedZ",
         "variableName": "RunningSpeedZ",
@@ -429,7 +429,7 @@
       "item": {
         "maxValue": 10000,
         "offset": 0,
-        "divisor": 10000,
+        "divisor": 1000,
         "unitName": "Unit",
         "name": "Peri Ratio",
         "variableName": "PeriRatio",
@@ -852,8 +852,13 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "SW_POLLING_MODE",
-        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "INTERRUPT_SWITCHES",
+        "latestValue": "false",
         "subsystem": "INPUT"
       },
       {
@@ -884,11 +889,6 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -929,7 +929,6 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ],
-    "appIsModular": false
+    ]
   }
 }

@@ -88,17 +88,19 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[la
 SubMenuInfo_ML minfoWireless = {lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK};
 BackMenuItem menuBackWireless(fnWirelessRtCall, &menuWifi);
 SubMenuItem menuWireless(&minfoWireless, &menuBackWireless, &menuResetSettings);
+AnalogMenuInfo_ML minfoPeriRatio = { lang[language][TEXT_PERI_RATIO], 52, 33, 10000, NO_CALLBACK, 0, 1000, "" };
+AnalogMenuItem menuPeriRatio(&minfoPeriRatio, 0, NULL);
 AnyMenuInfo_ML minfoCalibrateEncoderZ = {lang[language][TEXT_CALIBRATE_ENCODER], 50, 0xffff, 0, calibrateEncoderCallback};
-ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, NULL);
+ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, &menuPeriRatio);
 BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER], 30, 25, 1, saveValues, NAMING_TRUE_FALSE};
 BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, &menuCalibrateEncoderZ);
 BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, onChangeUseEncoder, NAMING_TRUE_FALSE};
 BooleanMenuItem menuUseEncoderZ(&minfoUseEncoderZ, false, &menuReversedEncoderZ);
 AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 33, 30, 1023, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentZ(&minfoRunningCurrentZ, 0, &menuUseEncoderZ);
-AnalogMenuInfo_ML minfoRunningSpeedZ = {lang[language][TEXT_RUNNING_SPEED], 32, 28, 600, onChangeSpeed, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoRunningSpeedZ = {lang[language][TEXT_RUNNING_SPEED], 32, 28, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedZ(&minfoRunningSpeedZ, 0, &menuRunningCurrentZ);
-AnalogMenuInfo_ML minfoPerimeterZ = {lang[language][TEXT_PERIMETER], 31, 26, 255, onChangePerimeter, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoPerimeterZ = {lang[language][TEXT_PERIMETER], 31, 26, 1000, onChangePerimeter, 0, 10, "mm"};
 AnalogMenuItem menuPerimeterZ(&minfoPerimeterZ, 0, &menuRunningSpeedZ);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnZAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Z_AXIS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoZAxis = {lang[language][TEXT_Z_AXIS], 18, 0xffff, 0, NO_CALLBACK};
@@ -110,9 +112,9 @@ BooleanMenuInfo_ML minfoVirtualEndstopY = {lang[language][TEXT_VIRTUAL_ENDSTOP],
 BooleanMenuItem menuVirtualEndstopY(&minfoVirtualEndstopY, false, &menuEndstopThresholdY);
 AnalogMenuInfo_ML minfoRunningCurrentY = {lang[language][TEXT_RUNNING_CURRENT], 28, 22, 1023, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentY(&minfoRunningCurrentY, 0, &menuVirtualEndstopY);
-AnalogMenuInfo_ML minfoRunningSpeedY = {lang[language][TEXT_RUNNING_SPEED], 27, 20, 600, onChangeSpeed, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoRunningSpeedY = {lang[language][TEXT_RUNNING_SPEED], 27, 20, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedY(&minfoRunningSpeedY, 0, &menuRunningCurrentY);
-AnalogMenuInfo_ML minfoPerimeterY = {lang[language][TEXT_PERIMETER], 26, 18, 255, onChangePerimeter, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoPerimeterY = {lang[language][TEXT_PERIMETER], 26, 18, 1000, onChangePerimeter, 0, 10, "mm"};
 AnalogMenuItem menuPerimeterY(&minfoPerimeterY, 0, &menuRunningSpeedY);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnYAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Y_AXIS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoYAxis = {lang[language][TEXT_Y_AXIS], 17, 0xffff, 0, NO_CALLBACK};
@@ -124,9 +126,9 @@ BooleanMenuInfo_ML minfoVirtualEndstopX = {lang[language][TEXT_VIRTUAL_ENDSTOP],
 BooleanMenuItem menuVirtualEndstopX(&minfoVirtualEndstopX, false, &menuEndstopThresholdX);
 AnalogMenuInfo_ML minfoRunningCurrentX = {lang[language][TEXT_RUNNING_CURRENT], 23, 13, 1023, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentX(&minfoRunningCurrentX, 0, &menuVirtualEndstopX);
-AnalogMenuInfo_ML minfoRunningSpeedX = {lang[language][TEXT_RUNNING_SPEED], 22, 11, 600, onChangeSpeed, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoRunningSpeedX = {lang[language][TEXT_RUNNING_SPEED], 22, 11, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedX(&minfoRunningSpeedX, 0, &menuRunningCurrentX);
-AnalogMenuInfo_ML minfoPerimeterX = {lang[language][TEXT_PERIMETER], 21, 9, 255, onChangePerimeter, 0, 1, "mm"};
+AnalogMenuInfo_ML minfoPerimeterX = {lang[language][TEXT_PERIMETER], 21, 9, 1000, onChangePerimeter, 0, 10, "mm"};
 AnalogMenuItem menuPerimeterX(&minfoPerimeterX, 0, &menuRunningSpeedX);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnXAxisRtCall, backSubItemRenderFn, lang[language][TEXT_X_AXIS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoXAxis = {lang[language][TEXT_X_AXIS], 16, 0xffff, 0, NO_CALLBACK};
@@ -174,6 +176,7 @@ void setupMenu()
     menuSSID.setReadOnly(true);
     menuIP.setReadOnly(true);
     menuSSIDToConnect.setReadOnly(true);
+    menuPeriRatio.setReadOnly(true);
 
     menuInfoView.setVisible(false);
     menuResetStatus.setVisible(false);

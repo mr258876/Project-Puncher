@@ -1,4 +1,4 @@
-# Transmission Protocol Over Serial
+# Transmission Content Definition
 ## Transmission Frame Discription
 The transmission process is made up of frames. Each frame has 8 bytes, and is composed of three parts: Frame head, Frame body, and CRC byte.
 
@@ -43,6 +43,7 @@ Frame body in client response frames contains responses from the client. The fir
 | -----------   | -----------       | -----------                       |
 | 0x01          | -----------       | Client Response                   |
 | 0x01          | 0x01 -----------  | Client Response: Success          |
+| 0x01          | 0x10 -----------  | Client Response: Heart Beat       |
 | ------------- | ----------------- | --------------------------------- |
 | 0x10          | -----------       | Client Status                     |
 | 0x10          | 0x01 -----------  | Client Status: Ready to transmit. |
@@ -52,6 +53,8 @@ Frame body in client response frames contains responses from the client. The fir
 | ------------- | ----------------- | --------------------------------- |
 | 0xE0          | -----------       | Runtime Error                     |
 | 0xE0          | 0x01 -----------  | Runtime Error: No hole data.      |
+| 0xE0          | 0x11 -----------  | Runtime Error: Puncher busy.      |
+| 0xE0          | 0xA0 -----------  | Runtime Error: Wifi command disabled. |
 | 0xE0          | 0xFF -----------  | Runtime Error: Unknown command    |
 | ------------- | ----------------- | --------------------------------- |
 | 0xE1          | -----------       | Data Error                        |
@@ -60,7 +63,8 @@ Frame body in client response frames contains responses from the client. The fir
 | 0xE2          | -----------       | Hardware Failure                  |
 | 0xE2          | 0x01 0xMM ------  | Hardware Failure: Unable to read motor load values of motor #MM. (00 - X, 01 - Y) |
 | 0xE2          | 0x02 -----------  | Hardware Failure: Unable to read magnet encoder values. |
-| 0xE2          | 0x03 -----------  | Hardware Failure: Z axis got jammed. |
+| 0xE2          | 0x03 -----------  | Hardware Failure: Z axis got jammed.  |
+| 0xE2          | 0x04 -----------  | Hardware Failure: Encoder not detected.   |
 
 #### CRC Error Frame
 CRC error frame means there's an error during transmission. No data would be contained in this frame.

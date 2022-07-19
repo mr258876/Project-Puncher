@@ -79,8 +79,9 @@
 #define TEXT_ZEROING_FAILED     52
 #define TEXT_CHECK_SETTINGS     53
 
-// 校准编码器错误信息
+// 校准编码器
 #define TEXT_ENCODER_DISABLED   54
 #define TEXT_PUNCHER_BUSY       55
+#define TEXT_PERI_RATIO         56
 
 #endif

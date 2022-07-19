@@ -124,8 +124,8 @@ void setup()
     setupMenu();
     installTheme();
 
-    checkReset();             // 检查是否需要设置初始值
-    
+    checkReset(); // 检查是否需要设置初始值
+
     menuProgress.setTextValue("idle");
     // menuMgr.navigateToMenu(menuInfoView.getChild());
 
@@ -155,16 +155,16 @@ void setup()
     stepperY.enable();
     stepperZ.enable();
 
-    DRIVER_SERIAL.begin(115200);    // 启动串口
-    driverX.begin();                // x方向驱动板开始通讯
-    driverX.microsteps(MICROSTEPS); // x方向驱动板设置微步大小
-                                    //    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
-    driverY.begin();                // y方向驱动板开始通讯
-    driverY.microsteps(MICROSTEPS); // y方向驱动板设置微步大小
-                                    //    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
-    driverZ.begin();                // z方向驱动板开始通讯
-    driverZ.microsteps(MICROSTEPS); // z方向驱动板设置微步大小
-                                    //    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
+    DRIVER_SERIAL.begin(115200);                                // 启动串口
+    driverX.begin();                                            // x方向驱动板开始通讯
+    driverX.microsteps(MICROSTEPS);                             // x方向驱动板设置微步大小
+    driverX.rms_current(menuRunningCurrentX.getCurrentValue()); // x方向驱动板设置电流大小 (mA)
+    driverY.begin();                                            // y方向驱动板开始通讯
+    driverY.microsteps(MICROSTEPS);                             // y方向驱动板设置微步大小
+    driverY.rms_current(menuRunningCurrentY.getCurrentValue()); // y方向驱动板设置电流大小 (mA)
+    driverZ.begin();                                            // z方向驱动板开始通讯
+    driverZ.microsteps(MICROSTEPS);                             // z方向驱动板设置微步大小
+    driverZ.rms_current(menuRunningCurrentZ.getCurrentValue()); // z方向驱动板设置电流大小 (mA)
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
@@ -310,22 +310,22 @@ void installTheme()
 void checkReset()
 {
     if (!menuResetStatus.getCurrentValue())
-    {   
-        menuPerimeterX.setCurrentValue(8);
-        menuPerimeterY.setCurrentValue(8);
-        menuPerimeterZ.setCurrentValue(20);
+    {
+        menuPerimeterX.setCurrentValue(80);
+        menuPerimeterY.setCurrentValue(80);
+        menuPerimeterZ.setCurrentValue(200);
 
-        menuRunningSpeedX.setCurrentValue(8);
-        menuRunningSpeedX.setCurrentValue(8);
-        menuRunningSpeedX.setCurrentValue(20);
+        menuRunningSpeedX.setCurrentValue(80);
+        menuRunningSpeedX.setCurrentValue(80);
+        menuRunningSpeedX.setCurrentValue(200);
 
         menuRunningCurrentX.setCurrentValue(500);
         menuRunningCurrentY.setCurrentValue(800);
         menuRunningCurrentZ.setCurrentValue(500);
-        
+
         menuVirtualEndstopX.setBoolean(false);
         menuVirtualEndstopY.setBoolean(false);
-        
+
         menuUseEncoderZ.setBoolean(false);
 
         menuWifi.setBoolean(false);
@@ -367,7 +367,7 @@ void serialCommand(void *pvParameters)
             while (Serial.available() > 7)
             {
                 Serial.readBytes(serBuf, 8);
-                handleSerialCommand(serBuf, 8);
+                Serial.write(handleSerialCommand(serBuf, 8), 8);
             }
             xSemaphoreGive(Serial0Mutex);
         }
@@ -442,7 +442,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
     if (!Xenabled && !Zenabled)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        if (abs(rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1 || encoderDisabled)
+        if (encoderDisabled || abs(rotatedAngle / (4096.0 * menuPeriRatio.getCurrentValue() / 1000) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
             moveYto(4);
             Ydown = true;
@@ -450,7 +450,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
         else
         {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS));
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuPeriRatio.getCurrentValue() / 1000) * MOTOR_STEPS * MICROSTEPS));
         }
     }
 }
@@ -459,7 +459,7 @@ void moveZ(float mm)
 {
     Zenabled = true;
     //     driverZ.rms_current(zOptiCurr);
-    long toMove = (long)(-mm * 25.852579588531222053828834659495);
+    long toMove = (long)(-mm / menuPerimeterZ.getCurrentValue() * 10 * MOTOR_STEPS * MICROSTEPS);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
     //     driverZ.rms_current(zStbyCurr);
@@ -481,7 +481,7 @@ void moveXto(float mm)
 {
     Xenabled = true;
     //    driverX.rms_current(xOptiCurr);
-    long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
+    long steps = (long)(mm / menuPerimeterX.getCurrentValue() * 10 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
     //    driverX.rms_current(xStbyCurr);
@@ -492,7 +492,7 @@ void moveYto(float mm)
 {
     Yenabled = true;
     //    driverY.rms_current(yOptiCurr);
-    long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
+    long steps = (long)(mm / menuPerimeterY.getCurrentValue() * 10 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
     //    driverY.rms_current(yStbyCurr);
@@ -562,6 +562,8 @@ void calibrateEncoder(void *pvParameters)
 
         uint16_t angleReading[MOTOR_STEPS * 2];
         uint16_t lastAngle = encoderZ.getAngle();
+        uint16_t readingA = 0;
+        uint16_t readingB = 0;
         // 正反转各一圈获取读数
         for (int i = 0; i < MOTOR_STEPS; i++)
         {
@@ -572,7 +574,15 @@ void calibrateEncoder(void *pvParameters)
             angleReading[i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-//            Serial.println(angleReading[i] - lastAngle);
+            //            Serial.println(angleReading[i] - lastAngle);
+            if (abs(angleReading[i] - lastAngle) > 2048)
+            {
+                readingA += 4096 - abs(angleReading[i] - lastAngle);
+            }
+            else
+            {
+                readingA += abs(angleReading[i] - lastAngle);
+            }
             lastAngle = angleReading[i];
         }
         for (int i = 0; i < MOTOR_STEPS; i++)
@@ -584,15 +594,24 @@ void calibrateEncoder(void *pvParameters)
             angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-//            Serial.println(angleReading[i] - lastAngle);
+            //            Serial.println(angleReading[i] - lastAngle);
+            if (abs(angleReading[i] - lastAngle) > 2048)
+            {
+                readingB += 4096 - abs(angleReading[i] - lastAngle);
+            }
+            else
+            {
+                readingB += abs(angleReading[i] - lastAngle);
+            }
             lastAngle = angleReading[i];
         }
         rotatedAngle = 0;
-        
-        
+
+        menuPeriRatio.setCurrentValue((readingA + readingB) / 2 / 4096 * 1000);
 
         // 重启编码器任务
         vTaskResume(runEncoder_Handle);
+        vTaskResume(punchSchedule_Handle);
     }
     else
     {
@@ -669,14 +688,24 @@ void scanWifi()
 void wifiCommand(void *pvParameters)
 {
     WiFiClient client = server.available();
-    byte serBuf[8] = {};
-    if (client)
+    byte wifiBuf[8] = {};
+    int readByteCount = 0;
+    client.flush();
+    while (1)
     {
-        while (client.connected())
+        if (client)
         {
-            if (client.available())
+            while (client.connected())
             {
-                /* code */
+                if (client.available())
+                {
+                    wifiBuf[readByteCount] = client.read();
+                    readByteCount += 1;
+                    if (readByteCount > 7)
+                    {
+                        client.write(handleWifiCommand(wifiBuf, 8), 8);
+                    }
+                }
             }
         }
     }
@@ -831,7 +860,7 @@ void CALLBACK_FUNCTION onChangeUseEncoder(int id)
 
 void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
 {
-        if (menuUseEncoderZ.getCurrentValue() == true)
+    if (menuUseEncoderZ.getCurrentValue() == true)
     {
         xTaskCreate(calibrateEncoder,   //任务函数
                     "calibrateEncoder", //任务名称

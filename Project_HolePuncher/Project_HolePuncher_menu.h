@@ -56,6 +56,7 @@ extern TextMenuItem menuWifiStatus;
 extern BooleanMenuItem menuWifi;
 extern BackMenuItem menuBackWireless;
 extern SubMenuItem menuWireless;
+extern AnalogMenuItem menuPeriRatio;
 extern ActionMenuItem menuCalibrateEncoderZ;
 extern BooleanMenuItem menuReversedEncoderZ;
 extern BooleanMenuItem menuUseEncoderZ;
@@ -104,12 +105,12 @@ int fnOpenFileRtCall(RuntimeMenuItem* item, uint8_t row, RenderFnMode mode, char
 void CALLBACK_FUNCTION onChangeCurrent(int id);
 void CALLBACK_FUNCTION onChangePerimeter(int id);
 void CALLBACK_FUNCTION onChangeSpeed(int id);
+void CALLBACK_FUNCTION onChangeUseEncoder(int id);
 void CALLBACK_FUNCTION onWifiSwitch(int id);
 void CALLBACK_FUNCTION resetSettings(int id);
 void CALLBACK_FUNCTION saveValues(int id);
 void CALLBACK_FUNCTION updateLanguage(int id);
 void CALLBACK_FUNCTION wifiConnectAttempt(int id);
-void CALLBACK_FUNCTION onChangeUseEncoder(int id);
 
 void openDialog(int title, int info1, int info2);
 void openDialogNoButton(int title, int info1, int info2);
