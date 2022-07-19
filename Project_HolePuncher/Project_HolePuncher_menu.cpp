@@ -88,7 +88,7 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[la
 SubMenuInfo_ML minfoWireless = {lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK};
 BackMenuItem menuBackWireless(fnWirelessRtCall, &menuWifi);
 SubMenuItem menuWireless(&minfoWireless, &menuBackWireless, &menuResetSettings);
-AnalogMenuInfo_ML minfoPeriRatio = { lang[language][TEXT_PERI_RATIO], 52, 33, 10000, NO_CALLBACK, 0, 1000, "" };
+AnalogMenuInfo_ML minfoPeriRatio = { lang[language][TEXT_PERI_RATIO], 52, 33, 10000, saveValues, 0, 1000, "" };
 AnalogMenuItem menuPeriRatio(&minfoPeriRatio, 0, NULL);
 AnyMenuInfo_ML minfoCalibrateEncoderZ = {lang[language][TEXT_CALIBRATE_ENCODER], 50, 0xffff, 0, calibrateEncoderCallback};
 ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, &menuPeriRatio);
