@@ -65,14 +65,17 @@ WiFiServer server(WIFI_CONTROL_PORT);
 #define xenablePin 23 // x使能控制引脚
 #define xdirPin 18    // x方向控制引脚
 #define xstepPin 19   // x步进控制引脚
+#define xdiagPin 39   // x方向过载引脚
 
 #define yenablePin 5 // y使能控制引脚
 #define ydirPin 2    // y方向控制引脚
 #define ystepPin 4   // y步进控制引脚
+#define ydiagPin 33  // y方向过载引脚
 
 #define zenablePin 25 // z使能控制引脚
 #define zdirPin 27    // z方向控制引脚
 #define zstepPin 26   // z步进控制引脚
+#define zdiagPin 36   // z方向过载引脚
 
 bool Xenabled = false;
 bool Yenabled = false;
@@ -126,7 +129,8 @@ void setup()
 
     checkReset(); // 检查是否需要设置初始值
 
-    menuProgress.setTextValue("idle");
+    menuProgress.setTextValue("idle");  // 将进度文字设为idle
+    renderer.turnOffResetLogic();       // 关闭闲置回调函数
     // menuMgr.navigateToMenu(menuInfoView.getChild());
 
     // 初始化电机
@@ -145,11 +149,11 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / menuPerimeterX.getAsFloatingPointValue() * 60 , MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / menuPerimeterX.getAsFloatingPointValue() * 60, MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / menuPerimeterY.getAsFloatingPointValue() * 60 , MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / menuPerimeterY.getAsFloatingPointValue() * 60, MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / menuPerimeterZ.getAsFloatingPointValue() * 60 , MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / menuPerimeterZ.getAsFloatingPointValue() * 60, MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -215,7 +219,8 @@ void setup()
 
     //--------------------检测编码器状态并启用编码器--------------------
     if (menuUseEncoderZ.getCurrentValue())
-    {
+    {   
+        openDialogNoButton(TEXT_ATTENTION, TEXT_CONNECTING_ENCODER, TEXT_EMPTY);
         Wire.beginTransmission(AS5600_I2C_ADDR);
         switch (Wire.endTransmission())
         {
@@ -252,19 +257,14 @@ void setup()
     {
         // 中断方式
         // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
-        // attachInterrupt(digitalPinToInterrupt(diagXPin), FUNCTION_PTR, MODE);
+        // attachInterrupt(digitalPinToInterrupt(xdiagPin), FUNCTION_PTR, MODE);
         uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_X_AXIS, TEXT_ZEROING);
 
         stepperX.startMove(99999);
-        while (1)
+        while (stepperX.nextAction() > 0)
         {
-            stepperX.nextAction();
-            if (driverX.SGTHRS() > sgThrs)
-            {
-                break;
-            }
         }
     }
 
@@ -275,18 +275,16 @@ void setup()
         openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
 
         stepperY.startMove(99999);
-        while (1)
+        while (stepperY.nextAction() > 0)
         {
-            stepperY.nextAction();
-            if (driverY.SGTHRS() > sgThrs)
-            {
-                break;
-            }
         }
-        moveYto(8);
+        // moveYto(8);
     }
 
     // Serial.println("Puncher booted.");
+
+    // 启动完成后切换至主菜单
+    menuMgr.navigateToMenu(menuProgress);
 }
 
 // 电机运行现由loop函数处理 DEV.20220718
@@ -565,7 +563,7 @@ void runEncoder(void *pvParameters)
                 // }
                 // else
                 // {
-                    rotatedAngle += v - lastAngle;
+                rotatedAngle += v - lastAngle;
                 // }
             }
             lastAngle = v;
@@ -578,68 +576,71 @@ void runEncoder(void *pvParameters)
 // 编码器校准
 void calibrateEncoder(void *pvParameters)
 {
-    if (puncherStatus == 0x10)
-    {
-        vTaskSuspend(runEncoder_Handle);    // 暂停编码器任务
-        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
-
-        uint16_t angleReading[MOTOR_STEPS * 2];
-        uint16_t lastAngle = encoderZ.getAngle();
-        uint16_t readingA = 0;
-        uint16_t readingB = 0;
-        // 正反转各一圈获取读数
-        for (int i = 0; i < MOTOR_STEPS; i++)
-        {
-            stepperZ.startMove(MICROSTEPS);
-            while (stepperZ_to_wait > 0)
-            {
-            }
-            angleReading[i] = encoderZ.getAngle();
-            vTaskDelay(pdMS_TO_TICKS(100));
-
-                    //    Serial.println(angleReading[i] - lastAngle);
-            if (abs(angleReading[i] - lastAngle) > 2048)
-            {
-                readingA += 4096 - abs(angleReading[i] - lastAngle);
-            }
-            else
-            {
-                readingA += abs(angleReading[i] - lastAngle);
-            }
-            lastAngle = angleReading[i];
-        }
-        for (int i = 0; i < MOTOR_STEPS; i++)
-        {
-            stepperZ.startMove(-MICROSTEPS);
-            while (stepperZ_to_wait > 0)
-            {
-            }
-            angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
-            vTaskDelay(pdMS_TO_TICKS(100));
-
-                       Serial.println(angleReading[i] - lastAngle);
-            if (abs(angleReading[i] - lastAngle) > 2048)
-            {
-                readingB += 4096 - abs(angleReading[i] - lastAngle);
-            }
-            else
-            {
-                readingB += abs(angleReading[i] - lastAngle);
-            }
-            lastAngle = angleReading[i];
-        }
-        rotatedAngle = 0;
-
-        menuPeriRatio.setFromFloatingPointValue((readingA + readingB) / 2.0 / 4096);
-
-        // 重启编码器任务
-        vTaskResume(runEncoder_Handle);
-        vTaskResume(punchSchedule_Handle);
-    }
-    else
+    // 若编码器不空闲则报错
+    if (puncherStatus != 0x10)
     {
         openDialog(TEXT_ERROR, TEXT_PUNCHER_BUSY, TEXT_EMPTY);
+        vTaskDelete(NULL);
     }
+
+    vTaskSuspend(runEncoder_Handle);    // 暂停编码器任务
+    vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
+    puncherStatus = 0x11;
+
+    uint16_t angleReading[MOTOR_STEPS * 2];
+    uint16_t lastAngle = encoderZ.getAngle();
+    uint16_t readingA = 0;
+    uint16_t readingB = 0;
+    // 正反转各一圈获取读数
+    for (int i = 0; i < MOTOR_STEPS; i++)
+    {
+        stepperZ.startMove(MICROSTEPS);
+        while (stepperZ_to_wait > 0)
+        {
+        }
+        angleReading[i] = encoderZ.getAngle();
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        //    Serial.println(angleReading[i] - lastAngle);
+        if (abs(angleReading[i] - lastAngle) > 2048)
+        {
+            readingA += 4096 - abs(angleReading[i] - lastAngle);
+        }
+        else
+        {
+            readingA += abs(angleReading[i] - lastAngle);
+        }
+        lastAngle = angleReading[i];
+    }
+    for (int i = 0; i < MOTOR_STEPS; i++)
+    {
+        stepperZ.startMove(-MICROSTEPS);
+        while (stepperZ_to_wait > 0)
+        {
+        }
+        angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        Serial.println(angleReading[i] - lastAngle);
+        if (abs(angleReading[i] - lastAngle) > 2048)
+        {
+            readingB += 4096 - abs(angleReading[i] - lastAngle);
+        }
+        else
+        {
+            readingB += abs(angleReading[i] - lastAngle);
+        }
+        lastAngle = angleReading[i];
+    }
+    rotatedAngle = 0;
+
+    // 获取主动轮/被动轮间周长比值
+    menuPeriRatio.setFromFloatingPointValue((readingA + readingB) / 2.0 / 4096);
+
+    puncherStatus = 0x10;
+    // 重启编码器任务
+    vTaskResume(runEncoder_Handle);
+    vTaskResume(punchSchedule_Handle);
 
     vTaskDelete(NULL);
 }

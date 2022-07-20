@@ -58,7 +58,8 @@ const PROGMEM char* enUS[] = {
     "Check Settings.",
     "Encoder Disabled.",
     "Puncher Busy.",
-    "Peri. Ratio"
+    "Peri. Ratio",
+    "Connecting Encoder"
 };
 
 #endif

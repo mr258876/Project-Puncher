@@ -83,5 +83,6 @@
 #define TEXT_ENCODER_DISABLED   54
 #define TEXT_PUNCHER_BUSY       55
 #define TEXT_PERI_RATIO         56
+#define TEXT_CONNECTING_ENCODER 57
 
 #endif

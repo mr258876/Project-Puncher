@@ -225,6 +225,7 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoPerimeterZ.name, lang[language][TEXT_PERIMETER]);
     strcpy(minfoZAxis.name, lang[language][TEXT_Z_AXIS]);
     strcpy(minfoCalibrateEncoderZ.name, lang[language][TEXT_CALIBRATE_ENCODER]);
+    strcpy(minfoPeriRatio.name, lang[language][TEXT_PERI_RATIO]);
 
     // Y轴菜单
     strcpy(minfoVirtualEndstopY.name, lang[language][TEXT_VIRTUAL_ENDSTOP]);
