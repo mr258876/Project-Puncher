@@ -463,15 +463,17 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
     if (!Xenabled && !Zenabled)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        if (encoderDisabled || abs(rotatedAngle / (4096.0 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
+        if (encoderDisabled || abs(rotatedAngle / (4096 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
             moveYto(4);
             Ydown = true;
+            rotatedAngle = 0;
         }
         else
         {
             Zenabled = true;
             stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS));
+            Serial.println(rotatedAngle / (4096 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove);
         }
     }
 }
