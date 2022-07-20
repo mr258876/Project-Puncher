@@ -45,5 +45,7 @@ byte *handle_WifiCommandDisable();
 
 void disableSerialCommand();
 void disableWifiCommand();
+bool isSerialCommandEnabled();
+bool isWifiCommandEnabled();
 
 #endif

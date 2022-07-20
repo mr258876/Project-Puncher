@@ -240,3 +240,13 @@ void disableWifiCommand()
 {
     wifiCommandEnabled = false;
 }
+
+bool isSerialCommandEnabled()
+{
+    return serialCommandEnabled;
+}
+
+bool isWifiCommandEnabled()
+{
+    return wifiCommandEnabled;
+}

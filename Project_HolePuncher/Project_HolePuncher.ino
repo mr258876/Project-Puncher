@@ -145,11 +145,11 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    stepperX.begin(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue(), MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / menuPerimeterX.getAsFloatingPointValue() * 60 , MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue(), MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / menuPerimeterY.getAsFloatingPointValue() * 60 , MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue(), MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / menuPerimeterZ.getAsFloatingPointValue() * 60 , MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -316,8 +316,8 @@ void checkReset()
         menuPerimeterZ.setCurrentValue(200);
 
         menuRunningSpeedX.setCurrentValue(80);
-        menuRunningSpeedX.setCurrentValue(80);
-        menuRunningSpeedX.setCurrentValue(200);
+        menuRunningSpeedY.setCurrentValue(80);
+        menuRunningSpeedZ.setCurrentValue(200);
 
         menuRunningCurrentX.setCurrentValue(500);
         menuRunningCurrentY.setCurrentValue(800);
@@ -372,15 +372,18 @@ void serialCommand(void *pvParameters)
                 lastConn = millis();
             }
 
-            // 30秒发一个心跳包
-            if (millis() - lastConn > 30000)
+            if (isSerialCommandEnabled())
             {
-                Serial.write(HeartBeatPackage, 8);
-            }
-            // 5秒内无回应关闭通讯
-            if (millis() - lastConn > 35000)
-            {
-                disableSerialCommand();
+                // 30秒发一个心跳包
+                if (millis() - lastConn > 30000)
+                {
+                    Serial.write(HeartBeatPackage, 8);
+                }
+                // 5秒内无回应关闭通讯
+                if (millis() - lastConn > 35000)
+                {
+                    disableSerialCommand();
+                }
             }
 
             xSemaphoreGive(Serial0Mutex);
@@ -460,7 +463,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
     if (!Xenabled && !Zenabled)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        if (encoderDisabled || abs(rotatedAngle / (4096.0 * menuPeriRatio.getCurrentValue() / 1000) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
+        if (encoderDisabled || abs(rotatedAngle / (4096.0 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
             moveYto(4);
             Ydown = true;
@@ -468,7 +471,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
         else
         {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuPeriRatio.getCurrentValue() / 1000) * MOTOR_STEPS * MICROSTEPS));
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuPeriRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS));
         }
     }
 }
@@ -477,7 +480,7 @@ void moveZ(float mm)
 {
     Zenabled = true;
     //     driverZ.rms_current(zOptiCurr);
-    long toMove = (long)(-mm / menuPerimeterZ.getCurrentValue() * 10 * MOTOR_STEPS * MICROSTEPS);
+    long toMove = (long)(-mm / menuPerimeterZ.getAsFloatingPointValue() * MOTOR_STEPS * MICROSTEPS);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
     //     driverZ.rms_current(zStbyCurr);
@@ -499,7 +502,7 @@ void moveXto(float mm)
 {
     Xenabled = true;
     //    driverX.rms_current(xOptiCurr);
-    long steps = (long)(mm / menuPerimeterX.getCurrentValue() * 10 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = (long)(mm / menuPerimeterX.getAsFloatingPointValue() * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
     //    driverX.rms_current(xStbyCurr);
@@ -510,7 +513,7 @@ void moveYto(float mm)
 {
     Yenabled = true;
     //    driverY.rms_current(yOptiCurr);
-    long steps = (long)(mm / menuPerimeterY.getCurrentValue() * 10 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = (long)(mm / menuPerimeterY.getAsFloatingPointValue() * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
     //    driverY.rms_current(yStbyCurr);
@@ -592,7 +595,7 @@ void calibrateEncoder(void *pvParameters)
             angleReading[i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            //            Serial.println(angleReading[i] - lastAngle);
+                       Serial.println(angleReading[i] - lastAngle);
             if (abs(angleReading[i] - lastAngle) > 2048)
             {
                 readingA += 4096 - abs(angleReading[i] - lastAngle);
@@ -612,7 +615,7 @@ void calibrateEncoder(void *pvParameters)
             angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            //            Serial.println(angleReading[i] - lastAngle);
+                       Serial.println(angleReading[i] - lastAngle);
             if (abs(angleReading[i] - lastAngle) > 2048)
             {
                 readingB += 4096 - abs(angleReading[i] - lastAngle);
@@ -625,7 +628,7 @@ void calibrateEncoder(void *pvParameters)
         }
         rotatedAngle = 0;
 
-        menuPeriRatio.setCurrentValue((readingA + readingB) / 2 / 4096 * 1000);
+        menuPeriRatio.setFromFloatingPointValue((readingA + readingB) / 2.0 / 4096);
 
         // 重启编码器任务
         vTaskResume(runEncoder_Handle);
@@ -727,15 +730,18 @@ void wifiCommand(void *pvParameters)
                     }
                 }
 
-                // 30秒发一个心跳包
-                if (millis() - lastConn > 30000)
+                if (isSerialCommandEnabled())
                 {
-                    client.write(HeartBeatPackage, 8);
-                }
-                // 5秒内无回应关闭通讯
-                if (millis() - lastConn > 35000)
-                {
-                    disableWifiCommand();
+                    // 30秒发一个心跳包
+                    if (millis() - lastConn > 30000)
+                    {
+                        client.write(HeartBeatPackage, 8);
+                    }
+                    // 5秒内无回应关闭通讯
+                    if (millis() - lastConn > 35000)
+                    {
+                        disableWifiCommand();
+                    }
                 }
             }
         }
@@ -876,9 +882,9 @@ void CALLBACK_FUNCTION onChangeCurrent(int id)
 
 void CALLBACK_FUNCTION onChangeSpeed(int id)
 {
-    stepperX.setRPM(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue());
-    stepperY.setRPM(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue());
-    stepperZ.setRPM(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue());
+    stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / menuPerimeterX.getAsFloatingPointValue() * 60);
+    stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / menuPerimeterY.getAsFloatingPointValue() * 60);
+    stepperZ.setRPM(menuRunningSpeedZ.getAsFloatingPointValue() / menuPerimeterZ.getAsFloatingPointValue() * 60);
     saveValues(id);
 }
 
