@@ -102,8 +102,10 @@ byte *handle_Command(byte *buffer, int len)
     switch (buffer[1])
     {
     case 0x01:
-        return handle_StatusQuery();
+        return &ClientSuccessResp;
     case 0x10:
+        return handle_StatusQuery();
+    case 0x11:
         return handle_StartPunch();
     case 0x30:
         return handle_SerialCommandDisable();
@@ -219,4 +221,19 @@ byte *handle_StartPunch()
         holeCount = holeList.size();
     }
     return handle_StatusQuery();
+}
+
+byte *handle_GetVariable(uint8_t id)
+{
+    return nullptr;
+}
+
+void disableSerialCommand()
+{
+    serialCommandEnabled = false;
+}
+
+void disableWifiCommand()
+{
+    wifiCommandEnabled = false;
 }

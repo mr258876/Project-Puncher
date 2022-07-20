@@ -360,6 +360,7 @@ void runTcMenu(void *pvParameters)
 void serialCommand(void *pvParameters)
 {
     byte serBuf[8] = {};
+    lastConn = millis();
     while (1)
     {
         if (xSemaphoreTake(Serial0Mutex, portMAX_DELAY) == pdTRUE)
@@ -368,8 +369,25 @@ void serialCommand(void *pvParameters)
             {
                 Serial.readBytes(serBuf, 8);
                 Serial.write(handleSerialCommand(serBuf, 8), 8);
+                lastConn = millis();
             }
+
+            // 30秒发一个心跳包
+            if (millis() - lastConn > 30000)
+            {
+                Serial.write({0xE0, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x75}, 8);
+            }
+            // 5秒内无回应关闭通讯
+            if (millis() - lastConn > 35000)
+            {
+                disableSerialCommand();
+            }
+
             xSemaphoreGive(Serial0Mutex);
+        }
+        else
+        {
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
@@ -689,8 +707,9 @@ void wifiCommand(void *pvParameters)
 {
     byte wifiBuf[8] = {};
     int readByteCount = 0;
+    lastConn = millis();
     while (1)
-    {   
+    {
         WiFiClient client = server.available();
         readByteCount = 0;
         if (client)
@@ -704,9 +723,25 @@ void wifiCommand(void *pvParameters)
                     if (readByteCount > 7)
                     {
                         client.write(handleWifiCommand(wifiBuf, 8), 8);
+                        lastConn = millis();
                     }
                 }
+
+                // 30秒发一个心跳包
+                if (millis() - lastConn > 30000)
+                {
+                    client.write({0xE0, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x75}, 8);
+                }
+                // 5秒内无回应关闭通讯
+                if (millis() - lastConn > 35000)
+                {
+                    disableWifiCommand();
+                }
             }
+        }
+        else
+        {
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
