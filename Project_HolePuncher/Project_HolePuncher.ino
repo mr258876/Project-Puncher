@@ -557,14 +557,14 @@ void runEncoder(void *pvParameters)
             int v = encoderZ.getAngle();
             if (lastAngle != -1)
             {
-                if (abs(v - lastAngle) > 2047)
-                {
-                    rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
-                }
-                else
-                {
+                // if (abs(v - lastAngle) > 2048)
+                // {
+                //     rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
+                // }
+                // else
+                // {
                     rotatedAngle += v - lastAngle;
-                }
+                // }
             }
             lastAngle = v;
             xSemaphoreGive(I2CMutex);
@@ -595,7 +595,7 @@ void calibrateEncoder(void *pvParameters)
             angleReading[i] = encoderZ.getAngle();
             vTaskDelay(pdMS_TO_TICKS(100));
 
-                       Serial.println(angleReading[i] - lastAngle);
+                    //    Serial.println(angleReading[i] - lastAngle);
             if (abs(angleReading[i] - lastAngle) > 2048)
             {
                 readingA += 4096 - abs(angleReading[i] - lastAngle);
