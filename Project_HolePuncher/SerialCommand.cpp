@@ -3,7 +3,8 @@
 byte msg[8];
 CRC8 crc;
 
-bool wifiCommandEnabled = true;
+bool serialCommandEnabled = false;
+bool wifiCommandEnabled = false;
 
 byte *commResponse = new byte[8];
 byte *lastcommResponse = new byte[8];
@@ -23,6 +24,20 @@ byte *handleSerialCommand(byte *buffer, int len)
         return commResponse;
     }
 
+    if (buffer[0] == 0xC0 && buffer[1] == 0x20)
+    {
+        serialCommandEnabled = true;
+        wifiCommandEnabled = false;
+        memcpy(commResponse, ClientSuccessResp, 8);
+        return commResponse;
+    }
+
+    if (!serialCommandEnabled)
+    {
+        memcpy(commResponse, SerialCommandDisabledResp, 8);
+        return commResponse;
+    }
+
     switch (buffer[0])
     {
     case 0xC0:
@@ -38,18 +53,36 @@ byte *handleSerialCommand(byte *buffer, int len)
 
 byte *handleWifiCommand(byte *buffer, int len)
 {
+    if (!checkCRC(buffer, len))
+    {
+        memcpy(commResponse, CRCErrorResp, 8);
+        return commResponse;
+    }
+
+    if (buffer[0] == 0xC0 && buffer[1] == 0x21 && !serialCommandEnabled)
+    {
+        wifiCommandEnabled = true;
+        memcpy(commResponse, ClientSuccessResp, 8);
+        return commResponse;
+    }
+
     if (!wifiCommandEnabled)
     {
         memcpy(commResponse, WifiCommandDisabledResp, 8);
         return commResponse;
     }
 
-    if (!checkCRC(buffer, len))
+    switch (buffer[0])
     {
-        memcpy(commResponse, CRCErrorResp, 8);
-        return commResponse;
+    case 0xC0:
+        return handle_Command(buffer, len);
+    case 0xD0:
+        return handle_DataReceive(buffer, len);
+    case 0xEF:
+        return handle_Resend();
+    default:
+        return handle_UnknownCommand();
     }
-    return nullptr;
 }
 
 byte *handle_Resend()
@@ -72,6 +105,10 @@ byte *handle_Command(byte *buffer, int len)
         return handle_StatusQuery();
     case 0x10:
         return handle_StartPunch();
+    case 0x30:
+        return handle_SerialCommandDisable();
+    case 0x31:
+        return handle_WifiCommandDisable();
     case 0xA0:
         return handle_StartDataTrans();
     case 0xA1:
@@ -79,6 +116,20 @@ byte *handle_Command(byte *buffer, int len)
     default:
         return handle_UnknownCommand();
     }
+}
+
+byte *handle_SerialCommandDisable()
+{
+    serialCommandEnabled = false;
+    memcpy(commResponse, ClientSuccessResp, 8);
+    return commResponse;
+}
+
+byte *handle_WifiCommandDisable()
+{
+    wifiCommandEnabled = false;
+    memcpy(commResponse, ClientSuccessResp, 8);
+    return commResponse;
 }
 
 byte *handle_UnknownCommand()

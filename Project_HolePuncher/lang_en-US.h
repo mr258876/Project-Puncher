@@ -57,7 +57,8 @@ const PROGMEM char* enUS[] = {
     "Zreoing Failed.",
     "Check Settings.",
     "Encoder Disabled.",
-    "Puncher Busy."
+    "Puncher Busy.",
+    "Peri. Ratio"
 };
 
 #endif

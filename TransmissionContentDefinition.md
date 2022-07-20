@@ -26,6 +26,10 @@ Since there's no much controlling commands, only the first byte of frame body in
 | -----------       | -----------                   |
 | 0x01 -----------  | Query Client Status           |
 | 0x10 -----------  | Start Punch Mission           |
+| 0x20 -----------  | Enable Serial Command         |
+| 0x21 -----------  | Enable Wifi Command           |
+| 0x30 -----------  | Disable Serial Command        |
+| 0x31 -----------  | Disable Wifi Command          |
 | 0xA0 -----------  | Hole Data Transmission Begin  |
 | 0xA1 -----------  | Hole Data Transmission End    |
 
@@ -54,7 +58,8 @@ Frame body in client response frames contains responses from the client. The fir
 | 0xE0          | -----------       | Runtime Error                     |
 | 0xE0          | 0x01 -----------  | Runtime Error: No hole data.      |
 | 0xE0          | 0x11 -----------  | Runtime Error: Puncher busy.      |
-| 0xE0          | 0xA0 -----------  | Runtime Error: Wifi command disabled. |
+| 0xE0          | 0xA0 -----------  | Runtime Error: Serial command disabled. |
+| 0xE0          | 0xA1 -----------  | Runtime Error: Wifi command disabled. |
 | 0xE0          | 0xFF -----------  | Runtime Error: Unknown command    |
 | ------------- | ----------------- | --------------------------------- |
 | 0xE1          | -----------       | Data Error                        |

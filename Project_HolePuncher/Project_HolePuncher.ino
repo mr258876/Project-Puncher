@@ -59,7 +59,7 @@ bool encoderDisabled = true;
 #define WIFI_CONTROL_PORT 22576
 
 int SSIDCount = 0;
-WiFiServer server(80);
+WiFiServer server(WIFI_CONTROL_PORT);
 
 //----------------------------------------电机控制变量
 #define xenablePin 23 // x使能控制引脚
@@ -687,12 +687,12 @@ void scanWifi()
 //------------------------------Wifi指令监听函数
 void wifiCommand(void *pvParameters)
 {
-    WiFiClient client = server.available();
     byte wifiBuf[8] = {};
     int readByteCount = 0;
-    client.flush();
     while (1)
-    {
+    {   
+        WiFiClient client = server.available();
+        readByteCount = 0;
         if (client)
         {
             while (client.connected())
