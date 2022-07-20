@@ -26,6 +26,8 @@ const PROGMEM byte WifiCommandDisabledResp[8] = {0xE0, 0xE0, 0xA1, 0x00, 0x00, 0
 const PROGMEM byte EncoderNotDetectedResp[8] = {0xE0, 0xE2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x73};
 const PROGMEM byte HeartBeat[8] = {0xE0, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x75};
 
+extern byte* HeartBeatPackage;
+
 byte *handleSerialCommand(byte *buffer, int len);
 byte *handleWifiCommand(byte *buffer, int len);
 byte *handle_Resend();

@@ -360,7 +360,7 @@ void runTcMenu(void *pvParameters)
 void serialCommand(void *pvParameters)
 {
     byte serBuf[8] = {};
-    lastConn = millis();
+    unsigned long lastConn = millis();
     while (1)
     {
         if (xSemaphoreTake(Serial0Mutex, portMAX_DELAY) == pdTRUE)
@@ -375,7 +375,7 @@ void serialCommand(void *pvParameters)
             // 30秒发一个心跳包
             if (millis() - lastConn > 30000)
             {
-                Serial.write({0xE0, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x75}, 8);
+                Serial.write(HeartBeatPackage, 8);
             }
             // 5秒内无回应关闭通讯
             if (millis() - lastConn > 35000)
@@ -707,7 +707,7 @@ void wifiCommand(void *pvParameters)
 {
     byte wifiBuf[8] = {};
     int readByteCount = 0;
-    lastConn = millis();
+    unsigned long lastConn = millis();
     while (1)
     {
         WiFiClient client = server.available();
@@ -730,7 +730,7 @@ void wifiCommand(void *pvParameters)
                 // 30秒发一个心跳包
                 if (millis() - lastConn > 30000)
                 {
-                    client.write({0xE0, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x75}, 8);
+                    client.write(HeartBeatPackage, 8);
                 }
                 // 5秒内无回应关闭通讯
                 if (millis() - lastConn > 35000)

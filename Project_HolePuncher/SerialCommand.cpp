@@ -9,6 +9,8 @@ bool wifiCommandEnabled = false;
 byte *commResponse = new byte[8];
 byte *lastcommResponse = new byte[8];
 
+byte* HeartBeatPackage = (byte*)&HeartBeat;
+
 // 将commResponse中内容复制一份随后返回
 byte *returnAndCopy()
 {
@@ -102,7 +104,8 @@ byte *handle_Command(byte *buffer, int len)
     switch (buffer[1])
     {
     case 0x01:
-        return &ClientSuccessResp;
+        memcpy(commResponse, ClientSuccessResp, 8);
+        return commResponse;
     case 0x10:
         return handle_StatusQuery();
     case 0x11:
