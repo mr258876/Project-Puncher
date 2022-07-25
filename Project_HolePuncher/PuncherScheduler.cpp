@@ -12,21 +12,22 @@ int abs(int a)
     return a>0? a:-a;
 }
 
-int calcETA(int Xrpm, int Yrpm, int Zrpm)
+int calcETA(double Xspeed, double Yspeed, double Zspeed)
 {   
-    float _eta = 0;
+    double _eta = 0;
 
     int _lastX = 0;
     ListNode<Hole>* current = holeList.getRoot();
 
     while (current->next != NULL)
     {
-        _eta += current->data.x * 25.852579588531222053828834659495 / Zrpm / 1600;
-        _eta += abs(current->data.x - _lastX) * 2.0 / 8 / Xrpm;
-        _eta += 8 / 8 /Yrpm;
+        _eta += abs(current->data.x - _lastX) * 2.0 / 8 / Xspeed;
+        _eta += 8 / Yspeed;
         current = current->next;
     }
-    _eta = _eta * 60; // 之前是以分钟为单位
+    _eta += current->data.z / Zspeed ;
+    _eta += 8 / Yspeed;
+
     punchETA = (int)_eta;
     return (int)_eta;
 }

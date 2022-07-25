@@ -1,20 +1,20 @@
 #include "SerialCommand.h"
 
-byte msg[8];
+byte msg[16];
 CRC8 crc;
 
 bool serialCommandEnabled = false;
 bool wifiCommandEnabled = false;
 
-byte *commResponse = new byte[8];
-byte *lastcommResponse = new byte[8];
+byte *commResponse = new byte[16];
+byte *lastcommResponse = new byte[16];
 
 byte* HeartBeatPackage = (byte*)&HeartBeat;
 
 // 将commResponse中内容复制一份随后返回
 byte *returnAndCopy()
 {
-    memcpy(lastcommResponse, commResponse, 8);
+    memcpy(lastcommResponse, commResponse, 16);
     return commResponse;
 }
 
@@ -22,7 +22,7 @@ byte *handleSerialCommand(byte *buffer, int len)
 {
     if (!checkCRC(buffer, len))
     {
-        memcpy(commResponse, CRCErrorResp, 8);
+        memcpy(commResponse, CRCErrorResp, 16);
         return commResponse;
     }
 
@@ -30,13 +30,13 @@ byte *handleSerialCommand(byte *buffer, int len)
     {
         serialCommandEnabled = true;
         wifiCommandEnabled = false;
-        memcpy(commResponse, ClientSuccessResp, 8);
+        memcpy(commResponse, ClientSuccessResp, 16);
         return commResponse;
     }
 
     if (!serialCommandEnabled)
     {
-        memcpy(commResponse, SerialCommandDisabledResp, 8);
+        memcpy(commResponse, SerialCommandDisabledResp, 16);
         return commResponse;
     }
 
@@ -57,20 +57,20 @@ byte *handleWifiCommand(byte *buffer, int len)
 {
     if (!checkCRC(buffer, len))
     {
-        memcpy(commResponse, CRCErrorResp, 8);
+        memcpy(commResponse, CRCErrorResp, 16);
         return commResponse;
     }
 
     if (buffer[0] == 0xC0 && buffer[1] == 0x21 && !serialCommandEnabled)
     {
         wifiCommandEnabled = true;
-        memcpy(commResponse, ClientSuccessResp, 8);
+        memcpy(commResponse, ClientSuccessResp, 16);
         return commResponse;
     }
 
     if (!wifiCommandEnabled)
     {
-        memcpy(commResponse, WifiCommandDisabledResp, 8);
+        memcpy(commResponse, WifiCommandDisabledResp, 16);
         return commResponse;
     }
 
@@ -95,8 +95,8 @@ byte *handle_Resend()
 bool checkCRC(byte *buffer, int len)
 {
     crc.reset();
-    crc.add((uint8_t *)buffer, 7);
-    return buffer[7] == (byte)crc.getCRC();
+    crc.add((uint8_t *)buffer, 15);
+    return buffer[15] == (byte)crc.getCRC();
 }
 
 byte *handle_Command(byte *buffer, int len)
@@ -104,7 +104,7 @@ byte *handle_Command(byte *buffer, int len)
     switch (buffer[1])
     {
     case 0x01:
-        memcpy(commResponse, ClientSuccessResp, 8);
+        memcpy(commResponse, ClientSuccessResp, 16);
         return commResponse;
     case 0x10:
         return handle_StatusQuery();
@@ -126,20 +126,20 @@ byte *handle_Command(byte *buffer, int len)
 byte *handle_SerialCommandDisable()
 {
     serialCommandEnabled = false;
-    memcpy(commResponse, ClientSuccessResp, 8);
+    memcpy(commResponse, ClientSuccessResp, 16);
     return commResponse;
 }
 
 byte *handle_WifiCommandDisable()
 {
     wifiCommandEnabled = false;
-    memcpy(commResponse, ClientSuccessResp, 8);
+    memcpy(commResponse, ClientSuccessResp, 16);
     return commResponse;
 }
 
 byte *handle_UnknownCommand()
 {
-    memcpy(commResponse, UnknownCommandResp, 8);
+    memcpy(commResponse, UnknownCommandResp, 16);
     return returnAndCopy();
 }
 
@@ -149,14 +149,14 @@ byte *handle_StatusQuery()
     msg[0] = 0xE0;
     msg[1] = 0x10;
     msg[2] = puncherStatus;
-    for (int i = 3; i < 8; i++)
+    for (int i = 3; i < 16; i++)
     {
         msg[i] = 0x00;
     }
-    crc.add((uint8_t *)msg, 7);
-    msg[7] = (byte)crc.getCRC();
+    crc.add((uint8_t *)msg, 15);
+    msg[15] = (byte)crc.getCRC();
 
-    memcpy(commResponse, msg, 8);
+    memcpy(commResponse, msg, 16);
     return returnAndCopy();
 }
 
@@ -187,25 +187,25 @@ byte *handle_DataReceive(byte *buffer, int len)
 
     if (buffer[1] > 29)
     {
-        memcpy(commResponse, DataXOutOfRangeResp, 8);
+        memcpy(commResponse, DataXOutOfRangeResp, 16);
         return returnAndCopy();
     }
 
-    FLOATUNION_t zPos;
-    for (int i = 0; i < 4; i++)
+    DOUBLEUNION_t zPos;
+    for (int i = 0; i < 8; i++)
     {
-        zPos.floatBytes[i] = buffer[i + 2];
+        zPos.doubleBytes[i] = buffer[i + 2];
     }
 
     holeList.add(Hole{(int)buffer[1], zPos.number});
 
-    memcpy(commResponse, ClientSuccessResp, 8);
+    memcpy(commResponse, ClientSuccessResp, 16);
     return returnAndCopy();
 }
 
 byte *handle_DataTransDisabled()
 {
-    memcpy(commResponse, DataTransDisabledResp, 8);
+    memcpy(commResponse, DataTransDisabledResp, 16);
     return returnAndCopy();
 }
 
@@ -215,7 +215,7 @@ byte *handle_StartPunch()
     {
         if (holeList.size() == 0)
         {
-            memcpy(commResponse, NoHoleDataResp, 8);
+            memcpy(commResponse, NoHoleDataResp, 16);
             return returnAndCopy();
         }
         puncherStatus = 0x11;

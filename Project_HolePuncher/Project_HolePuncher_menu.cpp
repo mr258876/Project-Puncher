@@ -16,7 +16,7 @@
 #include "MenuItems.h"
 
 // Global variable declarations
-const PROGMEM ConnectorLocalInfo applicationInfo = {"Proj.HolePuncher", "88eacbfd-af3c-4e0a-bee7-b7e9e9827f97"};
+const PROGMEM  ConnectorLocalInfo applicationInfo = { "Proj.HolePuncher", "88eacbfd-af3c-4e0a-bee7-b7e9e9827f97" };
 ArduinoEEPROMAbstraction glArduinoEeprom(&EEPROM);
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C gfx(U8G2_R0, U8X8_PIN_NONE, U8X8_PIN_NONE, U8X8_PIN_NONE);
 U8g2Drawable gfxDrawable(&gfx);
@@ -88,10 +88,10 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[la
 SubMenuInfo_ML minfoWireless = {lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK};
 BackMenuItem menuBackWireless(fnWirelessRtCall, &menuWifi);
 SubMenuItem menuWireless(&minfoWireless, &menuBackWireless, &menuResetSettings);
-AnalogMenuInfo_ML minfoPeriRatio = { lang[language][TEXT_PERI_RATIO], 52, 33, 10000, saveValues, 0, 1000, "" };
-AnalogMenuItem menuPeriRatio(&minfoPeriRatio, 0, NULL);
+AnalogMenuInfo_ML minfoDiamRatio = { lang[language][TEXT_DIAM_RATIO], 52, 33, 10000, saveValues, 0, 1000, "" };
+AnalogMenuItem menuDiamRatio(&minfoDiamRatio, 0, NULL);
 AnyMenuInfo_ML minfoCalibrateEncoderZ = {lang[language][TEXT_CALIBRATE_ENCODER], 50, 0xffff, 0, calibrateEncoderCallback};
-ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, &menuPeriRatio);
+ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, &menuDiamRatio);
 BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER], 30, 25, 1, saveValues, NAMING_TRUE_FALSE};
 BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, &menuCalibrateEncoderZ);
 BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, onChangeUseEncoder, NAMING_TRUE_FALSE};
@@ -100,11 +100,16 @@ AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 
 AnalogMenuItem menuRunningCurrentZ(&minfoRunningCurrentZ, 0, &menuUseEncoderZ);
 AnalogMenuInfo_ML minfoRunningSpeedZ = {lang[language][TEXT_RUNNING_SPEED], 32, 28, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedZ(&minfoRunningSpeedZ, 0, &menuRunningCurrentZ);
-AnalogMenuInfo_ML minfoPerimeterZ = {lang[language][TEXT_PERIMETER], 31, 26, 1000, onChangePerimeter, 0, 10, "mm"};
-AnalogMenuItem menuPerimeterZ(&minfoPerimeterZ, 0, &menuRunningSpeedZ);
+const char enumStrLengthTypeZ_0[] PROGMEM = "Peri";
+const char enumStrLengthTypeZ_1[] PROGMEM = "Diam";
+const char* const enumStrLengthTypeZ[] PROGMEM  = { enumStrLengthTypeZ_0, enumStrLengthTypeZ_1 };
+EnumMenuInfo_ML minfoLengthTypeZ = { lang[language][TEXT_LENGTH_TYPE], 55, 39, 1, onChangeDiameter, enumStrLengthTypeZ };
+EnumMenuItem menuLengthTypeZ(&minfoLengthTypeZ, 0, &menuRunningSpeedZ);
+AnalogMenuInfo_ML minfoLengthZ = { lang[language][TEXT_LENGTH], 31, 26, 10000, onChangeDiameter, 0, 100, "mm" };
+AnalogMenuItem menuLengthZ(&minfoLengthZ, 0, &menuLengthTypeZ);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnZAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Z_AXIS], -1, NO_CALLBACK)
-SubMenuInfo_ML minfoZAxis = {lang[language][TEXT_Z_AXIS], 18, 0xffff, 0, NO_CALLBACK};
-BackMenuItem menuBackZAxis(fnZAxisRtCall, &menuPerimeterZ);
+SubMenuInfo_ML minfoZAxis = { lang[language][TEXT_Z_AXIS], 18, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackZAxis(fnZAxisRtCall, &menuLengthZ);
 SubMenuItem menuZAxis(&minfoZAxis, &menuBackZAxis, &menuWireless);
 AnalogMenuInfo_ML minfoEndstopThresholdY = {lang[language][TEXT_ENDSTOP_THRESHOLD], 25, 16, 255, saveValues, 0, 1, ""};
 AnalogMenuItem menuEndstopThresholdY(&minfoEndstopThresholdY, 0, NULL);
@@ -114,11 +119,16 @@ AnalogMenuInfo_ML minfoRunningCurrentY = {lang[language][TEXT_RUNNING_CURRENT], 
 AnalogMenuItem menuRunningCurrentY(&minfoRunningCurrentY, 0, &menuVirtualEndstopY);
 AnalogMenuInfo_ML minfoRunningSpeedY = {lang[language][TEXT_RUNNING_SPEED], 27, 20, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedY(&minfoRunningSpeedY, 0, &menuRunningCurrentY);
-AnalogMenuInfo_ML minfoPerimeterY = {lang[language][TEXT_PERIMETER], 26, 18, 1000, onChangePerimeter, 0, 10, "mm"};
-AnalogMenuItem menuPerimeterY(&minfoPerimeterY, 0, &menuRunningSpeedY);
+const char enumStrLengthTypeY_0[] PROGMEM = "Peri";
+const char enumStrLengthTypeY_1[] PROGMEM = "Diam";
+const char* const enumStrLengthTypeY[] PROGMEM  = { enumStrLengthTypeY_0, enumStrLengthTypeY_1 };
+EnumMenuInfo_ML minfoLengthTypeY = { lang[language][TEXT_LENGTH_TYPE], 54, 37, 1, onChangeDiameter, enumStrLengthTypeY };
+EnumMenuItem menuLengthTypeY(&minfoLengthTypeY, 0, &menuRunningSpeedY);
+AnalogMenuInfo_ML minfoLengthY = { lang[language][TEXT_LENGTH], 26, 18, 10000, onChangeDiameter, 0, 100, "mm" };
+AnalogMenuItem menuLengthY(&minfoLengthY, 0, &menuLengthTypeY);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnYAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Y_AXIS], -1, NO_CALLBACK)
-SubMenuInfo_ML minfoYAxis = {lang[language][TEXT_Y_AXIS], 17, 0xffff, 0, NO_CALLBACK};
-BackMenuItem menuBackYAxis(fnYAxisRtCall, &menuPerimeterY);
+SubMenuInfo_ML minfoYAxis = { lang[language][TEXT_Y_AXIS], 17, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackYAxis(fnYAxisRtCall, &menuLengthY);
 SubMenuItem menuYAxis(&minfoYAxis, &menuBackYAxis, &menuZAxis);
 AnalogMenuInfo_ML minfoEndstopThresholdX = {lang[language][TEXT_ENDSTOP_THRESHOLD], 20, 7, 255, saveValues, 0, 1, ""};
 AnalogMenuItem menuEndstopThresholdX(&minfoEndstopThresholdX, 0, NULL);
@@ -128,11 +138,16 @@ AnalogMenuInfo_ML minfoRunningCurrentX = {lang[language][TEXT_RUNNING_CURRENT], 
 AnalogMenuItem menuRunningCurrentX(&minfoRunningCurrentX, 0, &menuVirtualEndstopX);
 AnalogMenuInfo_ML minfoRunningSpeedX = {lang[language][TEXT_RUNNING_SPEED], 22, 11, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedX(&minfoRunningSpeedX, 0, &menuRunningCurrentX);
-AnalogMenuInfo_ML minfoPerimeterX = {lang[language][TEXT_PERIMETER], 21, 9, 1000, onChangePerimeter, 0, 10, "mm"};
-AnalogMenuItem menuPerimeterX(&minfoPerimeterX, 0, &menuRunningSpeedX);
+const char enumStrLengthTypeX_0[] PROGMEM = "Peri";
+const char enumStrLengthTypeX_1[] PROGMEM = "Diam";
+const char* const enumStrLengthTypeX[] PROGMEM  = { enumStrLengthTypeX_0, enumStrLengthTypeX_1 };
+EnumMenuInfo_ML minfoLengthTypeX = { lang[language][TEXT_LENGTH_TYPE], 53, 35, 1, onChangeDiameter, enumStrLengthTypeX };
+EnumMenuItem menuLengthTypeX(&minfoLengthTypeX, 0, &menuRunningSpeedX);
+AnalogMenuInfo_ML minfoLengthX = { lang[language][TEXT_LENGTH], 21, 9, 10000, onChangeDiameter, 0, 100, "mm" };
+AnalogMenuItem menuLengthX(&minfoLengthX, 0, &menuLengthTypeX);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnXAxisRtCall, backSubItemRenderFn, lang[language][TEXT_X_AXIS], -1, NO_CALLBACK)
-SubMenuInfo_ML minfoXAxis = {lang[language][TEXT_X_AXIS], 16, 0xffff, 0, NO_CALLBACK};
-BackMenuItem menuBackXAxis(fnXAxisRtCall, &menuPerimeterX);
+SubMenuInfo_ML minfoXAxis = { lang[language][TEXT_X_AXIS], 16, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackXAxis(fnXAxisRtCall, &menuLengthX);
 SubMenuItem menuXAxis(&minfoXAxis, &menuBackXAxis, &menuYAxis);
 const char enumStrLanguage_0[] PROGMEM = "ENG";
 const char enumStrLanguage_1[] PROGMEM = "CHS";
@@ -143,11 +158,19 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnSettingsRtCall, backSubItemRenderFn, lang[la
 SubMenuInfo_ML minfoSettings(lang[language][TEXT_SETTINGS], 10, 0xffff, 0, NO_CALLBACK);
 BackMenuItem menuBackSettings(fnSettingsRtCall, &menuLanguage);
 SubMenuItem menuSettings(&minfoSettings, &menuBackSettings, &menuAbout);
-ListRuntimeMenuItem menuOpenFile(34, 0, fnOpenFileRtCall, &menuSettings);
+BooleanMenuInfo_ML minfoFeed = { lang[language][TEXT_FEED_PAPER_FEED], 58, 0xffff, 1, onChangeFeed, NAMING_ON_OFF };
+BooleanMenuItem menuFeed(&minfoFeed, false, NULL);
+BooleanMenuInfo_ML minfoReverseDirection = { lang[language][TEXT_FEED_PAPER_REVERSE], 57, 0xffff, 1, NO_CALLBACK, NAMING_TRUE_FALSE };
+BooleanMenuItem menuReverseDirection(&minfoReverseDirection, false, &menuFeed);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnFeedPaperRtCall, backSubItemRenderFn, lang[language][TEXT_FEED_PAPER], -1, NO_CALLBACK)
+SubMenuInfo_ML minfoFeedPaper = { lang[language][TEXT_FEED_PAPER], 56, 0xffff, 0, NO_CALLBACK };
+BackMenuItem menuBackFeedPaper(fnFeedPaperRtCall, &menuReverseDirection);
+SubMenuItem menuFeedPaper(&minfoFeedPaper, &menuBackFeedPaper, &menuSettings);
+ListRuntimeMenuItem menuOpenFile(34, 0, fnOpenFileRtCall, &menuFeedPaper);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnMenuRtCall, backSubItemRenderFn, lang[language][TEXT_MENU], -1, NO_CALLBACK)
-SubMenuInfo_ML minfoMenu(lang[language][TEXT_MENU], 9, 0xffff, 0, NO_CALLBACK);
+SubMenuInfo_ML minfoMenu = { lang[language][TEXT_MENU], 9, 0xffff, 0, NO_CALLBACK };
 BackMenuItem menuBackMenu(fnMenuRtCall, &menuOpenFile);
-SubMenuItem menuMenu(&minfoMenu, &menuBackMenu, &menuInfoView); // 变更：&menuInfoView
+SubMenuItem menuMenu(&minfoMenu, &menuBackMenu, &menuInfoView);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnDurationRtCall, timeItemRenderFn, lang[language][TEXT_DURATION], -1, NO_CALLBACK)
 TimeFormattedMenuItem menuDuration(fnDurationRtCall, 8, (MultiEditWireType)6, &menuMenu);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnETARtCall, timeItemRenderFn, lang[language][TEXT_REMAINING], -1, NO_CALLBACK)
@@ -155,8 +178,7 @@ TimeFormattedMenuItem menuETA(fnETARtCall, 7, (MultiEditWireType)2, &menuDuratio
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnProgressRtCall, textItemRenderFn, lang[language][TEXT_PROGRESS], -1, NO_CALLBACK)
 TextMenuItem menuProgress(fnProgressRtCall, 6, 9, &menuETA);
 
-void setupMenu()
-{
+void setupMenu() {
     // First we set up eeprom and authentication (if needed).
     EEPROM.begin(512);
     menuMgr.setEepromRef(&glArduinoEeprom);
@@ -176,7 +198,6 @@ void setupMenu()
     menuSSID.setReadOnly(true);
     menuIP.setReadOnly(true);
     menuSSIDToConnect.setReadOnly(true);
-    menuPeriRatio.setReadOnly(true);
 
     menuInfoView.setVisible(false);
     menuResetStatus.setVisible(false);
@@ -186,7 +207,7 @@ void setupMenu()
     gfx.begin();
     renderer.setUpdatesPerSecond(10);
     switches.initialise(internalDigitalIo(), true);
-    menuMgr.initForEncoder(&renderer, &menuProgress, 32, 34, 35);
+    menuMgr.initForEncoder(&renderer, &menuProgress, 34, 35, 32);
     renderer.setTitleMode(BaseGraphicalRenderer::TITLE_FIRST_ROW);
     renderer.setUseSliderForAnalog(false);
     installMonoInverseTitleTheme(renderer, MenuFontDef(u8g2_font_wqy14_t_gb2312b, 1), MenuFontDef(u8g2_font_wqy14_t_gb2312b, 1), true);
@@ -222,17 +243,19 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoUseEncoderZ.name, lang[language][TEXT_USE_ENCODER]);
     strcpy(minfoRunningCurrentZ.name, lang[language][TEXT_RUNNING_CURRENT]);
     strcpy(minfoRunningSpeedZ.name, lang[language][TEXT_RUNNING_SPEED]);
-    strcpy(minfoPerimeterZ.name, lang[language][TEXT_PERIMETER]);
+    strcpy(minfoLengthZ.name, lang[language][TEXT_LENGTH]);
+    strcpy(minfoLengthTypeZ.name, lang[language][TEXT_LENGTH_TYPE]);
     strcpy(minfoZAxis.name, lang[language][TEXT_Z_AXIS]);
     strcpy(minfoCalibrateEncoderZ.name, lang[language][TEXT_CALIBRATE_ENCODER]);
-    strcpy(minfoPeriRatio.name, lang[language][TEXT_PERI_RATIO]);
+    strcpy(minfoDiamRatio.name, lang[language][TEXT_DIAM_RATIO]);
 
     // Y轴菜单
     strcpy(minfoVirtualEndstopY.name, lang[language][TEXT_VIRTUAL_ENDSTOP]);
     strcpy(minfoEndstopThresholdY.name, lang[language][TEXT_ENDSTOP_THRESHOLD]);
     strcpy(minfoRunningCurrentY.name, lang[language][TEXT_RUNNING_CURRENT]);
     strcpy(minfoRunningSpeedY.name, lang[language][TEXT_RUNNING_SPEED]);
-    strcpy(minfoPerimeterY.name, lang[language][TEXT_PERIMETER]);
+    strcpy(minfoLengthY.name, lang[language][TEXT_LENGTH]);
+    strcpy(minfoLengthTypeY.name, lang[language][TEXT_LENGTH_TYPE]);
     strcpy(minfoYAxis.name, lang[language][TEXT_Y_AXIS]);
 
     // X轴菜单
@@ -240,7 +263,8 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoEndstopThresholdX.name, lang[language][TEXT_ENDSTOP_THRESHOLD]);
     strcpy(minfoRunningCurrentX.name, lang[language][TEXT_RUNNING_CURRENT]);
     strcpy(minfoRunningSpeedX.name, lang[language][TEXT_RUNNING_SPEED]);
-    strcpy(minfoPerimeterX.name, lang[language][TEXT_PERIMETER]);
+    strcpy(minfoLengthX.name, lang[language][TEXT_LENGTH]);
+    strcpy(minfoLengthTypeX.name, lang[language][TEXT_LENGTH_TYPE]);
     strcpy(minfoXAxis.name, lang[language][TEXT_X_AXIS]);
 
     // 重置菜单
@@ -253,6 +277,10 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoConnect.name, lang[language][TEXT_CONNECT]);
     strcpy(minfoConnectTo.name, lang[language][TEXT_CONNECT_TO]);
     strcpy(minfoWifi.name, lang[language][TEXT_AUTO_CONNECT]);
+
+    strcpy(minfoFeedPaper.name, lang[language][TEXT_FEED_PAPER]);
+    strcpy(minfoReverseDirection.name, lang[language][TEXT_FEED_PAPER_REVERSE]);
+    strcpy(minfoFeed.name, lang[language][TEXT_FEED_PAPER_FEED]);
 
     saveValues(0);
 }

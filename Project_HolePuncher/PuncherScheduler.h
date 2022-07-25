@@ -6,7 +6,7 @@
 struct Hole
 {
     int x;
-    float z;
+    double z;
 };
 
 extern int punchETA;
@@ -16,6 +16,6 @@ extern LinkedList<Hole> holeList;
 extern int holeCount;
 extern int holeFinished;
 
-int calcETA(int Xrpm, int Yrpm, int Zrpm);
+int calcETA(double Xspeed, double Yspeed, double Zspeed);
 
 #endif

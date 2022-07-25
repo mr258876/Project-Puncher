@@ -1,6 +1,6 @@
 # Transmission Content Definition
 ## Transmission Frame Discription
-The transmission process is made up of frames. Each frame has 8 bytes, and is composed of three parts: Frame head, Frame body, and CRC byte.
+The transmission process is made up of frames. Each frame has 16 bytes, and is composed of three parts: Frame head, Frame body, and CRC byte.
 
 ### Frame Head
 The frame head decides what type of data this frame contains. The definitnons of frame heads are listed in the folowing table.
@@ -39,7 +39,7 @@ Each hole data frame carries position data of one hole (related to pervious hole
 
 | X Position    | Y position         | Description                   |
 | -----------   | -----------        | -----------                   |
-| 0xMM          | 4 byte float ----  | Hole at X potision # MM, Z position equals the float.    |
+| 0xMM          | 8 byte double ----  | Hole at X potision # MM, Z position equals the float.    |
 
 #### Client Response
 Frame body in client response frames contains responses from the client. The first byte defines response type, and the rest 5 bytes are the message.

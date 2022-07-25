@@ -22,7 +22,7 @@ const PROGMEM char* enUS[] = {
     "X axis",
     "Y axis",
     "Z axis",
-    "Perimeter",
+    "Length",
     "Speed",
     "V. Endstop",
     "Es. Thres.",
@@ -58,8 +58,12 @@ const PROGMEM char* enUS[] = {
     "Check Settings.",
     "Encoder Disabled.",
     "Puncher Busy.",
-    "Peri. Ratio",
-    "Connecting Encoder"
+    "Diam. Ratio",
+    "Connecting Encoder",
+    "Length Type",
+    "Feed Paper",
+    "Return Paper",
+    "Feed"
 };
 
 #endif

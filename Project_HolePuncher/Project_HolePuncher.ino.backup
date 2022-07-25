@@ -59,20 +59,23 @@ bool encoderDisabled = true;
 #define WIFI_CONTROL_PORT 22576
 
 int SSIDCount = 0;
-WiFiServer server(80);
+WiFiServer server(WIFI_CONTROL_PORT);
 
 //----------------------------------------电机控制变量
 #define xenablePin 23 // x使能控制引脚
 #define xdirPin 18    // x方向控制引脚
 #define xstepPin 19   // x步进控制引脚
+#define xdiagPin 39   // x方向过载引脚
 
 #define yenablePin 5 // y使能控制引脚
 #define ydirPin 2    // y方向控制引脚
 #define ystepPin 4   // y步进控制引脚
+#define ydiagPin 33  // y方向过载引脚
 
 #define zenablePin 25 // z使能控制引脚
 #define zdirPin 27    // z方向控制引脚
 #define zstepPin 26   // z步进控制引脚
+#define zdiagPin 36   // z方向过载引脚
 
 bool Xenabled = false;
 bool Yenabled = false;
@@ -91,17 +94,23 @@ int yStbyCurr = 50;  // 电机y待机电流
 int zOptiCurr = 500; // 电机z工作电流
 int zStbyCurr = 150; // 电机z待机电流
 
+double xPerimeter = 0;  // x轴转动周长
+double yPerimeter = 0;  // y轴转动周长
+double zPerimeter = 0;  // z轴转动周长
+
 BasicStepperDriver stepperX(MOTOR_STEPS, xdirPin, xstepPin, xenablePin);
 BasicStepperDriver stepperY(MOTOR_STEPS, ydirPin, ystepPin, yenablePin);
 BasicStepperDriver stepperZ(MOTOR_STEPS, zdirPin, zstepPin, zenablePin);
 
-TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b00);
-TMC2209Stepper driverY(&DRIVER_SERIAL, R_SENSE, 0b10);
-TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b01);
+TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b10);
+TMC2209Stepper driverY(&DRIVER_SERIAL, R_SENSE, 0b01);
+TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b00);
 
 long xPosition = 0;
 long yPosition = 0;
 long zLastMove = 0;
+
+double lengthZ = 0; // z轴位置
 
 //-----------------------------------------tcMenu工具变量
 char progressCA[9];
@@ -124,9 +133,10 @@ void setup()
     setupMenu();
     installTheme();
 
-    checkReset();             // 检查是否需要设置初始值
-    
-    menuProgress.setTextValue("idle");
+    checkReset(); // 检查是否需要设置初始值
+
+    menuProgress.setTextValue("idle"); // 将进度文字设为idle
+    renderer.turnOffResetLogic();      // 关闭闲置回调函数
     // menuMgr.navigateToMenu(menuInfoView.getChild());
 
     // 初始化电机
@@ -145,26 +155,28 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    stepperX.begin(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue(), MICROSTEPS);
+    getSterpperPerimeters();
+
+    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue(), MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue(), MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
     stepperZ.enable();
 
-    DRIVER_SERIAL.begin(115200);    // 启动串口
-    driverX.begin();                // x方向驱动板开始通讯
-    driverX.microsteps(MICROSTEPS); // x方向驱动板设置微步大小
-                                    //    driverX.rms_current(xStbyCurr); // x方向驱动板设置电流大小 (mA)
-    driverY.begin();                // y方向驱动板开始通讯
-    driverY.microsteps(MICROSTEPS); // y方向驱动板设置微步大小
-                                    //    driverY.rms_current(yStbyCurr); // y方向驱动板设置电流大小 (mA)
-    driverZ.begin();                // z方向驱动板开始通讯
-    driverZ.microsteps(MICROSTEPS); // z方向驱动板设置微步大小
-                                    //    driverZ.rms_current(zStbyCurr); // z方向驱动板设置电流大小 (mA)
+    DRIVER_SERIAL.begin(115200);                                // 启动串口
+    driverX.begin();                                            // x方向驱动板开始通讯
+    driverX.microsteps(MICROSTEPS);                             // x方向驱动板设置微步大小
+    driverX.rms_current(menuRunningCurrentX.getCurrentValue()); // x方向驱动板设置电流大小 (mA)
+    driverY.begin();                                            // y方向驱动板开始通讯
+    driverY.microsteps(MICROSTEPS);                             // y方向驱动板设置微步大小
+    driverY.rms_current(menuRunningCurrentY.getCurrentValue()); // y方向驱动板设置电流大小 (mA)
+    driverZ.begin();                                            // z方向驱动板开始通讯
+    driverZ.microsteps(MICROSTEPS);                             // z方向驱动板设置微步大小
+    driverZ.rms_current(menuRunningCurrentZ.getCurrentValue()); // z方向驱动板设置电流大小 (mA)
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
@@ -216,6 +228,7 @@ void setup()
     //--------------------检测编码器状态并启用编码器--------------------
     if (menuUseEncoderZ.getCurrentValue())
     {
+        // openDialogNoButton(TEXT_ATTENTION, TEXT_CONNECTING_ENCODER, TEXT_EMPTY);
         Wire.beginTransmission(AS5600_I2C_ADDR);
         switch (Wire.endTransmission())
         {
@@ -252,19 +265,14 @@ void setup()
     {
         // 中断方式
         // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
-        // attachInterrupt(digitalPinToInterrupt(diagXPin), FUNCTION_PTR, MODE);
+        // attachInterrupt(digitalPinToInterrupt(xdiagPin), FUNCTION_PTR, MODE);
         uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_X_AXIS, TEXT_ZEROING);
 
         stepperX.startMove(99999);
-        while (1)
+        while (stepperX.nextAction() > 0)
         {
-            stepperX.nextAction();
-            if (driverX.SGTHRS() > sgThrs)
-            {
-                break;
-            }
         }
     }
 
@@ -275,18 +283,16 @@ void setup()
         openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
 
         stepperY.startMove(99999);
-        while (1)
+        while (stepperY.nextAction() > 0)
         {
-            stepperY.nextAction();
-            if (driverY.SGTHRS() > sgThrs)
-            {
-                break;
-            }
         }
-        moveYto(8);
+        // moveYto(8);
     }
 
     // Serial.println("Puncher booted.");
+
+    // 启动完成后切换至主菜单
+    // menuMgr.navigateToMenu(&menuProgress);
 }
 
 // 电机运行现由loop函数处理 DEV.20220718
@@ -307,25 +313,26 @@ void installTheme()
     menuDuration.setTime(secToTime(0));
 }
 
+// 默认值设置
 void checkReset()
 {
     if (!menuResetStatus.getCurrentValue())
-    {   
-        menuPerimeterX.setCurrentValue(8);
-        menuPerimeterY.setCurrentValue(8);
-        menuPerimeterZ.setCurrentValue(20);
+    {
+        menuDiameterX.setCurrentValue(800);
+        menuDiameterY.setCurrentValue(800);
+        menuDiameterZ.setCurrentValue(20000);
 
-        menuRunningSpeedX.setCurrentValue(8);
-        menuRunningSpeedX.setCurrentValue(8);
-        menuRunningSpeedX.setCurrentValue(20);
+        menuRunningSpeedX.setCurrentValue(240);
+        menuRunningSpeedY.setCurrentValue(160);
+        menuRunningSpeedZ.setCurrentValue(400);
 
         menuRunningCurrentX.setCurrentValue(500);
         menuRunningCurrentY.setCurrentValue(800);
         menuRunningCurrentZ.setCurrentValue(500);
-        
+
         menuVirtualEndstopX.setBoolean(false);
         menuVirtualEndstopY.setBoolean(false);
-        
+
         menuUseEncoderZ.setBoolean(false);
 
         menuWifi.setBoolean(false);
@@ -335,10 +342,12 @@ void checkReset()
     }
 }
 
+// 计算周长
+
+
 //------------------------------TcMenu 主进程循环函数
 void runTcMenu(void *pvParameters)
 {
-    Serial.println();
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -359,17 +368,38 @@ void runTcMenu(void *pvParameters)
 //------------------------------串口监听函数
 void serialCommand(void *pvParameters)
 {
-    byte serBuf[8] = {};
+    byte serBuf[16] = {};
+    unsigned long lastConn = millis();
     while (1)
     {
         if (xSemaphoreTake(Serial0Mutex, portMAX_DELAY) == pdTRUE)
         {
-            while (Serial.available() > 7)
+            while (Serial.available() > 15)
             {
-                Serial.readBytes(serBuf, 8);
-                handleSerialCommand(serBuf, 8);
+                Serial.readBytes(serBuf, 16);
+                Serial.write(handleSerialCommand(serBuf, 16), 16);
+                lastConn = millis();
             }
+
+            if (isSerialCommandEnabled())
+            {
+                // 30秒发一个心跳包
+                if (millis() - lastConn > 30000)
+                {
+                    Serial.write(HeartBeatPackage, 16);
+                }
+                // 5秒内无回应关闭通讯
+                if (millis() - lastConn > 35000)
+                {
+                    disableSerialCommand();
+                }
+            }
+
             xSemaphoreGive(Serial0Mutex);
+        }
+        else
+        {
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
@@ -387,16 +417,25 @@ void punchSchedule(void *pvParameters)
             isPunching = true;
             Hole h = holeList.shift(); // 获取一个孔
             moveXpos(h.x);             // 移动X轴
-            moveZ(h.z);                // 移动Z轴
+            moveZ(h.z - lengthZ);      // 移动Z轴
 
             (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
             menuProgress.setTextValue(progressCA);
-            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue(), menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue(), menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue())));
+            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getAsFloatingPointValue(), menuRunningSpeedY.getAsFloatingPointValue(), menuRunningSpeedZ.getAsFloatingPointValue())));
             menuETA.setChanged(true);
+
+            lengthZ = h.z;
+        }
+        else if (!isPunching && puncherStatus == 0x11 && holeList.size() == 0)
+        {
+            lengthZ = 0;
+            rotatedAngle = 0;
+            puncherStatus = 0x10;
         }
 
         if (Xenabled)
-        {
+        {   
+            vTaskDelay(pdMS_TO_TICKS(100));
             if (stepperX_to_wait <= 0)
             {
                 Xenabled = false;
@@ -406,6 +445,7 @@ void punchSchedule(void *pvParameters)
 
         if (Zenabled)
         {
+            vTaskDelay(pdMS_TO_TICKS(100));
             if (stepperZ_to_wait <= 0)
             {
                 Zenabled = false;
@@ -414,9 +454,10 @@ void punchSchedule(void *pvParameters)
         }
 
         if (Yenabled)
-        {
+        {   
+            vTaskDelay(pdMS_TO_TICKS(100));
             if (stepperY_to_wait <= 0)
-            {
+            { 
                 if (Ydown)
                 {
                     moveYto(0); // 若Y轴已移动至下方则回到初始位置
@@ -442,24 +483,26 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
     if (!Xenabled && !Zenabled)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        if (abs(rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1 || encoderDisabled)
+        if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
             moveYto(4);
             Ydown = true;
+            rotatedAngle = 0;
         }
         else
         {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle / 4096.0 * MOTOR_STEPS * MICROSTEPS));
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS));
+            // Serial.println(rotatedAngle / (4096 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove);
         }
     }
 }
 
-void moveZ(float mm)
+void moveZ(double mm)
 {
     Zenabled = true;
     //     driverZ.rms_current(zOptiCurr);
-    long toMove = (long)(-mm * 25.852579588531222053828834659495);
+    long toMove = (long)(-mm / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
     //     driverZ.rms_current(zStbyCurr);
@@ -477,22 +520,22 @@ void moveXpos(int pos)
     }
 }
 
-void moveXto(float mm)
+void moveXto(double mm)
 {
     Xenabled = true;
     //    driverX.rms_current(xOptiCurr);
-    long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
+    long steps = (long)(mm / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
     //    driverX.rms_current(xStbyCurr);
     xPosition = steps;
 }
 
-void moveYto(float mm)
+void moveYto(double mm)
 {
     Yenabled = true;
     //    driverY.rms_current(yOptiCurr);
-    long steps = (long)(mm / 8.0 * (200 * 8) + 0.5);
+    long steps = (long)(mm / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
     //    driverY.rms_current(yStbyCurr);
@@ -531,23 +574,31 @@ void runEncoder(void *pvParameters)
 {
     while (1)
     {
-        if (xSemaphoreTake(I2CMutex, portMAX_DELAY) == pdTRUE)
+        while (xSemaphoreTake(I2CMutex, portMAX_DELAY) != pdTRUE)
         {
-            int v = encoderZ.getAngle();
-            if (lastAngle != -1)
-            {
-                if (abs(v - lastAngle) > 2047)
-                {
-                    rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
-                }
-                else
-                {
-                    rotatedAngle += v - lastAngle;
-                }
-            }
-            lastAngle = v;
-            xSemaphoreGive(I2CMutex);
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
+
+        int v = encoderZ.getAngle();
+        if (lastAngle != -1)
+        {
+            if (abs(v - lastAngle) > 2048)
+            {
+                rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
+            }
+            else
+            {
+                rotatedAngle += v - lastAngle;
+            }
+        }
+        else
+        {
+            rotatedAngle = 0;
+        }
+
+        lastAngle = v;
+        xSemaphoreGive(I2CMutex);
+
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
@@ -555,49 +606,95 @@ void runEncoder(void *pvParameters)
 // 编码器校准
 void calibrateEncoder(void *pvParameters)
 {
-    if (puncherStatus == 0x10)
-    {
-        vTaskSuspend(runEncoder_Handle);    // 暂停编码器任务
-        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
-
-        uint16_t angleReading[MOTOR_STEPS * 2];
-        uint16_t lastAngle = encoderZ.getAngle();
-        // 正反转各一圈获取读数
-        for (int i = 0; i < MOTOR_STEPS; i++)
-        {
-            stepperZ.startMove(MICROSTEPS);
-            while (stepperZ_to_wait > 0)
-            {
-            }
-            angleReading[i] = encoderZ.getAngle();
-            vTaskDelay(pdMS_TO_TICKS(100));
-
-//            Serial.println(angleReading[i] - lastAngle);
-            lastAngle = angleReading[i];
-        }
-        for (int i = 0; i < MOTOR_STEPS; i++)
-        {
-            stepperZ.startMove(-MICROSTEPS);
-            while (stepperZ_to_wait > 0)
-            {
-            }
-            angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
-            vTaskDelay(pdMS_TO_TICKS(100));
-
-//            Serial.println(angleReading[i] - lastAngle);
-            lastAngle = angleReading[i];
-        }
-        rotatedAngle = 0;
-        
-        
-
-        // 重启编码器任务
-        vTaskResume(runEncoder_Handle);
-    }
-    else
+    // 若编码器不空闲则报错
+    if (puncherStatus != 0x10)
     {
         openDialog(TEXT_ERROR, TEXT_PUNCHER_BUSY, TEXT_EMPTY);
+        vTaskDelete(NULL);
     }
+
+    openDialogNoButton(TEXT_ATTENTION, TEXT_CALIBRATING_ENCODER, TEXT_EMPTY);
+
+    vTaskSuspend(runEncoder_Handle);    // 暂停编码器任务
+    vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
+    puncherStatus = 0x11;
+
+    uint16_t angleReading[MOTOR_STEPS * 2];
+    uint16_t lastAngle = encoderZ.getAngle();
+    uint16_t readingA = 0;
+    uint16_t readingB = 0;
+    // 正反转各一圈获取读数
+    for (int i = 0; i < MOTOR_STEPS; i++)
+    {
+        stepperZ.startMove(MICROSTEPS);
+        while (stepperZ_to_wait)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        while (xSemaphoreTake(I2CMutex, portMAX_DELAY) != pdTRUE)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        angleReading[i] = encoderZ.getAngle();
+
+        xSemaphoreGive(I2CMutex);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        //    Serial.println(angleReading[i] - lastAngle);
+        if (abs(angleReading[i] - lastAngle) > 2048)
+        {
+            readingA += 4096 - abs(angleReading[i] - lastAngle);
+        }
+        else
+        {
+            readingA += abs(angleReading[i] - lastAngle);
+        }
+        lastAngle = angleReading[i];
+    }
+    for (int i = 0; i < MOTOR_STEPS; i++)
+    {
+        stepperZ.startMove(-MICROSTEPS);
+        while (stepperZ_to_wait)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        while (xSemaphoreTake(I2CMutex, portMAX_DELAY) != pdTRUE)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
+
+        xSemaphoreGive(I2CMutex);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        // Serial.println(angleReading[MOTOR_STEPS + i] - lastAngle);
+        if (abs(angleReading[MOTOR_STEPS + i] - lastAngle) > 2048)
+        {
+            readingB += 4096 - abs(angleReading[MOTOR_STEPS + i] - lastAngle);
+        }
+        else
+        {
+            readingB += abs(angleReading[MOTOR_STEPS + i] - lastAngle);
+        }
+        lastAngle = angleReading[MOTOR_STEPS + i];
+    }
+    rotatedAngle = 0;
+
+    // 获取主动轮/被动轮间周长比值
+    menuDiamRatio.setFromFloatingPointValue((readingA + readingB) / 2.0 / 4096);
+
+    puncherStatus = 0x10;
+    // 重启编码器任务
+    vTaskResume(runEncoder_Handle);
+    vTaskResume(punchSchedule_Handle);
+
+    menuMgr.navigateToMenu(menuZAxis.getChild());
 
     vTaskDelete(NULL);
 }
@@ -668,16 +765,46 @@ void scanWifi()
 //------------------------------Wifi指令监听函数
 void wifiCommand(void *pvParameters)
 {
-    WiFiClient client = server.available();
-    byte serBuf[8] = {};
-    if (client)
+    byte wifiBuf[16] = {};
+    int readByteCount = 0;
+    unsigned long lastConn = millis();
+    while (1)
     {
-        while (client.connected())
+        WiFiClient client = server.available();
+        readByteCount = 0;
+        if (client)
         {
-            if (client.available())
+            while (client.connected())
             {
-                /* code */
+                if (client.available())
+                {
+                    wifiBuf[readByteCount] = client.read();
+                    readByteCount += 1;
+                    if (readByteCount > 15)
+                    {
+                        client.write(handleWifiCommand(wifiBuf, 16), 16);
+                        lastConn = millis();
+                    }
+                }
+
+                if (isSerialCommandEnabled())
+                {
+                    // 30秒发一个心跳包
+                    if (millis() - lastConn > 30000)
+                    {
+                        client.write(HeartBeatPackage, 16);
+                    }
+                    // 5秒内无回应关闭通讯
+                    if (millis() - lastConn > 35000)
+                    {
+                        disableWifiCommand();
+                    }
+                }
             }
+        }
+        else
+        {
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
@@ -709,8 +836,8 @@ char *getStringEEPROM(int start_pos)
 // 保存字符串至EEPROM
 void writeStringEEPROM(int start_pos, int data_size, char *s)
 {
-    Serial.println("length:");
-    Serial.println(strlen(s));
+    // Serial.println("length:");
+    // Serial.println(strlen(s));
     EEPROM.write(start_pos, data_size);
     for (int i = 0; i < data_size; i++)
     {
@@ -812,13 +939,13 @@ void CALLBACK_FUNCTION onChangeCurrent(int id)
 
 void CALLBACK_FUNCTION onChangeSpeed(int id)
 {
-    stepperX.setRPM(menuRunningSpeedX.getCurrentValue() * 60 / menuPerimeterX.getCurrentValue());
-    stepperY.setRPM(menuRunningSpeedY.getCurrentValue() * 60 / menuPerimeterY.getCurrentValue());
-    stepperZ.setRPM(menuRunningSpeedZ.getCurrentValue() * 60 / menuPerimeterZ.getCurrentValue());
+    stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * 60);
+    stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * 60);
+    stepperZ.setRPM(menuRunningSpeedZ.getAsFloatingPointValue() / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * 60);
     saveValues(id);
 }
 
-void CALLBACK_FUNCTION onChangePerimeter(int id)
+void CALLBACK_FUNCTION onChangeDiameter(int id)
 {
     saveValues(id);
 }
@@ -831,7 +958,7 @@ void CALLBACK_FUNCTION onChangeUseEncoder(int id)
 
 void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
 {
-        if (menuUseEncoderZ.getCurrentValue() == true)
+    if (menuUseEncoderZ.getCurrentValue() == true)
     {
         xTaskCreate(calibrateEncoder,   //任务函数
                     "calibrateEncoder", //任务名称
@@ -893,7 +1020,7 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
     EEPROM.commit();
 
     //------------------------------重新创建连接Wifi任务
-    Serial.print(eTaskGetState(&wifiConnect_Handle));
+    // Serial.print(eTaskGetState(&wifiConnect_Handle));
 
     xTaskCreate(wifiConnect,          //任务函数
                 "wifiConnect",        //任务名称

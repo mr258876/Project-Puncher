@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Project description",
-  "author": "mr258876",
+  "author": "Mr258876",
   "items": [
     {
       "parentId": 0,
@@ -82,6 +82,49 @@
       "type": "subMenu",
       "item": {
         "secured": false,
+        "name": "Feed Paper",
+        "variableName": "FeedPaper",
+        "id": 56,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 56,
+      "type": "boolItem",
+      "item": {
+        "naming": "TRUE_FALSE",
+        "name": "Reverse Direction",
+        "variableName": "ReverseDirection",
+        "id": 57,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 56,
+      "type": "boolItem",
+      "item": {
+        "naming": "ON_OFF",
+        "name": "Feed",
+        "variableName": "Feed",
+        "id": 58,
+        "eepromAddress": -1,
+        "functionName": "onChangeFeed",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 9,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
         "name": "Settings",
         "variableName": "Settings",
         "id": 10,
@@ -127,15 +170,33 @@
       "parentId": 16,
       "type": "analogItem",
       "item": {
-        "maxValue": 1000,
+        "maxValue": 10000,
         "offset": 0,
-        "divisor": 10,
+        "divisor": 100,
         "unitName": "mm",
-        "name": "PerimeterX",
-        "variableName": "PerimeterX",
+        "name": "Lentgh X",
+        "variableName": "LengthX",
         "id": 21,
         "eepromAddress": 9,
-        "functionName": "onChangePerimeter",
+        "functionName": "onChangeDiameter",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 16,
+      "type": "enumItem",
+      "item": {
+        "enumEntries": [
+          "Peri",
+          "Diam"
+        ],
+        "name": "Length Type X",
+        "variableName": "LengthTypeX",
+        "id": 53,
+        "eepromAddress": 35,
+        "functionName": "onChangeDiameter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -228,15 +289,33 @@
       "parentId": 17,
       "type": "analogItem",
       "item": {
-        "maxValue": 1000,
+        "maxValue": 10000,
         "offset": 0,
-        "divisor": 1,
+        "divisor": 100,
         "unitName": "mm",
-        "name": "PerimeterY",
-        "variableName": "PerimeterY",
+        "name": "Length Y",
+        "variableName": "LengthY",
         "id": 26,
         "eepromAddress": 18,
-        "functionName": "onChangePerimeter",
+        "functionName": "onChangeDiameter",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "enumItem",
+      "item": {
+        "enumEntries": [
+          "Peri",
+          "Diam"
+        ],
+        "name": "Length Type Y",
+        "variableName": "LengthTypeY",
+        "id": 54,
+        "eepromAddress": 37,
+        "functionName": "onChangeDiameter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -329,15 +408,33 @@
       "parentId": 18,
       "type": "analogItem",
       "item": {
-        "maxValue": 1000,
+        "maxValue": 10000,
         "offset": 0,
-        "divisor": 10,
+        "divisor": 100,
         "unitName": "mm",
-        "name": "PerimeterZ",
-        "variableName": "PerimeterZ",
+        "name": "Length Z",
+        "variableName": "LengthZ",
         "id": 31,
         "eepromAddress": 26,
-        "functionName": "onChangePerimeter",
+        "functionName": "onChangeDiameter",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 18,
+      "type": "enumItem",
+      "item": {
+        "enumEntries": [
+          "Peri",
+          "Diam"
+        ],
+        "name": "Length TypeZ",
+        "variableName": "LengthTypeZ",
+        "id": 55,
+        "eepromAddress": 39,
+        "functionName": "onChangeDiameter",
         "readOnly": false,
         "localOnly": false,
         "visible": true
@@ -431,8 +528,8 @@
         "offset": 0,
         "divisor": 1000,
         "unitName": "Unit",
-        "name": "Peri Ratio",
-        "variableName": "PeriRatio",
+        "name": "Diam Ratio",
+        "variableName": "DiamRatio",
         "id": 52,
         "eepromAddress": 33,
         "readOnly": true,
@@ -852,13 +949,8 @@
         "subsystem": "DISPLAY"
       },
       {
-        "name": "PULLUP_LOGIC",
-        "latestValue": "true",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "INTERRUPT_SWITCHES",
-        "latestValue": "false",
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
         "subsystem": "INPUT"
       },
       {
@@ -868,17 +960,17 @@
       },
       {
         "name": "ENCODER_PIN_A",
-        "latestValue": "32",
-        "subsystem": "INPUT"
-      },
-      {
-        "name": "ENCODER_PIN_B",
         "latestValue": "34",
         "subsystem": "INPUT"
       },
       {
-        "name": "ENCODER_PIN_OK",
+        "name": "ENCODER_PIN_B",
         "latestValue": "35",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_PIN_OK",
+        "latestValue": "32",
         "subsystem": "INPUT"
       },
       {
@@ -889,6 +981,11 @@
       {
         "name": "ENCODER_NEXT_PIN",
         "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
         "subsystem": "INPUT"
       },
       {
@@ -908,12 +1005,12 @@
       },
       {
         "name": "TITLE_HEADER_PADDING",
-        "latestValue": "2",
+        "latestValue": "0",
         "subsystem": "THEME"
       },
       {
         "name": "TITLE_TO_ITEM_SPACING",
-        "latestValue": "2",
+        "latestValue": "0",
         "subsystem": "THEME"
       },
       {
@@ -929,6 +1026,11 @@
     "authenticatorDefinition": "",
     "projectIoExpanders": [
       "deviceIO:"
-    ]
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false
   }
 }

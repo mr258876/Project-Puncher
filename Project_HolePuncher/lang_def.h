@@ -36,7 +36,7 @@
 #define TEXT_X_AXIS             17
 #define TEXT_Y_AXIS             18
 #define TEXT_Z_AXIS             19
-#define TEXT_PERIMETER          20
+#define TEXT_LENGTH             20
 #define TEXT_RUNNING_SPEED      21
 #define TEXT_VIRTUAL_ENDSTOP    22
 #define TEXT_ENDSTOP_THRESHOLD  23
@@ -82,7 +82,15 @@
 // 校准编码器
 #define TEXT_ENCODER_DISABLED   54
 #define TEXT_PUNCHER_BUSY       55
-#define TEXT_PERI_RATIO         56
+#define TEXT_DIAM_RATIO         56
 #define TEXT_CONNECTING_ENCODER 57
+
+// 长度类型
+#define TEXT_LENGTH_TYPE        58
+
+// 进纸
+#define TEXT_FEED_PAPER         59
+#define TEXT_FEED_PAPER_REVERSE 60
+#define TEXT_FEED_PAPER_FEED    61
 
 #endif
