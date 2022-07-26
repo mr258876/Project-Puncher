@@ -265,7 +265,7 @@ void setup()
     }
 
     //--------------------X/Y轴归零--------------------
-    if (menuVirtualEndstopX.getCurrentValue())
+    if (menuVirtualEndstopX.getBoolean())
     {
         // 中断
         // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
@@ -277,7 +277,7 @@ void setup()
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_X_AXIS, TEXT_ZEROING);
 
-        driverX.rms_current(100);
+        driverX.rms_current(250);
         // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
         stepperX.startMove(-99999);
         stepperX.setRPM(20);
@@ -311,7 +311,7 @@ void setup()
         closeDialog();
     }
 
-    if (menuVirtualEndstopY.getCurrentValue())
+    if (menuVirtualEndstopY.getBoolean())
     {
         // 中断
         // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
@@ -323,13 +323,13 @@ void setup()
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
 
-        driverY.rms_current(100);
-        // driverX.SGTHRS(menuEndstopThresholdY.getCurrentValue());
+        driverY.rms_current(250);
+        // driverY.SGTHRS(menuEndstopThresholdY.getCurrentValue());
         stepperY.startMove(-99999);
         stepperY.setRPM(20);
         while (stepperY.nextAction() > 0)
         {   
-            // Serial.println(driverY.SG_RESULT());
+            Serial.println(driverY.SG_RESULT());
             // 10个读数取平均
             if (driverY.SG_RESULT() > 0)
             {
