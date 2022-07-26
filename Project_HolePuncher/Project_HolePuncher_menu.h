@@ -17,6 +17,7 @@
 #include <RuntimeMenuItem.h>
 #include <IoAbstraction.h>
 #include <ArduinoEEPROMAbstraction.h>
+#include <EditableLargeNumberMenuItem.h>
 
 // variables we declare that you may need to access
 extern const PROGMEM ConnectorLocalInfo applicationInfo;
@@ -56,14 +57,14 @@ extern TextMenuItem menuWifiStatus;
 extern BooleanMenuItem menuWifi;
 extern BackMenuItem menuBackWireless;
 extern SubMenuItem menuWireless;
-extern AnalogMenuItem menuDiamRatio;
+extern EditableLargeNumberMenuItem menuDiamRatio;
 extern ActionMenuItem menuCalibrateEncoderZ;
 extern BooleanMenuItem menuReversedEncoderZ;
 extern BooleanMenuItem menuUseEncoderZ;
 extern AnalogMenuItem menuRunningCurrentZ;
 extern AnalogMenuItem menuRunningSpeedZ;
 extern EnumMenuItem menuLengthTypeZ;
-extern AnalogMenuItem menuLengthZ;
+extern EditableLargeNumberMenuItem menuLengthZ;
 extern BackMenuItem menuBackZAxis;
 extern SubMenuItem menuZAxis;
 extern AnalogMenuItem menuEndstopThresholdY;

@@ -88,8 +88,8 @@ RENDERING_CALLBACK_NAME_INVOKE_ML(fnWirelessRtCall, backSubItemRenderFn, lang[la
 SubMenuInfo_ML minfoWireless = {lang[language][TEXT_WIRELESS], 36, 0xffff, 0, NO_CALLBACK};
 BackMenuItem menuBackWireless(fnWirelessRtCall, &menuWifi);
 SubMenuItem menuWireless(&minfoWireless, &menuBackWireless, &menuResetSettings);
-AnalogMenuInfo_ML minfoDiamRatio = { lang[language][TEXT_DIAM_RATIO], 52, 33, 10000, saveValues, 0, 1000, "" };
-AnalogMenuItem menuDiamRatio(&minfoDiamRatio, 0, NULL);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnDiamRatioRtCall, largeNumItemRenderFn, lang[language][TEXT_DIAM_RATIO], 49, saveValues)
+EditableLargeNumberMenuItem menuDiamRatio(fnDiamRatioRtCall, 60, 9, 8, false, NULL);
 AnyMenuInfo_ML minfoCalibrateEncoderZ = {lang[language][TEXT_CALIBRATE_ENCODER], 50, 0xffff, 0, calibrateEncoderCallback};
 ActionMenuItem menuCalibrateEncoderZ(&minfoCalibrateEncoderZ, &menuDiamRatio);
 BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER], 30, 25, 1, saveValues, NAMING_TRUE_FALSE};
@@ -105,8 +105,8 @@ const char enumStrLengthTypeZ_1[] PROGMEM = "Diam";
 const char* const enumStrLengthTypeZ[] PROGMEM  = { enumStrLengthTypeZ_0, enumStrLengthTypeZ_1 };
 EnumMenuInfo_ML minfoLengthTypeZ = { lang[language][TEXT_LENGTH_TYPE], 55, 39, 1, onChangeDiameter, enumStrLengthTypeZ };
 EnumMenuItem menuLengthTypeZ(&minfoLengthTypeZ, 0, &menuRunningSpeedZ);
-AnalogMenuInfo_ML minfoLengthZ = { lang[language][TEXT_LENGTH], 31, 26, 10000, onChangeDiameter, 0, 100, "mm" };
-AnalogMenuItem menuLengthZ(&minfoLengthZ, 0, &menuLengthTypeZ);
+RENDERING_CALLBACK_NAME_INVOKE_ML(fnLengthZRtCall, largeNumItemRenderFn, lang[language][TEXT_LENGTH], 41, onChangeDiameter)
+EditableLargeNumberMenuItem menuLengthZ(fnLengthZRtCall, 59, 10, 8, false, &menuLengthTypeZ);
 RENDERING_CALLBACK_NAME_INVOKE_ML(fnZAxisRtCall, backSubItemRenderFn, lang[language][TEXT_Z_AXIS], -1, NO_CALLBACK)
 SubMenuInfo_ML minfoZAxis = { lang[language][TEXT_Z_AXIS], 18, 0xffff, 0, NO_CALLBACK };
 BackMenuItem menuBackZAxis(fnZAxisRtCall, &menuLengthZ);
@@ -243,11 +243,9 @@ void CALLBACK_FUNCTION updateLanguage(int id)
     strcpy(minfoUseEncoderZ.name, lang[language][TEXT_USE_ENCODER]);
     strcpy(minfoRunningCurrentZ.name, lang[language][TEXT_RUNNING_CURRENT]);
     strcpy(minfoRunningSpeedZ.name, lang[language][TEXT_RUNNING_SPEED]);
-    strcpy(minfoLengthZ.name, lang[language][TEXT_LENGTH]);
     strcpy(minfoLengthTypeZ.name, lang[language][TEXT_LENGTH_TYPE]);
     strcpy(minfoZAxis.name, lang[language][TEXT_Z_AXIS]);
     strcpy(minfoCalibrateEncoderZ.name, lang[language][TEXT_CALIBRATE_ENCODER]);
-    strcpy(minfoDiamRatio.name, lang[language][TEXT_DIAM_RATIO]);
 
     // Y轴菜单
     strcpy(minfoVirtualEndstopY.name, lang[language][TEXT_VIRTUAL_ENDSTOP]);

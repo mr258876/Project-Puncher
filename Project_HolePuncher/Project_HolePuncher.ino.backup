@@ -62,15 +62,15 @@ int SSIDCount = 0;
 WiFiServer server(WIFI_CONTROL_PORT);
 
 //----------------------------------------电机控制变量
-#define xenablePin 23 // x使能控制引脚
-#define xdirPin 18    // x方向控制引脚
-#define xstepPin 19   // x步进控制引脚
-#define xdiagPin 39   // x方向过载引脚
+#define xenablePin 5 // x使能控制引脚
+#define xdirPin 2    // x方向控制引脚
+#define xstepPin 4   // x步进控制引脚
+#define xydiagPin 33  // x方向过载引脚
 
-#define yenablePin 5 // y使能控制引脚
-#define ydirPin 2    // y方向控制引脚
-#define ystepPin 4   // y步进控制引脚
-#define ydiagPin 33  // y方向过载引脚
+#define yenablePin 23 // y使能控制引脚
+#define ydirPin 18    // y方向控制引脚
+#define ystepPin 19   // y步进控制引脚
+#define ydiagPin 39   // y方向过载引脚
 
 #define zenablePin 25 // z使能控制引脚
 #define zdirPin 27    // z方向控制引脚
@@ -94,17 +94,17 @@ int yStbyCurr = 50;  // 电机y待机电流
 int zOptiCurr = 500; // 电机z工作电流
 int zStbyCurr = 150; // 电机z待机电流
 
-double xPerimeter = 0;  // x轴转动周长
-double yPerimeter = 0;  // y轴转动周长
-double zPerimeter = 0;  // z轴转动周长
+double xPerimeter = 0; // x轴转动周长
+double yPerimeter = 0; // y轴转动周长
+double zPerimeter = 0; // z轴转动周长
 
 BasicStepperDriver stepperX(MOTOR_STEPS, xdirPin, xstepPin, xenablePin);
 BasicStepperDriver stepperY(MOTOR_STEPS, ydirPin, ystepPin, yenablePin);
 BasicStepperDriver stepperZ(MOTOR_STEPS, zdirPin, zstepPin, zenablePin);
 
-TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b10);
+TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b00);
 TMC2209Stepper driverY(&DRIVER_SERIAL, R_SENSE, 0b01);
-TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b00);
+TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b10);
 
 long xPosition = 0;
 long yPosition = 0;
@@ -155,13 +155,13 @@ void setup()
     digitalWrite(yenablePin, LOW); // 启用y方向电机
     digitalWrite(zenablePin, LOW); // 启用z方向电机
 
-    getSterpperPerimeters();
+    getStepperPerimeters();
 
-    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60, MICROSTEPS);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60, MICROSTEPS);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * 60, MICROSTEPS);
+    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / zPerimeter * 60, MICROSTEPS);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -177,6 +177,8 @@ void setup()
     driverZ.begin();                                            // z方向驱动板开始通讯
     driverZ.microsteps(MICROSTEPS);                             // z方向驱动板设置微步大小
     driverZ.rms_current(menuRunningCurrentZ.getCurrentValue()); // z方向驱动板设置电流大小 (mA)
+
+    driverX.VACTUAL(100);
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
@@ -318,12 +320,18 @@ void checkReset()
 {
     if (!menuResetStatus.getCurrentValue())
     {
-        menuDiameterX.setCurrentValue(800);
-        menuDiameterY.setCurrentValue(800);
-        menuDiameterZ.setCurrentValue(20000);
+        menuLengthX.setCurrentValue(800);
+        menuLengthY.setCurrentValue(800);
+        menuLengthZ.getLargeNumber()->setFromFloat(20.0);
 
-        menuRunningSpeedX.setCurrentValue(240);
-        menuRunningSpeedY.setCurrentValue(160);
+        menuLengthTypeX.setCurrentValue(0);
+        menuLengthTypeY.setCurrentValue(0);
+        menuLengthTypeZ.setCurrentValue(0);
+
+        menuDiamRatio.setCurrentValue(0);
+
+        menuRunningSpeedX.setCurrentValue(120);
+        menuRunningSpeedY.setCurrentValue(80);
         menuRunningSpeedZ.setCurrentValue(400);
 
         menuRunningCurrentX.setCurrentValue(500);
@@ -343,7 +351,12 @@ void checkReset()
 }
 
 // 计算周长
-
+void getStepperPerimeters()
+{
+    xPerimeter = menuLengthX.getAsFloatingPointValue() * (menuLengthTypeX.getCurrentValue() == 0 ? 1 : 3.14159265358979);
+    yPerimeter = menuLengthY.getAsFloatingPointValue() * (menuLengthTypeY.getCurrentValue() == 0 ? 1 : 3.14159265358979);
+    zPerimeter = menuLengthZ.getLargeNumber()->getAsFloat() * (menuLengthTypeZ.getCurrentValue() == 0 ? 1 : 3.14159265358979);
+}
 
 //------------------------------TcMenu 主进程循环函数
 void runTcMenu(void *pvParameters)
@@ -413,16 +426,18 @@ void punchSchedule(void *pvParameters)
     {
         //    Serial.println(encoderZ.getAngle());
         if (!isPunching && puncherStatus == 0x11 && holeList.size() > 0) // 当状态为正在打孔且打孔队列有孔时才进行调度
-        {
+        {   
+            // 计算剩余时间
+            // 注意：calcETA需要访问holeList, 因此必须放在holeList.shift()前，否则在list size == 1时将会产生null pointer exception
+            (String(holeFinished + 1) + "/" + String(holeCount)).toCharArray(progressCA, 9);
+            menuProgress.setTextValue(progressCA);
+            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getAsFloatingPointValue(), menuRunningSpeedY.getAsFloatingPointValue(), menuRunningSpeedZ.getAsFloatingPointValue())));
+            menuETA.setChanged(true);
+
             isPunching = true;
             Hole h = holeList.shift(); // 获取一个孔
             moveXpos(h.x);             // 移动X轴
             moveZ(h.z - lengthZ);      // 移动Z轴
-
-            (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
-            menuProgress.setTextValue(progressCA);
-            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getAsFloatingPointValue(), menuRunningSpeedY.getAsFloatingPointValue(), menuRunningSpeedZ.getAsFloatingPointValue())));
-            menuETA.setChanged(true);
 
             lengthZ = h.z;
         }
@@ -431,10 +446,15 @@ void punchSchedule(void *pvParameters)
             lengthZ = 0;
             rotatedAngle = 0;
             puncherStatus = 0x10;
+
+            menuProgress.setTextValue("idle");
+            menuETA.setTime(secToTime(0));
+            menuETA.setChanged(true);
+            menuDuration.setTime(secToTime(0));
         }
 
         if (Xenabled)
-        {   
+        {
             vTaskDelay(pdMS_TO_TICKS(100));
             if (stepperX_to_wait <= 0)
             {
@@ -454,10 +474,10 @@ void punchSchedule(void *pvParameters)
         }
 
         if (Yenabled)
-        {   
+        {
             vTaskDelay(pdMS_TO_TICKS(100));
             if (stepperY_to_wait <= 0)
-            { 
+            {
                 if (Ydown)
                 {
                     moveYto(0); // 若Y轴已移动至下方则回到初始位置
@@ -502,7 +522,7 @@ void moveZ(double mm)
 {
     Zenabled = true;
     //     driverZ.rms_current(zOptiCurr);
-    long toMove = (long)(-mm / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS);
+    long toMove = (long)(-mm / zPerimeter * MOTOR_STEPS * MICROSTEPS);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
     //     driverZ.rms_current(zStbyCurr);
@@ -524,7 +544,7 @@ void moveXto(double mm)
 {
     Xenabled = true;
     //    driverX.rms_current(xOptiCurr);
-    long steps = (long)(mm / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = (long)(mm / xPerimeter * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
     //    driverX.rms_current(xStbyCurr);
@@ -535,7 +555,7 @@ void moveYto(double mm)
 {
     Yenabled = true;
     //    driverY.rms_current(yOptiCurr);
-    long steps = (long)(mm / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = (long)(mm / yPerimeter * (MOTOR_STEPS * MICROSTEPS) + 0.5);
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
     //    driverY.rms_current(yStbyCurr);
@@ -694,7 +714,7 @@ void calibrateEncoder(void *pvParameters)
     vTaskResume(runEncoder_Handle);
     vTaskResume(punchSchedule_Handle);
 
-    menuMgr.navigateToMenu(menuZAxis.getChild());
+    closeDialog();
 
     vTaskDelete(NULL);
 }
@@ -939,14 +959,15 @@ void CALLBACK_FUNCTION onChangeCurrent(int id)
 
 void CALLBACK_FUNCTION onChangeSpeed(int id)
 {
-    stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / menuDiameterX.getAsFloatingPointValue() / 3.14159265358979 * 60);
-    stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / menuDiameterY.getAsFloatingPointValue() / 3.14159265358979 * 60);
-    stepperZ.setRPM(menuRunningSpeedZ.getAsFloatingPointValue() / menuDiameterZ.getAsFloatingPointValue() / 3.14159265358979 * 60);
+    stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60);
+    stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60);
+    stepperZ.setRPM(menuRunningSpeedZ.getAsFloatingPointValue() / zPerimeter * 60);
     saveValues(id);
 }
 
 void CALLBACK_FUNCTION onChangeDiameter(int id)
 {
+    getStepperPerimeters();
     saveValues(id);
 }
 
@@ -1028,4 +1049,25 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
                 NULL,                 //任务参数
                 tskIDLE_PRIORITY,     //任务优先级
                 &wifiConnect_Handle); //任务句柄
+}
+
+// 进纸
+void CALLBACK_FUNCTION onChangeFeed(int id)
+{
+    if (menuFeed.getBoolean())
+    {
+        if (menuReverseDirection.getBoolean())
+        {
+            stepperZ.startMove(99999);
+        }
+        else
+        {
+            stepperZ.startMove(-99999);
+        }
+    }
+    else
+    {   
+        stepperZ.startMove(0);
+        rotatedAngle = 0;
+    }
 }

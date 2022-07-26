@@ -62,15 +62,15 @@ int SSIDCount = 0;
 WiFiServer server(WIFI_CONTROL_PORT);
 
 //----------------------------------------电机控制变量
-#define xenablePin 23 // x使能控制引脚
-#define xdirPin 18    // x方向控制引脚
-#define xstepPin 19   // x步进控制引脚
-#define xdiagPin 39   // x方向过载引脚
+#define xenablePin 5 // x使能控制引脚
+#define xdirPin 2    // x方向控制引脚
+#define xstepPin 4   // x步进控制引脚
+#define xdiagPin 33  // x方向过载引脚
 
-#define yenablePin 5 // y使能控制引脚
-#define ydirPin 2    // y方向控制引脚
-#define ystepPin 4   // y步进控制引脚
-#define ydiagPin 33  // y方向过载引脚
+#define yenablePin 23 // y使能控制引脚
+#define ydirPin 18    // y方向控制引脚
+#define ystepPin 19   // y步进控制引脚
+#define ydiagPin 39   // y方向过载引脚
 
 #define zenablePin 25 // z使能控制引脚
 #define zdirPin 27    // z方向控制引脚
@@ -102,9 +102,9 @@ BasicStepperDriver stepperX(MOTOR_STEPS, xdirPin, xstepPin, xenablePin);
 BasicStepperDriver stepperY(MOTOR_STEPS, ydirPin, ystepPin, yenablePin);
 BasicStepperDriver stepperZ(MOTOR_STEPS, zdirPin, zstepPin, zenablePin);
 
-TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b10);
+TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b00);
 TMC2209Stepper driverY(&DRIVER_SERIAL, R_SENSE, 0b01);
-TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b00);
+TMC2209Stepper driverZ(&DRIVER_SERIAL, R_SENSE, 0b10);
 
 long xPosition = 0;
 long yPosition = 0;
@@ -150,6 +150,10 @@ void setup()
     pinMode(xenablePin, OUTPUT);
     pinMode(yenablePin, OUTPUT);
     pinMode(zenablePin, OUTPUT);
+
+    pinMode(xdiagPin, INPUT);
+    pinMode(ydiagPin, INPUT);
+    pinMode(zdiagPin, INPUT);
 
     digitalWrite(xenablePin, LOW); // 启用x方向电机
     digitalWrite(yenablePin, LOW); // 启用y方向电机
@@ -263,30 +267,94 @@ void setup()
     //--------------------X/Y轴归零--------------------
     if (menuVirtualEndstopX.getCurrentValue())
     {
-        // 中断方式
-        // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
-        // attachInterrupt(digitalPinToInterrupt(xdiagPin), FUNCTION_PTR, MODE);
+        // 中断
+        // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
+
         uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
+        int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
+        int readingIndex = 0;
+        int readingSum = 0;
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_X_AXIS, TEXT_ZEROING);
 
-        stepperX.startMove(99999);
+        driverX.rms_current(100);
+        // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
+        stepperX.startMove(-99999);
+        stepperX.setRPM(20);
         while (stepperX.nextAction() > 0)
-        {
+        {   
+            // Serial.println(driverX.SG_RESULT());
+            // 10个读数取平均
+            if (driverX.SG_RESULT() > 0)
+            {
+                sgReadings[readingIndex] = driverX.SG_RESULT();
+                readingIndex++;
+            }
+            if (readingIndex > 9)
+            {
+                readingIndex = 0;
+            }
+            readingSum = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                readingSum += sgReadings[i];
+            }
+
+            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
+            {
+                stepperX.startMove(0);
+                stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60);
+                driverX.rms_current(menuRunningCurrentX.getCurrentValue());
+                break;
+            }
         }
+        closeDialog();
     }
 
     if (menuVirtualEndstopY.getCurrentValue())
     {
+        // 中断
+        // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
+        
         uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
+        int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
+        int readingIndex = 0;
+        int readingSum = 0;
 
         openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
 
-        stepperY.startMove(99999);
+        driverY.rms_current(100);
+        // driverX.SGTHRS(menuEndstopThresholdY.getCurrentValue());
+        stepperY.startMove(-99999);
+        stepperY.setRPM(20);
         while (stepperY.nextAction() > 0)
-        {
+        {   
+            // Serial.println(driverY.SG_RESULT());
+            // 10个读数取平均
+            if (driverY.SG_RESULT() > 0)
+            {
+                sgReadings[readingIndex] = driverY.SG_RESULT();
+                readingIndex++;
+            }
+            if (readingIndex > 9)
+            {
+                readingIndex = 0;
+            }
+            readingSum = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                readingSum += sgReadings[i];
+            }
+
+            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
+            {
+                stepperY.startMove(0);
+                stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60);
+                driverY.rms_current(menuRunningCurrentY.getCurrentValue());
+                break;
+            }
         }
-        // moveYto(8);
+        closeDialog();
     }
 
     // Serial.println("Puncher booted.");
@@ -320,10 +388,16 @@ void checkReset()
     {
         menuLengthX.setCurrentValue(800);
         menuLengthY.setCurrentValue(800);
-        menuLengthZ.setCurrentValue(20000);
+        menuLengthZ.getLargeNumber()->setFromFloat(20.0);
 
-        menuRunningSpeedX.setCurrentValue(240);
-        menuRunningSpeedY.setCurrentValue(160);
+        menuLengthTypeX.setCurrentValue(0);
+        menuLengthTypeY.setCurrentValue(0);
+        menuLengthTypeZ.setCurrentValue(0);
+
+        menuDiamRatio.getLargeNumber()->setFromFloat(0);
+
+        menuRunningSpeedX.setCurrentValue(120);
+        menuRunningSpeedY.setCurrentValue(80);
         menuRunningSpeedZ.setCurrentValue(400);
 
         menuRunningCurrentX.setCurrentValue(500);
@@ -332,6 +406,9 @@ void checkReset()
 
         menuVirtualEndstopX.setBoolean(false);
         menuVirtualEndstopY.setBoolean(false);
+
+        menuEndstopThresholdX.setCurrentValue(30);
+        menuEndstopThresholdY.setCurrentValue(30);
 
         menuUseEncoderZ.setBoolean(false);
 
@@ -345,9 +422,9 @@ void checkReset()
 // 计算周长
 void getStepperPerimeters()
 {
-    xPerimeter = menuLengthX.getAsFloatingPointValue() * menuLengthTypeX.getCurrentValue() == 0 ? 1 : 3.14159265358979;
-    yPerimeter = menuLengthY.getAsFloatingPointValue() * menuLengthTypeY.getCurrentValue() == 0 ? 1 : 3.14159265358979;
-    zPerimeter = menuLengthZ.getAsFloatingPointValue() * menuLengthTypeZ.getCurrentValue() == 0 ? 1 : 3.14159265358979;
+    xPerimeter = menuLengthX.getAsFloatingPointValue() * (menuLengthTypeX.getCurrentValue() == 0 ? 1 : 3.14159265358979);
+    yPerimeter = menuLengthY.getAsFloatingPointValue() * (menuLengthTypeY.getCurrentValue() == 0 ? 1 : 3.14159265358979);
+    zPerimeter = menuLengthZ.getLargeNumber()->getAsFloat() * (menuLengthTypeZ.getCurrentValue() == 0 ? 1 : 3.14159265358979);
 }
 
 //------------------------------TcMenu 主进程循环函数
@@ -419,15 +496,17 @@ void punchSchedule(void *pvParameters)
         //    Serial.println(encoderZ.getAngle());
         if (!isPunching && puncherStatus == 0x11 && holeList.size() > 0) // 当状态为正在打孔且打孔队列有孔时才进行调度
         {
+            // 计算剩余时间
+            // 注意：calcETA需要访问holeList, 因此必须放在holeList.shift()前，否则在list size == 1时将会产生null pointer exception
+            (String(holeFinished + 1) + "/" + String(holeCount)).toCharArray(progressCA, 9);
+            menuProgress.setTextValue(progressCA);
+            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getAsFloatingPointValue(), menuRunningSpeedY.getAsFloatingPointValue(), menuRunningSpeedZ.getAsFloatingPointValue())));
+            menuETA.setChanged(true);
+
             isPunching = true;
             Hole h = holeList.shift(); // 获取一个孔
             moveXpos(h.x);             // 移动X轴
             moveZ(h.z - lengthZ);      // 移动Z轴
-
-            (String(holeFinished) + "/" + String(holeCount)).toCharArray(progressCA, 9);
-            menuProgress.setTextValue(progressCA);
-            menuETA.setTime(secToTime(calcETA(menuRunningSpeedX.getAsFloatingPointValue(), menuRunningSpeedY.getAsFloatingPointValue(), menuRunningSpeedZ.getAsFloatingPointValue())));
-            menuETA.setChanged(true);
 
             lengthZ = h.z;
         }
@@ -436,6 +515,11 @@ void punchSchedule(void *pvParameters)
             lengthZ = 0;
             rotatedAngle = 0;
             puncherStatus = 0x10;
+
+            menuProgress.setTextValue("idle");
+            menuETA.setTime(secToTime(0));
+            menuETA.setChanged(true);
+            menuDuration.setTime(secToTime(0));
         }
 
         if (Xenabled)
@@ -488,7 +572,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
     if (!Xenabled && !Zenabled)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
-        if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
+        if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
             moveYto(4);
             Ydown = true;
@@ -497,8 +581,8 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
         else
         {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS));
-            // Serial.println(rotatedAngle / (4096 * menuDiamRatio.getAsFloatingPointValue()) * MOTOR_STEPS * MICROSTEPS + zLastMove);
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS));
+            // Serial.println(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS + zLastMove);
         }
     }
 }
@@ -692,7 +776,8 @@ void calibrateEncoder(void *pvParameters)
     rotatedAngle = 0;
 
     // 获取主动轮/被动轮间周长比值
-    menuDiamRatio.setFromFloatingPointValue((readingA + readingB) / 2.0 / 4096);
+    menuDiamRatio.getLargeNumber()->setFromFloat((readingA + readingB) / 2.0 / 4096);
+    // Serial.println((readingA + readingB) / 2.0 / 4096);
 
     puncherStatus = 0x10;
     // 重启编码器任务
@@ -700,6 +785,8 @@ void calibrateEncoder(void *pvParameters)
     vTaskResume(punchSchedule_Handle);
 
     closeDialog();
+
+    saveValues(0);
 
     vTaskDelete(NULL);
 }
@@ -935,6 +1022,7 @@ int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, Rende
 void CALLBACK_FUNCTION onWifiSwitch(int id)
 {
     saveValues(id);
+    ESP.restart();
 }
 
 void CALLBACK_FUNCTION onChangeCurrent(int id)
@@ -1039,5 +1127,20 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
 // 进纸
 void CALLBACK_FUNCTION onChangeFeed(int id)
 {
-    // TODO - your menu change code
+    if (menuFeed.getBoolean())
+    {
+        if (menuReverseDirection.getBoolean())
+        {
+            stepperZ.startMove(99999);
+        }
+        else
+        {
+            stepperZ.startMove(-99999);
+        }
+    }
+    else
+    {
+        stepperZ.startMove(0);
+        rotatedAngle = 0;
+    }
 }
