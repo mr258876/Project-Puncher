@@ -585,7 +585,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
         vTaskDelay(pdMS_TO_TICKS(50));
         if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
         {
-            moveYto(4);
+            moveYto(5.5);
             Ydown = true;
             rotatedAngle = 0;
         }
@@ -616,7 +616,7 @@ void moveXpos(int pos)
     }
     else
     {
-        moveXto(2 * (pos - 29) - 3.55 - 0.3);
+        moveXto(2 * (pos - 29) - 3.9);
     }
 }
 

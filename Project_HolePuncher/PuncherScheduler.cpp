@@ -21,12 +21,13 @@ int calcETA(double Xspeed, double Yspeed, double Zspeed)
 
     while (current->next != NULL)
     {
-        _eta += abs(current->data.x - _lastX) * 2.0 / 8 / Xspeed;
-        _eta += 8 / Yspeed;
+        _eta += abs(current->data.x - _lastX) * 2.0 / Xspeed;
+        _eta += 11 / Yspeed;
         current = current->next;
     }
+    _eta += abs(current->data.x - _lastX) * 2.0 / Xspeed;
     _eta += current->data.z / Zspeed ;
-    _eta += 8 / Yspeed;
+    _eta += 11 / Yspeed;
 
     punchETA = (int)_eta;
     return (int)_eta;
