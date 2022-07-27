@@ -270,6 +270,8 @@ void setup()
         // 中断
         // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
 
+        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
+
         uint8_t sgThrs = menuEndstopThresholdX.getCurrentValue();
         int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
         int readingIndex = 0;
@@ -308,6 +310,8 @@ void setup()
                 break;
             }
         }
+
+        vTaskResume(punchSchedule_Handle);  // 重启调度任务
         closeDialog();
     }
 
@@ -315,6 +319,8 @@ void setup()
     {
         // 中断
         // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
+        
+        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
         
         uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
         int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
@@ -329,7 +335,7 @@ void setup()
         stepperY.setRPM(20);
         while (stepperY.nextAction() > 0)
         {   
-            Serial.println(driverY.SG_RESULT());
+            // Serial.println(driverY.SG_RESULT());
             // 10个读数取平均
             if (driverY.SG_RESULT() > 0)
             {
@@ -351,9 +357,13 @@ void setup()
                 stepperY.startMove(0);
                 stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60);
                 driverY.rms_current(menuRunningCurrentY.getCurrentValue());
+                moveYto(6);
+                yPosition = 0;
                 break;
             }
         }
+
+        vTaskResume(punchSchedule_Handle);  // 重启调度任务
         closeDialog();
     }
 
@@ -407,8 +417,8 @@ void checkReset()
         menuVirtualEndstopX.setBoolean(false);
         menuVirtualEndstopY.setBoolean(false);
 
-        menuEndstopThresholdX.setCurrentValue(30);
-        menuEndstopThresholdY.setCurrentValue(30);
+        menuEndstopThresholdX.setCurrentValue(15);
+        menuEndstopThresholdY.setCurrentValue(5);
 
         menuUseEncoderZ.setBoolean(false);
 
@@ -520,6 +530,7 @@ void punchSchedule(void *pvParameters)
             menuETA.setTime(secToTime(0));
             menuETA.setChanged(true);
             menuDuration.setTime(secToTime(0));
+            punchStartTime = 0;
         }
 
         if (Xenabled)
@@ -669,11 +680,14 @@ void runEncoder(void *pvParameters)
         }
 
         int v = encoderZ.getAngle();
+        // v += encoderZ.getAngle();
+        // v += encoderZ.getAngle();
+        // v = v / 3;
         if (lastAngle != -1)
         {
             if (abs(v - lastAngle) > 2048)
             {
-                rotatedAngle += v > 2048 ? v - lastAngle - 4096 : v - lastAngle + 4096;
+                rotatedAngle += v > 2048 ? v + lastAngle - 4096 : v - lastAngle + 4096;
             }
             else
             {
@@ -712,9 +726,12 @@ void calibrateEncoder(void *pvParameters)
     uint16_t lastAngle = encoderZ.getAngle();
     uint16_t readingA = 0;
     uint16_t readingB = 0;
+    uint16_t readingTemp = 0;
     // 正反转各一圈获取读数
+    // 正转
     for (int i = 0; i < MOTOR_STEPS; i++)
-    {
+    {   
+        readingTemp = 0;
         stepperZ.startMove(MICROSTEPS);
         while (stepperZ_to_wait)
         {
@@ -726,16 +743,20 @@ void calibrateEncoder(void *pvParameters)
             vTaskDelay(pdMS_TO_TICKS(10));
         }
 
+        // readingTemp += encoderZ.getAngle();
+        // readingTemp += encoderZ.getAngle();
+        // readingTemp += encoderZ.getAngle();
+        // angleReading[i] = readingTemp / 2;
         angleReading[i] = encoderZ.getAngle();
 
         xSemaphoreGive(I2CMutex);
 
         vTaskDelay(pdMS_TO_TICKS(100));
 
-        //    Serial.println(angleReading[i] - lastAngle);
+        Serial.println(angleReading[i] - lastAngle);
         if (abs(angleReading[i] - lastAngle) > 2048)
         {
-            readingA += 4096 - abs(angleReading[i] - lastAngle);
+            readingA += angleReading[i] > 2048 ? abs(angleReading[i] + lastAngle - 4096) : abs(angleReading[i] - lastAngle + 4096);
         }
         else
         {
@@ -743,8 +764,10 @@ void calibrateEncoder(void *pvParameters)
         }
         lastAngle = angleReading[i];
     }
+    // 反转
     for (int i = 0; i < MOTOR_STEPS; i++)
-    {
+    {   
+        readingTemp = 0;
         stepperZ.startMove(-MICROSTEPS);
         while (stepperZ_to_wait)
         {
@@ -755,17 +778,21 @@ void calibrateEncoder(void *pvParameters)
         {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
-
+        
+        // readingTemp += encoderZ.getAngle();
+        // readingTemp += encoderZ.getAngle();
+        // readingTemp += encoderZ.getAngle();
+        // angleReading[MOTOR_STEPS + i] = readingTemp / 2;
         angleReading[MOTOR_STEPS + i] = encoderZ.getAngle();
 
         xSemaphoreGive(I2CMutex);
 
         vTaskDelay(pdMS_TO_TICKS(100));
 
-        // Serial.println(angleReading[MOTOR_STEPS + i] - lastAngle);
+        Serial.println(angleReading[MOTOR_STEPS + i] - lastAngle);
         if (abs(angleReading[MOTOR_STEPS + i] - lastAngle) > 2048)
         {
-            readingB += 4096 - abs(angleReading[MOTOR_STEPS + i] - lastAngle);
+            readingA += angleReading[MOTOR_STEPS + i] > 2048 ? abs(angleReading[MOTOR_STEPS + i] + lastAngle - 4096) : abs(angleReading[MOTOR_STEPS + i] - lastAngle + 4096);
         }
         else
         {

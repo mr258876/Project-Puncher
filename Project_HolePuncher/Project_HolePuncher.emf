@@ -272,6 +272,23 @@
       }
     },
     {
+      "parentId": 16,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 1023,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "mA",
+        "name": "Endstop CurrentX",
+        "variableName": "EndstopCurrentX",
+        "id": 61,
+        "eepromAddress": 57,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
       "parentId": 10,
       "type": "subMenu",
       "item": {
@@ -385,6 +402,23 @@
         "id": 25,
         "eepromAddress": 16,
         "functionName": "saveValues",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true
+      }
+    },
+    {
+      "parentId": 17,
+      "type": "analogItem",
+      "item": {
+        "maxValue": 1023,
+        "offset": 0,
+        "divisor": 1,
+        "unitName": "mA",
+        "name": "Endstop CurrentY",
+        "variableName": "EndstopCurrentY",
+        "id": 62,
+        "eepromAddress": 59,
         "readOnly": false,
         "localOnly": false,
         "visible": true
