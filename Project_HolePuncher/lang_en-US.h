@@ -52,7 +52,7 @@ const PROGMEM char* enUS[] = {
     "Could not connect",
     "to your wifi.",
     "Connecting...",
-    "Auto Connect",
+    "Wifi",
     "Zeroing...",
     "Zreoing Failed.",
     "Check Settings.",

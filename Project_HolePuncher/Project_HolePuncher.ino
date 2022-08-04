@@ -213,20 +213,15 @@ void setup()
     xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
 
     //--------------------连接Wifi--------------------
-    WiFi.mode(WIFI_STA);
-    SSIDCount = WiFi.scanNetworks();
-    menuAllNetworks.setNumberOfRows(SSIDCount);
     menuSSID.setTextValue("N/A");
     menuIP.setIpAddress("127.0.0.1");
     if (menuWifi.getCurrentValue() == true)
     {
-        //------------------------------创建连接Wifi任务
-        xTaskCreate(wifiConnect,          //任务函数
-                    "wifiConnect",        //任务名称
-                    8192,                 //任务堆栈大小
-                    NULL,                 //任务参数
-                    tskIDLE_PRIORITY,     //任务优先级
-                    &wifiConnect_Handle); //任务句柄
+        asyncWifiConnect();
+    }
+    else
+    {
+        WiFi.mode(WIFI_OFF);
     }
 
     //--------------------检测编码器状态并启用编码器--------------------
@@ -284,7 +279,7 @@ void setup()
         stepperX.startMove(-99999);
         stepperX.setRPM(20);
         while (stepperX.nextAction() > 0)
-        {   
+        {
             // Serial.println(driverX.SG_RESULT());
             // 10个读数取平均
             if (driverX.SG_RESULT() > 0)
@@ -311,7 +306,7 @@ void setup()
             }
         }
 
-        vTaskResume(punchSchedule_Handle);  // 重启调度任务
+        vTaskResume(punchSchedule_Handle); // 重启调度任务
         closeDialog();
     }
 
@@ -319,9 +314,9 @@ void setup()
     {
         // 中断
         // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
-        
+
         vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
-        
+
         uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
         int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
         int readingIndex = 0;
@@ -334,7 +329,7 @@ void setup()
         stepperY.startMove(-99999);
         stepperY.setRPM(20);
         while (stepperY.nextAction() > 0)
-        {   
+        {
             // Serial.println(driverY.SG_RESULT());
             // 10个读数取平均
             if (driverY.SG_RESULT() > 0)
@@ -363,7 +358,7 @@ void setup()
             }
         }
 
-        vTaskResume(punchSchedule_Handle);  // 重启调度任务
+        vTaskResume(punchSchedule_Handle); // 重启调度任务
         closeDialog();
     }
 
@@ -702,7 +697,7 @@ void runEncoder(void *pvParameters)
         lastAngle = v;
         xSemaphoreGive(I2CMutex);
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(25));
     }
 }
 
@@ -730,7 +725,7 @@ void calibrateEncoder(void *pvParameters)
     // 正反转各一圈获取读数
     // 正转
     for (int i = 0; i < MOTOR_STEPS; i++)
-    {   
+    {
         readingTemp = 0;
         stepperZ.startMove(MICROSTEPS);
         while (stepperZ_to_wait)
@@ -766,7 +761,7 @@ void calibrateEncoder(void *pvParameters)
     }
     // 反转
     for (int i = 0; i < MOTOR_STEPS; i++)
-    {   
+    {
         readingTemp = 0;
         stepperZ.startMove(-MICROSTEPS);
         while (stepperZ_to_wait)
@@ -778,7 +773,7 @@ void calibrateEncoder(void *pvParameters)
         {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
-        
+
         // readingTemp += encoderZ.getAngle();
         // readingTemp += encoderZ.getAngle();
         // readingTemp += encoderZ.getAngle();
@@ -821,6 +816,21 @@ void calibrateEncoder(void *pvParameters)
 //----------------------------------------
 // Wifi 相关
 //----------------------------------------
+// 网络连接函数
+void asyncWifiConnect()
+{
+    WiFi.mode(WIFI_STA);
+    SSIDCount = WiFi.scanNetworks();
+    menuAllNetworks.setNumberOfRows(SSIDCount);
+    //------------------------------创建连接Wifi任务
+    xTaskCreate(wifiConnect,          //任务函数
+                "wifiConnect",        //任务名称
+                8192,                 //任务堆栈大小
+                NULL,                 //任务参数
+                tskIDLE_PRIORITY,     //任务优先级
+                &wifiConnect_Handle); //任务句柄
+}
+
 // 自动连接至网络
 void wifiConnect(void *pvParameters)
 {
@@ -1047,9 +1057,18 @@ int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, Rende
 }
 
 void CALLBACK_FUNCTION onWifiSwitch(int id)
-{
+{   
+    menuSSID.setTextValue("N/A");
+    menuIP.setIpAddress("127.0.0.1");
+    if (menuWifi.getCurrentValue() == true)
+    {
+        asyncWifiConnect();
+    }
+    else
+    {
+        WiFi.mode(WIFI_OFF);
+    }
     saveValues(id);
-    ESP.restart();
 }
 
 void CALLBACK_FUNCTION onChangeCurrent(int id)
