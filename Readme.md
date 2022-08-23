@@ -2,6 +2,9 @@
 ### 赛博音乐盒计划第二部分
 ### Cyber Musicbox Project Part II
 
+# 重要：项目已暂停，下次更新未定。
+# Inportant: Project paused currently. Updates are not guranteed.
+
 ## Libraries Used
 ### 3rd party libraries:
 - tcMenu by davetcc                 https://www.arduino.cc/reference/en/libraries/tcmenu/

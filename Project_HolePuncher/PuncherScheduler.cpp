@@ -17,16 +17,22 @@ int calcETA(double Xspeed, double Yspeed, double Zspeed)
     double _eta = 0;
 
     int _lastX = 0;
+    double _lastZ = 0;
     ListNode<Hole>* current = holeList.getRoot();
 
     while (current->next != NULL)
     {
-        _eta += abs(current->data.x - _lastX) * 2.0 / Xspeed;
-        _eta += 11 / Yspeed;
+        _eta += abs(current->data.x - _lastX) * 2.0 / Xspeed;   // X轴
+        _eta += abs(current->data.z - _lastZ) / Zspeed;         // Y轴
+        _eta += 11 / Yspeed;                                    // Z轴
+
+        _lastX = current->data.x;
+        _lastZ = current->data.z;
+
         current = current->next;
     }
     _eta += abs(current->data.x - _lastX) * 2.0 / Xspeed;
-    _eta += current->data.z / Zspeed ;
+    _eta += abs(current->data.z - _lastZ) / Zspeed;
     _eta += 11 / Yspeed;
 
     punchETA = (int)_eta;

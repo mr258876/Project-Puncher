@@ -879,6 +879,14 @@ void wifiConnect(void *pvParameters)
     menuSSID.setTextValue(WiFi.SSID().c_str());
     menuIP.setIpAddress(WiFi.localIP().toString().c_str());
 
+    //------------------------------创建Wifi指令任务
+    xTaskCreate(wifiCommand,          //任务函数
+                "wifiCommand",        //任务名称
+                8192,                 //任务堆栈大小
+                NULL,                 //任务参数
+                tskIDLE_PRIORITY,     //任务优先级
+                &wifiCommand_Handle); //任务句柄
+
     delete[] wifiSSID;
     delete[] wifiPswd;
     vTaskDelete(NULL);
@@ -893,43 +901,31 @@ void scanWifi()
 
 //------------------------------Wifi指令监听函数
 void wifiCommand(void *pvParameters)
-{
+{   
+    server.begin();
+
     byte wifiBuf[16] = {};
     int readByteCount = 0;
-    unsigned long lastConn = millis();
     while (1)
     {
         WiFiClient client = server.available();
         readByteCount = 0;
         if (client)
-        {
+        {   
             while (client.connected())
             {
                 if (client.available())
-                {
+                {   
                     wifiBuf[readByteCount] = client.read();
                     readByteCount += 1;
                     if (readByteCount > 15)
                     {
                         client.write(handleWifiCommand(wifiBuf, 16), 16);
-                        lastConn = millis();
-                    }
-                }
-
-                if (isSerialCommandEnabled())
-                {
-                    // 30秒发一个心跳包
-                    if (millis() - lastConn > 30000)
-                    {
-                        client.write(HeartBeatPackage, 16);
-                    }
-                    // 5秒内无回应关闭通讯
-                    if (millis() - lastConn > 35000)
-                    {
-                        disableWifiCommand();
+                        readByteCount = 0;
                     }
                 }
             }
+            disableWifiCommand();
         }
         else
         {
@@ -1060,7 +1056,7 @@ void CALLBACK_FUNCTION onWifiSwitch(int id)
 {   
     menuSSID.setTextValue("N/A");
     menuIP.setIpAddress("127.0.0.1");
-    if (menuWifi.getCurrentValue() == true)
+    if (menuWifi.getBoolean())
     {
         asyncWifiConnect();
     }

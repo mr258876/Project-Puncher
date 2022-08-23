@@ -1,4 +1,5 @@
 #include "SerialCommand.h"
+#include "Project_HolePuncher_menu.h"
 
 byte msg[16];
 CRC8 crc;
@@ -9,7 +10,7 @@ bool wifiCommandEnabled = false;
 byte *commResponse = new byte[16];
 byte *lastcommResponse = new byte[16];
 
-byte* HeartBeatPackage = (byte*)&HeartBeat;
+byte *HeartBeatPackage = (byte *)&HeartBeat;
 
 // 将commResponse中内容复制一份随后返回
 byte *returnAndCopy()
@@ -227,7 +228,19 @@ byte *handle_StartPunch()
 }
 
 byte *handle_GetVariable(uint8_t id)
-{
+{   
+    switch (getMenuItemById(id)->getMenuType())
+    {
+    case MENUTYPE_INT_VALUE:
+        static_cast<AnalogMenuItem *>(getMenuItemById(id)) -> getAsFloatingPointValue();
+        break;
+    case MENUTYPE_ENUM_VALUE:
+    case MENUTYPE_BOOLEAN_VALUE:
+        static_cast<ValueMenuItem *>(getMenuItemById(id)) -> getCurrentValue();
+        break;
+    default:
+        break;
+    }
     return nullptr;
 }
 
