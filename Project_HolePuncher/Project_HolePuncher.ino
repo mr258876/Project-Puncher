@@ -110,8 +110,6 @@ long xPosition = 0;
 long yPosition = 0;
 long zLastMove = 0;
 
-double lengthZ = 0; // z轴位置
-
 //-----------------------------------------tcMenu工具变量
 char progressCA[9];
 
@@ -184,33 +182,33 @@ void setup()
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
-    xTaskCreate(runTcMenu,          //任务函数
-                "runTcMenu",        //任务名称
-                8192,               //任务堆栈大小
-                NULL,               //任务参数
-                2,                  //任务优先级
-                &runTcMenu_Handle); //任务句柄
+    xTaskCreate(runTcMenu,          // 任务函数
+                "runTcMenu",        // 任务名称
+                8192,               // 任务堆栈大小
+                NULL,               // 任务参数
+                2,                  // 任务优先级
+                &runTcMenu_Handle); // 任务句柄
 
     //------------------------------创建串口命令监听任务
-    xTaskCreate(serialCommand,          //任务函数
-                "serialCommand",        //任务名称
-                8192,                   //任务堆栈大小
-                NULL,                   //任务参数
-                tskIDLE_PRIORITY,       //任务优先级
-                &serialCommand_Handle); //任务句柄
+    xTaskCreate(serialCommand,          // 任务函数
+                "serialCommand",        // 任务名称
+                8192,                   // 任务堆栈大小
+                NULL,                   // 任务参数
+                tskIDLE_PRIORITY,       // 任务优先级
+                &serialCommand_Handle); // 任务句柄
 
     //------------------------------创建调度任务
-    xTaskCreate(punchSchedule,          //任务函数
-                "punchSchedule",        //任务名称
-                8192,                   //任务堆栈大小
-                NULL,                   //任务参数
-                tskIDLE_PRIORITY,       //任务优先级
-                &punchSchedule_Handle); //任务句柄
+    xTaskCreate(punchSchedule,          // 任务函数
+                "punchSchedule",        // 任务名称
+                8192,                   // 任务堆栈大小
+                NULL,                   // 任务参数
+                tskIDLE_PRIORITY,       // 任务优先级
+                &punchSchedule_Handle); // 任务句柄
 
-    xSemaphoreGive(XaxisBinary);   //释放X轴同步信号量
-    xSemaphoreGive(YaxisBinary);   //释放Y轴同步信号量
-    xSemaphoreGive(ZaxisBinary);   //释放Z轴同步信号量
-    xSemaphoreGive(PuncherBinary); //释放打孔机同步信号量
+    xSemaphoreGive(XaxisBinary);   // 释放X轴同步信号量
+    xSemaphoreGive(YaxisBinary);   // 释放Y轴同步信号量
+    xSemaphoreGive(ZaxisBinary);   // 释放Z轴同步信号量
+    xSemaphoreGive(PuncherBinary); // 释放打孔机同步信号量
 
     //--------------------连接Wifi--------------------
     menuSSID.setTextValue("N/A");
@@ -237,12 +235,12 @@ void setup()
                 encoderDisabled = false;
                 // Serial.println("Endocer detected and enabled.");
                 //------------------------------创建磁编码器任务
-                xTaskCreate(runEncoder,          //任务函数
-                            "runEncoder",        //任务名称
-                            4096,                //任务堆栈大小
-                            NULL,                //任务参数
-                            3,                   //任务优先级
-                            &runEncoder_Handle); //任务句柄
+                xTaskCreate(runEncoder,          // 任务函数
+                            "runEncoder",        // 任务名称
+                            4096,                // 任务堆栈大小
+                            NULL,                // 任务参数
+                            3,                   // 任务优先级
+                            &runEncoder_Handle); // 任务句柄
             }
             else
             {
@@ -260,6 +258,57 @@ void setup()
     }
 
     //--------------------X/Y轴归零--------------------
+    // Y轴归零
+    if (menuVirtualEndstopY.getBoolean())
+    {
+        // 中断
+        // attachInterrupt(digitalPinToInterrupt(xdiagPin), onInterruptX, RISING);
+
+        vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
+
+        uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
+        int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
+        int readingIndex = 0;
+        int readingSum = 0;
+
+        openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
+
+        driverY.rms_current(250);
+        // driverY.SGTHRS(menuEndstopThresholdY.getCurrentValue());
+        stepperY.startMove(-99999);
+        stepperY.setRPM(20);
+        while (stepperY.nextAction() > 0)
+        {
+            // Serial.println(driverY.SG_RESULT());
+            // 10个读数取平均
+            if (driverY.SG_RESULT() > 0)
+            {
+                sgReadings[readingIndex] = driverY.SG_RESULT();
+                readingIndex++;
+            }
+            if (readingIndex > 9)
+            {
+                readingIndex = 0;
+            }
+            readingSum = 0;
+            for (int i = 0; i < 10; i++)
+            {
+                readingSum += sgReadings[i];
+            }
+
+            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
+            {
+                stepperY.startMove(0);
+                break;
+            }
+        }
+
+        vTaskResume(punchSchedule_Handle); // 重启调度任务
+        closeDialog();
+    }
+
+
+    // X轴归零
     if (menuVirtualEndstopX.getBoolean())
     {
         // 中断
@@ -310,6 +359,7 @@ void setup()
         closeDialog();
     }
 
+    // Y轴移动至准备位置
     if (menuVirtualEndstopY.getBoolean())
     {
         // 中断
@@ -317,45 +367,15 @@ void setup()
 
         vTaskSuspend(punchSchedule_Handle); // 暂停调度任务
 
-        uint8_t sgThrs = menuEndstopThresholdY.getCurrentValue();
-        int sgReadings[] = {509, 509, 509, 509, 509, 509, 509, 509, 509, 509};
-        int readingIndex = 0;
-        int readingSum = 0;
-
         openDialogNoButton(TEXT_ATTENTION, TEXT_Y_AXIS, TEXT_ZEROING);
 
-        driverY.rms_current(250);
-        // driverY.SGTHRS(menuEndstopThresholdY.getCurrentValue());
-        stepperY.startMove(-99999);
-        stepperY.setRPM(20);
+        stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60);
+        driverY.rms_current(menuRunningCurrentY.getCurrentValue());
+        moveYto(6);
+        yPosition = 0;
+
         while (stepperY.nextAction() > 0)
         {
-            // Serial.println(driverY.SG_RESULT());
-            // 10个读数取平均
-            if (driverY.SG_RESULT() > 0)
-            {
-                sgReadings[readingIndex] = driverY.SG_RESULT();
-                readingIndex++;
-            }
-            if (readingIndex > 9)
-            {
-                readingIndex = 0;
-            }
-            readingSum = 0;
-            for (int i = 0; i < 10; i++)
-            {
-                readingSum += sgReadings[i];
-            }
-
-            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
-            {
-                stepperY.startMove(0);
-                stepperY.setRPM(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60);
-                driverY.rms_current(menuRunningCurrentY.getCurrentValue());
-                moveYto(6);
-                yPosition = 0;
-                break;
-            }
         }
 
         vTaskResume(punchSchedule_Handle); // 重启调度任务
@@ -823,12 +843,12 @@ void asyncWifiConnect()
     SSIDCount = WiFi.scanNetworks();
     menuAllNetworks.setNumberOfRows(SSIDCount);
     //------------------------------创建连接Wifi任务
-    xTaskCreate(wifiConnect,          //任务函数
-                "wifiConnect",        //任务名称
-                8192,                 //任务堆栈大小
-                NULL,                 //任务参数
-                tskIDLE_PRIORITY,     //任务优先级
-                &wifiConnect_Handle); //任务句柄
+    xTaskCreate(wifiConnect,          // 任务函数
+                "wifiConnect",        // 任务名称
+                8192,                 // 任务堆栈大小
+                NULL,                 // 任务参数
+                tskIDLE_PRIORITY,     // 任务优先级
+                &wifiConnect_Handle); // 任务句柄
 }
 
 // 自动连接至网络
@@ -880,12 +900,12 @@ void wifiConnect(void *pvParameters)
     menuIP.setIpAddress(WiFi.localIP().toString().c_str());
 
     //------------------------------创建Wifi指令任务
-    xTaskCreate(wifiCommand,          //任务函数
-                "wifiCommand",        //任务名称
-                8192,                 //任务堆栈大小
-                NULL,                 //任务参数
-                tskIDLE_PRIORITY,     //任务优先级
-                &wifiCommand_Handle); //任务句柄
+    xTaskCreate(wifiCommand,          // 任务函数
+                "wifiCommand",        // 任务名称
+                8192,                 // 任务堆栈大小
+                NULL,                 // 任务参数
+                tskIDLE_PRIORITY,     // 任务优先级
+                &wifiCommand_Handle); // 任务句柄
 
     delete[] wifiSSID;
     delete[] wifiPswd;
@@ -901,7 +921,7 @@ void scanWifi()
 
 //------------------------------Wifi指令监听函数
 void wifiCommand(void *pvParameters)
-{   
+{
     server.begin();
 
     byte wifiBuf[16] = {};
@@ -911,11 +931,11 @@ void wifiCommand(void *pvParameters)
         WiFiClient client = server.available();
         readByteCount = 0;
         if (client)
-        {   
+        {
             while (client.connected())
             {
                 if (client.available())
-                {   
+                {
                     wifiBuf[readByteCount] = client.read();
                     readByteCount += 1;
                     if (readByteCount > 15)
@@ -1053,7 +1073,7 @@ int CALLBACK_FUNCTION fnOpenFileRtCall(RuntimeMenuItem *item, uint8_t row, Rende
 }
 
 void CALLBACK_FUNCTION onWifiSwitch(int id)
-{   
+{
     menuSSID.setTextValue("N/A");
     menuIP.setIpAddress("127.0.0.1");
     if (menuWifi.getBoolean())
@@ -1096,12 +1116,12 @@ void CALLBACK_FUNCTION calibrateEncoderCallback(int id)
 {
     if (menuUseEncoderZ.getCurrentValue() == true)
     {
-        xTaskCreate(calibrateEncoder,   //任务函数
-                    "calibrateEncoder", //任务名称
-                    8192,               //任务堆栈大小
-                    NULL,               //任务参数
-                    tskIDLE_PRIORITY,   //任务优先级
-                    NULL);              //任务句柄
+        xTaskCreate(calibrateEncoder,   // 任务函数
+                    "calibrateEncoder", // 任务名称
+                    8192,               // 任务堆栈大小
+                    NULL,               // 任务参数
+                    tskIDLE_PRIORITY,   // 任务优先级
+                    NULL);              // 任务句柄
     }
     else
     {
@@ -1158,12 +1178,12 @@ void CALLBACK_FUNCTION wifiConnectAttempt(int id)
     //------------------------------重新创建连接Wifi任务
     // Serial.print(eTaskGetState(&wifiConnect_Handle));
 
-    xTaskCreate(wifiConnect,          //任务函数
-                "wifiConnect",        //任务名称
-                8192,                 //任务堆栈大小
-                NULL,                 //任务参数
-                tskIDLE_PRIORITY,     //任务优先级
-                &wifiConnect_Handle); //任务句柄
+    xTaskCreate(wifiConnect,          // 任务函数
+                "wifiConnect",        // 任务名称
+                8192,                 // 任务堆栈大小
+                NULL,                 // 任务参数
+                tskIDLE_PRIORITY,     // 任务优先级
+                &wifiConnect_Handle); // 任务句柄
 }
 
 // 进纸

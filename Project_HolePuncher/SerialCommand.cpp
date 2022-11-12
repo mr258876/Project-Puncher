@@ -119,6 +119,8 @@ byte *handle_Command(byte *buffer, int len)
         return handle_StartDataTrans();
     case 0xA1:
         return handle_EndDataTrans();
+    case 0xB0:
+        return handle_SetCursor(buffer, len);
     default:
         return handle_UnknownCommand();
     }
@@ -179,6 +181,40 @@ byte *handle_EndDataTrans()
     return handle_StatusQuery();
 }
 
+byte *handle_SetCursor(byte *buffer, int len)
+{
+    // 设置当前打孔位置
+    // 注意：打孔位置从1开始计算
+    // 若设置当前打孔位置为x，则将从x处开始打孔(包含x)
+    if (puncherStatus != 0x10)
+    {
+        memcpy(commResponse, PuncherBusyResp, 16);
+        return returnAndCopy();
+    }
+    
+    UINT16UNION_t hole_pos;
+    for (int i = 0; i < 2; i++)
+    {
+        hole_pos.uint16Bytes[i] = buffer[i + 2];
+    }
+
+    if (holeList.size() < hole_pos.number)
+    {
+        memcpy(commResponse, DataOutOfRangeResp, 16);
+        return returnAndCopy();
+    }
+
+    for (int i = 0; i < hole_pos.number-1; i++)
+    {
+        holeList.shift();
+    }
+    holeFinished = hole_pos.number-1;
+    lengthZ = holeList.getRoot()->data.z;
+
+    memcpy(commResponse, ClientSuccessResp, 16);
+    return returnAndCopy();
+}
+
 byte *handle_DataReceive(byte *buffer, int len)
 {
     if (puncherStatus != 0x01)
@@ -228,15 +264,15 @@ byte *handle_StartPunch()
 }
 
 byte *handle_GetVariable(uint8_t id)
-{   
+{
     switch (getMenuItemById(id)->getMenuType())
     {
     case MENUTYPE_INT_VALUE:
-        static_cast<AnalogMenuItem *>(getMenuItemById(id)) -> getAsFloatingPointValue();
+        static_cast<AnalogMenuItem *>(getMenuItemById(id))->getAsFloatingPointValue();
         break;
     case MENUTYPE_ENUM_VALUE:
     case MENUTYPE_BOOLEAN_VALUE:
-        static_cast<ValueMenuItem *>(getMenuItemById(id)) -> getCurrentValue();
+        static_cast<ValueMenuItem *>(getMenuItemById(id))->getCurrentValue();
         break;
     default:
         break;

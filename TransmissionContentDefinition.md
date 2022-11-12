@@ -33,6 +33,7 @@ Since there's no much controlling commands, only the first byte of frame body in
 | 0x31 -----------  | Disable Wifi Command          |
 | 0xA0 -----------  | Hole Data Transmission Begin  |
 | 0xA1 -----------  | Hole Data Transmission End    |
+| 0xB0 - uint16 --  | Set cursor to hole X          |
 
 #### Hole Data Frame
 Each hole data frame carries position data of one hole (related to pervious hole).
@@ -61,6 +62,7 @@ Frame body in client response frames contains responses from the client. The fir
 | ------------- | ----------------- | --------------------------------- |
 | 0xE0          | -----------       | Runtime Error                     |
 | 0xE0          | 0x01 -----------  | Runtime Error: No hole data.      |
+| 0xE0          | 0x02 -----------  | Runtime Error: Data out of range. |
 | 0xE0          | 0x11 -----------  | Runtime Error: Puncher busy.      |
 | 0xE0          | 0xA0 -----------  | Runtime Error: Serial command disabled.   |
 | 0xE0          | 0xA1 -----------  | Runtime Error: Wifi command disabled.     |

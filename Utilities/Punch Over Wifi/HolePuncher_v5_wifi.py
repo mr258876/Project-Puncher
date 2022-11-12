@@ -61,7 +61,7 @@ class HolePuncher():
         resultList = resultList + tempList
         return resultList
 
-    def punchMidi(self, midi, pitch=0, zoom=1):
+    def punchMidi(self, midi, pitch=0, zoom=1, cursor=1):
         ticks_per_beat = midi.ticks_per_beat/zoom
 
         logging.info("Punch mission started.")
@@ -136,6 +136,28 @@ class HolePuncher():
             raise Exception("Client Response Error. Response:%s" % str(bresp))
         if bresp[1:3] != [0x10, 0x10]:
             raise Exception("Client Not Ready. Response:%s" % str(bresp))
+        
+        # 设置起始位置
+        if cursor > 1:
+            ba = bytearray()
+            ba.append(0xC0)
+            ba.append(0xB0)
+            ba = ba + struct.pack("H", cursor)
+            for i in range(11):
+                ba.append(0x00)
+            ba.append(self.getCRC8(ba))
+
+            self.conn.sendData(ba)
+
+            bresp = self.conn.readData()
+            if not self.checkCRC8(bresp):
+                raise Exception("Transmission Error. Response:%s" % str(bresp))
+            if bresp[0] != 0xE0:
+                raise Exception(
+                    "Client Response Error. Response:%s" % str(bresp))
+            if bresp[1:3] != [0x01, 0x01]:
+                raise Exception(
+                    "Client Receive Fail. Response:%s" % str(bresp))
 
         # 启动打孔
         self.conn.sendData([0xC0, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1D])
@@ -178,4 +200,4 @@ if __name__ == '__main__':
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
     midi = mido.MidiFile(mifiFilePath)
     puncher = HolePuncher(puncherIP)
-    puncher.punchMidi(midi, pitch=0, zoom=1.0)
+    puncher.punchMidi(midi, pitch=0, zoom=1.0, cursor=1)

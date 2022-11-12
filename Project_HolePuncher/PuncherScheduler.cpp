@@ -6,6 +6,7 @@ extern int puncherStatus = 0x10;
 extern LinkedList<Hole> holeList = LinkedList<Hole>();
 extern int holeCount = 0;
 extern int holeFinished = 0;
+extern double lengthZ = 0; // z轴位置
 
 int abs(int a)
 {
