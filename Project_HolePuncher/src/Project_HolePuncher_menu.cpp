@@ -96,7 +96,7 @@ BooleanMenuInfo_ML minfoReversedEncoderZ = {lang[language][TEXT_REVERSED_ENCODER
 BooleanMenuItem menuReversedEncoderZ(&minfoReversedEncoderZ, false, &menuCalibrateEncoderZ);
 BooleanMenuInfo_ML minfoUseEncoderZ = {lang[language][TEXT_USE_ENCODER], 29, 24, 1, onChangeUseEncoder, NAMING_TRUE_FALSE};
 BooleanMenuItem menuUseEncoderZ(&minfoUseEncoderZ, false, &menuReversedEncoderZ);
-AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 33, 30, 1023, onChangeCurrent, 0, 1, "mA"};
+AnalogMenuInfo_ML minfoRunningCurrentZ = {lang[language][TEXT_RUNNING_CURRENT], 33, 30, 2047, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentZ(&minfoRunningCurrentZ, 0, &menuUseEncoderZ);
 AnalogMenuInfo_ML minfoRunningSpeedZ = {lang[language][TEXT_RUNNING_SPEED], 32, 28, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedZ(&minfoRunningSpeedZ, 0, &menuRunningCurrentZ);
@@ -115,7 +115,7 @@ AnalogMenuInfo_ML minfoEndstopThresholdY = {lang[language][TEXT_ENDSTOP_THRESHOL
 AnalogMenuItem menuEndstopThresholdY(&minfoEndstopThresholdY, 0, NULL);
 BooleanMenuInfo_ML minfoVirtualEndstopY = {lang[language][TEXT_VIRTUAL_ENDSTOP], 24, 15, 1, saveValues, NAMING_TRUE_FALSE};
 BooleanMenuItem menuVirtualEndstopY(&minfoVirtualEndstopY, false, &menuEndstopThresholdY);
-AnalogMenuInfo_ML minfoRunningCurrentY = {lang[language][TEXT_RUNNING_CURRENT], 28, 22, 1023, onChangeCurrent, 0, 1, "mA"};
+AnalogMenuInfo_ML minfoRunningCurrentY = {lang[language][TEXT_RUNNING_CURRENT], 28, 22, 2047, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentY(&minfoRunningCurrentY, 0, &menuVirtualEndstopY);
 AnalogMenuInfo_ML minfoRunningSpeedY = {lang[language][TEXT_RUNNING_SPEED], 27, 20, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedY(&minfoRunningSpeedY, 0, &menuRunningCurrentY);
@@ -134,7 +134,7 @@ AnalogMenuInfo_ML minfoEndstopThresholdX = {lang[language][TEXT_ENDSTOP_THRESHOL
 AnalogMenuItem menuEndstopThresholdX(&minfoEndstopThresholdX, 0, NULL);
 BooleanMenuInfo_ML minfoVirtualEndstopX = {lang[language][TEXT_VIRTUAL_ENDSTOP], 19, 6, 1, saveValues, NAMING_TRUE_FALSE};
 BooleanMenuItem menuVirtualEndstopX(&minfoVirtualEndstopX, false, &menuEndstopThresholdX);
-AnalogMenuInfo_ML minfoRunningCurrentX = {lang[language][TEXT_RUNNING_CURRENT], 23, 13, 1023, onChangeCurrent, 0, 1, "mA"};
+AnalogMenuInfo_ML minfoRunningCurrentX = {lang[language][TEXT_RUNNING_CURRENT], 23, 13, 2047, onChangeCurrent, 0, 1, "mA"};
 AnalogMenuItem menuRunningCurrentX(&minfoRunningCurrentX, 0, &menuVirtualEndstopX);
 AnalogMenuInfo_ML minfoRunningSpeedX = {lang[language][TEXT_RUNNING_SPEED], 22, 11, 1000, onChangeSpeed, 0, 10, "mm"};
 AnalogMenuItem menuRunningSpeedX(&minfoRunningSpeedX, 0, &menuRunningCurrentX);

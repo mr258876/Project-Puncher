@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "initializer_list": "cpp",
+        "chrono": "cpp",
+        "algorithm": "cpp",
+        "pcnt_hal.h": "c",
+        "pcnt_ll.h": "c",
+        "pcnt_periph.h": "c",
+        "esp_rom_gpio.h": "c",
+        "gpio_hal.h": "c",
+        "ratio": "cpp"
+    }
+}

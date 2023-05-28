@@ -1,7 +1,7 @@
 #ifndef _PUNCHER_SCHEDULER_H_
 #define _PUNCHER_SCHEDULER_H_
 
-#include "lib/LinkedList/LinkedList.h"
+#include "LinkedList.h"
 
 struct Hole
 {

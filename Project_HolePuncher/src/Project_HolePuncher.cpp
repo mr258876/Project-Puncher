@@ -1,4 +1,6 @@
-#include <BasicStepperDriver.h>
+#include <Arduino.h>
+
+#include <LEDCStepperDriver.h>
 #include <Wire.h>
 #include "AS5600.h"
 #include <TMCStepper.h>
@@ -17,7 +19,9 @@
 
 //----------------------------------------电机控制用常量
 #define MOTOR_STEPS 200
-#define MICROSTEPS 8
+#define MICROSTEPS_X 16
+#define MICROSTEPS_Y 8
+#define MICROSTEPS_Z 16
 
 #define DRIVER_SERIAL Serial2 // TMC controller Serial Port
 #define R_SENSE 0.11f         // Match to your driver <- ???
@@ -83,10 +87,6 @@ bool Zenabled = false;
 bool Ydown = false;
 bool isPunching = false;
 
-unsigned stepperX_to_wait;
-unsigned stepperY_to_wait;
-unsigned stepperZ_to_wait;
-
 int xOptiCurr = 500; // 电机x工作电流
 int xStbyCurr = 50;  // 电机x待机电流
 int yOptiCurr = 500; // 电机y工作电流
@@ -98,9 +98,9 @@ double xPerimeter = 0; // x轴转动周长
 double yPerimeter = 0; // y轴转动周长
 double zPerimeter = 0; // z轴转动周长
 
-BasicStepperDriver stepperX(MOTOR_STEPS, xdirPin, xstepPin, xenablePin);
-BasicStepperDriver stepperY(MOTOR_STEPS, ydirPin, ystepPin, yenablePin);
-BasicStepperDriver stepperZ(MOTOR_STEPS, zdirPin, zstepPin, zenablePin);
+LEDCStepperDriver stepperX(MOTOR_STEPS, xdirPin, xstepPin, xenablePin, 0);
+LEDCStepperDriver stepperY(MOTOR_STEPS, ydirPin, ystepPin, yenablePin, 1);
+LEDCStepperDriver stepperZ(MOTOR_STEPS, zdirPin, zstepPin, zenablePin, 2);
 
 TMC2209Stepper driverX(&DRIVER_SERIAL, R_SENSE, 0b00);
 TMC2209Stepper driverY(&DRIVER_SERIAL, R_SENSE, 0b01);
@@ -112,6 +112,23 @@ long zLastMove = 0;
 
 //-----------------------------------------tcMenu工具变量
 char progressCA[9];
+
+//-----------------------------------------函数声明
+void installTheme();
+void checkReset();
+void getStepperPerimeters();
+TimeStorage secToTime(int sec);
+char *getStringEEPROM(int start_pos);
+void asyncWifiConnect();
+void wifiConnect(void *pvParameters);
+void wifiCommand(void *pvParameters);
+void wifiSetConnection(int row);
+uint8_t getMagnetStatus();
+void startYaxis();
+void moveXpos(int pos);
+void moveXto(double mm);
+void moveYto(double mm);
+void moveZ(double mm);
 
 //-----------------------------------------
 // 运行函数
@@ -138,32 +155,18 @@ void setup()
     // menuMgr.navigateToMenu(menuInfoView.getChild());
 
     // 初始化电机
-    pinMode(xstepPin, OUTPUT);
-    pinMode(xdirPin, OUTPUT);
-    pinMode(ystepPin, OUTPUT);
-    pinMode(ydirPin, OUTPUT);
-    pinMode(zstepPin, OUTPUT);
-    pinMode(zdirPin, OUTPUT);
-
-    pinMode(xenablePin, OUTPUT);
-    pinMode(yenablePin, OUTPUT);
-    pinMode(zenablePin, OUTPUT);
-
     pinMode(xdiagPin, INPUT);
     pinMode(ydiagPin, INPUT);
     pinMode(zdiagPin, INPUT);
 
-    digitalWrite(xenablePin, LOW); // 启用x方向电机
-    digitalWrite(yenablePin, LOW); // 启用y方向电机
-    digitalWrite(zenablePin, LOW); // 启用z方向电机
-
     getStepperPerimeters();
 
-    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60, MICROSTEPS);
+    stepperX.begin(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60, MICROSTEPS_X);
     stepperX.setEnableActiveState(LOW);
-    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60, MICROSTEPS);
+    stepperY.begin(menuRunningSpeedY.getAsFloatingPointValue() / yPerimeter * 60, MICROSTEPS_Y);
     stepperY.setEnableActiveState(LOW);
-    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / zPerimeter * 60, MICROSTEPS);
+    stepperY.setAutoSleep(true);
+    stepperZ.begin(menuRunningSpeedZ.getAsFloatingPointValue() / zPerimeter * 60, MICROSTEPS_Z);
     stepperZ.setEnableActiveState(LOW);
     stepperX.enable();
     stepperY.enable();
@@ -171,23 +174,24 @@ void setup()
 
     DRIVER_SERIAL.begin(115200);                                // 启动串口
     driverX.begin();                                            // x方向驱动板开始通讯
-    driverX.microsteps(MICROSTEPS);                             // x方向驱动板设置微步大小
+    driverX.microsteps(MICROSTEPS_X);                           // x方向驱动板设置微步大小
     driverX.rms_current(menuRunningCurrentX.getCurrentValue()); // x方向驱动板设置电流大小 (mA)
     driverY.begin();                                            // y方向驱动板开始通讯
-    driverY.microsteps(MICROSTEPS);                             // y方向驱动板设置微步大小
+    driverY.microsteps(MICROSTEPS_Y);                           // y方向驱动板设置微步大小
     driverY.rms_current(menuRunningCurrentY.getCurrentValue()); // y方向驱动板设置电流大小 (mA)
     driverZ.begin();                                            // z方向驱动板开始通讯
-    driverZ.microsteps(MICROSTEPS);                             // z方向驱动板设置微步大小
+    driverZ.microsteps(MICROSTEPS_Z);                           // z方向驱动板设置微步大小
     driverZ.rms_current(menuRunningCurrentZ.getCurrentValue()); // z方向驱动板设置电流大小 (mA)
 
     // FreeRTOS创建任务
     //------------------------------创建tcMenu任务
-    xTaskCreate(runTcMenu,          // 任务函数
-                "runTcMenu",        // 任务名称
-                8192,               // 任务堆栈大小
-                NULL,               // 任务参数
-                2,                  // 任务优先级
-                &runTcMenu_Handle); // 任务句柄
+    xTaskCreatePinnedToCore(runTcMenu,         // 任务函数
+                            "runTcMenu",       // 任务名称
+                            8192,              // 任务堆栈大小
+                            NULL,              // 任务参数
+                            2,                 // 任务优先级
+                            &runTcMenu_Handle, // 任务句柄
+                            1);                // 任务核心
 
     //------------------------------创建串口命令监听任务
     xTaskCreate(serialCommand,          // 任务函数
@@ -198,12 +202,13 @@ void setup()
                 &serialCommand_Handle); // 任务句柄
 
     //------------------------------创建调度任务
-    xTaskCreate(punchSchedule,          // 任务函数
-                "punchSchedule",        // 任务名称
-                8192,                   // 任务堆栈大小
-                NULL,                   // 任务参数
-                tskIDLE_PRIORITY,       // 任务优先级
-                &punchSchedule_Handle); // 任务句柄
+    xTaskCreatePinnedToCore(punchSchedule,         // 任务函数
+                            "punchSchedule",       // 任务名称
+                            8192,                  // 任务堆栈大小
+                            NULL,                  // 任务参数
+                            1,                     // 任务优先级
+                            &punchSchedule_Handle, // 任务句柄
+                            0);                    // 任务核心
 
     xSemaphoreGive(XaxisBinary);   // 释放X轴同步信号量
     xSemaphoreGive(YaxisBinary);   // 释放Y轴同步信号量
@@ -275,9 +280,9 @@ void setup()
 
         driverY.rms_current(250);
         // driverY.SGTHRS(menuEndstopThresholdY.getCurrentValue());
-        stepperY.startMove(-99999);
         stepperY.setRPM(20);
-        while (stepperY.nextAction() > 0)
+        stepperY.startMove(-99999);
+        while (stepperY.isRunning())
         {
             // Serial.println(driverY.SG_RESULT());
             // 10个读数取平均
@@ -296,7 +301,7 @@ void setup()
                 readingSum += sgReadings[i];
             }
 
-            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
+            if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc2209手册
             {
                 stepperY.startMove(0);
                 break;
@@ -306,7 +311,6 @@ void setup()
         vTaskResume(punchSchedule_Handle); // 重启调度任务
         closeDialog();
     }
-
 
     // X轴归零
     if (menuVirtualEndstopX.getBoolean())
@@ -325,9 +329,9 @@ void setup()
 
         driverX.rms_current(250);
         // driverX.SGTHRS(menuEndstopThresholdX.getCurrentValue());
-        stepperX.startMove(-99999);
         stepperX.setRPM(20);
-        while (stepperX.nextAction() > 0)
+        stepperX.startMove(99999);
+        while (stepperX.isRunning())
         {
             // Serial.println(driverX.SG_RESULT());
             // 10个读数取平均
@@ -348,8 +352,8 @@ void setup()
 
             if (readingSum / 10 > 0 && readingSum / 10 < sgThrs * 2) // SG_RESULT小于阈值两倍时代表电机过载，详见tmc209手册
             {
-                stepperX.startMove(0);
                 stepperX.setRPM(menuRunningSpeedX.getAsFloatingPointValue() / xPerimeter * 60);
+                stepperX.startMove(0);
                 driverX.rms_current(menuRunningCurrentX.getCurrentValue());
                 break;
             }
@@ -374,8 +378,9 @@ void setup()
         moveYto(6);
         yPosition = 0;
 
-        while (stepperY.nextAction() > 0)
+        while (stepperY.isRunning())
         {
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
 
         vTaskResume(punchSchedule_Handle); // 重启调度任务
@@ -388,12 +393,10 @@ void setup()
     // menuMgr.navigateToMenu(&menuProgress);
 }
 
-// 电机运行现由loop函数处理 DEV.20220718
+// 电机运行现已无须处理 DEV.20230522
 void loop()
 {
-    stepperX_to_wait = stepperX.nextAction();
-    stepperY_to_wait = stepperY.nextAction();
-    stepperZ_to_wait = stepperZ.nextAction();
+    vTaskDelete(NULL);
 }
 
 // TcMenu 主题设置
@@ -457,7 +460,7 @@ void runTcMenu(void *pvParameters)
 {
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(5));
         if (xSemaphoreTake(I2CMutex, portMAX_DELAY) == pdTRUE)
         {
             taskManager.runLoop();
@@ -550,8 +553,7 @@ void punchSchedule(void *pvParameters)
 
         if (Xenabled)
         {
-            vTaskDelay(pdMS_TO_TICKS(100));
-            if (stepperX_to_wait <= 0)
+            if (!stepperX.isRunning())
             {
                 Xenabled = false;
                 startYaxis();
@@ -560,8 +562,7 @@ void punchSchedule(void *pvParameters)
 
         if (Zenabled)
         {
-            vTaskDelay(pdMS_TO_TICKS(100));
-            if (stepperZ_to_wait <= 0)
+            if (!stepperZ.isRunning())
             {
                 Zenabled = false;
                 startYaxis();
@@ -570,8 +571,7 @@ void punchSchedule(void *pvParameters)
 
         if (Yenabled)
         {
-            vTaskDelay(pdMS_TO_TICKS(100));
-            if (stepperY_to_wait <= 0)
+            if (!stepperY.isRunning())
             {
                 if (Ydown)
                 {
@@ -587,6 +587,8 @@ void punchSchedule(void *pvParameters)
                 }
             }
         }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -597,8 +599,8 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
 {
     if (!Xenabled && !Zenabled)
     {
-        vTaskDelay(pdMS_TO_TICKS(50));
-        if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS + zLastMove) < 1)
+        vTaskDelay(pdMS_TO_TICKS(10));
+        if (encoderDisabled || abs(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS_Y + zLastMove) < 1)
         {
             moveYto(5.5);
             Ydown = true;
@@ -607,7 +609,7 @@ void startYaxis() // X,Z轴移动完成后控制Y轴向下移动打孔
         else
         {
             Zenabled = true;
-            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS));
+            stepperZ.startMove((long)(zLastMove + rotatedAngle / (4096.0 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS_Y));
             // Serial.println(rotatedAngle / (4096 * menuDiamRatio.getLargeNumber()->getAsFloat()) * MOTOR_STEPS * MICROSTEPS + zLastMove);
         }
     }
@@ -617,7 +619,7 @@ void moveZ(double mm)
 {
     Zenabled = true;
     //     driverZ.rms_current(zOptiCurr);
-    long toMove = (long)(-mm / zPerimeter * MOTOR_STEPS * MICROSTEPS);
+    long toMove = (long)(-mm / zPerimeter * MOTOR_STEPS * MICROSTEPS_Z);
     zLastMove = toMove;
     stepperZ.startMove(toMove);
     //     driverZ.rms_current(zStbyCurr);
@@ -631,7 +633,7 @@ void moveXpos(int pos)
     }
     else
     {
-        moveXto(2 * (pos - 29) - 3.9);
+        moveXto(2 * pos + 3.5);
     }
 }
 
@@ -639,7 +641,7 @@ void moveXto(double mm)
 {
     Xenabled = true;
     //    driverX.rms_current(xOptiCurr);
-    long steps = (long)(mm / xPerimeter * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = (long)(mm / xPerimeter * (MOTOR_STEPS * MICROSTEPS_X) + 0.5);
     long toMove = xPosition - steps;
     stepperX.startMove(toMove);
     //    driverX.rms_current(xStbyCurr);
@@ -650,7 +652,7 @@ void moveYto(double mm)
 {
     Yenabled = true;
     //    driverY.rms_current(yOptiCurr);
-    long steps = (long)(mm / yPerimeter * (MOTOR_STEPS * MICROSTEPS) + 0.5);
+    long steps = long(mm / yPerimeter * (MOTOR_STEPS * MICROSTEPS_Y));
     long toMove = steps - yPosition;
     stepperY.startMove(toMove);
     //    driverY.rms_current(yStbyCurr);
@@ -747,8 +749,8 @@ void calibrateEncoder(void *pvParameters)
     for (int i = 0; i < MOTOR_STEPS; i++)
     {
         readingTemp = 0;
-        stepperZ.startMove(MICROSTEPS);
-        while (stepperZ_to_wait)
+        stepperZ.startMove(MICROSTEPS_Z);
+        while (stepperZ.isRunning())
         {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
@@ -783,8 +785,8 @@ void calibrateEncoder(void *pvParameters)
     for (int i = 0; i < MOTOR_STEPS; i++)
     {
         readingTemp = 0;
-        stepperZ.startMove(-MICROSTEPS);
-        while (stepperZ_to_wait)
+        stepperZ.startMove(-MICROSTEPS_Z);
+        while (stepperZ.isRunning())
         {
             vTaskDelay(pdMS_TO_TICKS(10));
         }
@@ -960,7 +962,7 @@ void wifiCommand(void *pvParameters)
 // 秒数转时间
 TimeStorage secToTime(int sec)
 {
-    return (TimeStorage{sec / 3600, sec % 3600 / 60, sec % 60, 0});
+    return (TimeStorage{(uint8_t)(sec / 3600), (uint8_t)(sec % 3600 / 60), (uint8_t)(sec % 60), 0});
 }
 
 // EEPROM中读取字符串
@@ -1191,6 +1193,7 @@ void CALLBACK_FUNCTION onChangeFeed(int id)
 {
     if (menuFeed.getBoolean())
     {
+        stepperZ.setRPM(30);
         if (menuReverseDirection.getBoolean())
         {
             stepperZ.startMove(99999);
@@ -1203,6 +1206,7 @@ void CALLBACK_FUNCTION onChangeFeed(int id)
     else
     {
         stepperZ.startMove(0);
+        stepperZ.setRPM(menuRunningSpeedZ.getAsFloatingPointValue() / zPerimeter * 60);
         rotatedAngle = 0;
     }
 }
