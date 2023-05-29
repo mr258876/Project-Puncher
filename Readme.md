@@ -2,16 +2,18 @@
 ### 赛博音乐盒计划第二部分
 ### Cyber Musicbox Project Part II
 
-# 重要：项目已暂停，下次更新未定。
-# Important: Project paused currently. Updates are not guaranteed.
-
-## Libraries Used
-### 3rd party libraries:
-- tcMenu by davetcc                 https://www.arduino.cc/reference/en/libraries/tcmenu/
-- StepperDriver by Laurentiu Badea  https://www.arduino.cc/reference/en/libraries/stepperdriver/
-- TMCStepper by teemuatlut          https://www.arduino.cc/reference/en/libraries/tmcstepper/
-- CRC by RobTillaart                https://www.arduino.cc/reference/en/libraries/crc/
-- Wifi by Arduino                   https://www.arduino.cc/reference/en/libraries/wifi/
-### Distribute with source code under MIT license:
-- as5600_i2c_arduino by owennewo    https://github.com/owennewo/as5600_i2c_arduino
-- LinkedList by ivanseidel          https://github.com/ivanseidel/LinkedList
+## 项目文件结构 / Project File Structure
+    |   Project Puncher
+    |
+    +---Models
+    |       3D模型文件
+    |       3D models of puncher
+    +---Project_HolePuncher
+    |       ESP32下位机程序
+    |       Program for puncher controller based on ESP32
+    +---Schematic
+    |       项目电路图及PCB文件
+    |       Circuit schematic & PCB
+    \---Utilities
+            上位机程序
+            Host program runs on your PC
