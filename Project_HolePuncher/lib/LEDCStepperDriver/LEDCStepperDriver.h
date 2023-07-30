@@ -60,6 +60,7 @@ private:
     long step_count;      // step count
     long steps_remaining; // to complete the current move (absolute value)
     long pulse_freq;      // step pulse frequency (hz)
+    uint8_t infinite_run;
 
     // microstep range (1, 16, 32 etc)
     static const short MAX_MICROSTEP = 128;
@@ -120,8 +121,11 @@ public:
      */
     void rotate(double deg);
     /*
-     * Methods for non-blocking mode.
-     * Uses LEDC and PCNT.
+     * Rotate infinitely. Use stop() or move(0) to stop.
+     */
+    void rotate_infinite(int dir);
+    /*
+     * For compatibility.
      */
     void startMove(long steps);
     inline void startRotate(int deg)

@@ -282,6 +282,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     ESP_ERROR_CHECK(pcnt_intr_enable(pcnt_unit));
 
     pcnt_running = false;
+    infinite_run = 0;
 
     /* To use LEDC and PCNT on the same pin
        See https://esp32.com/viewtopic.php?t=18115 */
@@ -353,6 +354,15 @@ void LEDCStepperDriver::rotate(double deg)
 {
     move(calcStepsForRotation(deg));
 }
+/*
+ * Rotate infinitely. Use stop() or move(0) to stop.
+ */
+void LEDCStepperDriver::rotate_infinite(int dir)
+{
+    infinite_run = 1;
+    startMove(dir * PCNT_THRES_VAL);
+    __pcnt_pause(pcnt_unit);
+}
 void LEDCStepperDriver::startMove(long steps)
 {
     stop();
@@ -421,6 +431,7 @@ void LEDCStepperDriver::disable(void)
 long LEDCStepperDriver::stop()
 {
     driver_pwm_stop();
+    infinite_run = 0;
 
     int16_t counter_value;
     pcnt_get_counter_value(pcnt_unit, &counter_value);
