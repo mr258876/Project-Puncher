@@ -13,7 +13,7 @@ enum observe_notify_t
     OBSERVE_NOTIFY_ON_CRITICAL,
 };
 
-typedef struct observe_data_t
+struct observe_data_t
 {
     observe_notify_t interface;
     void *request_data;

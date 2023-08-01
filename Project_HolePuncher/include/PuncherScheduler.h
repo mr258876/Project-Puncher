@@ -7,13 +7,13 @@
 #include <time.h>
 
 #include "Observe.h"
+#include "PuncherSchedulerAbst.h"
 #include "MotorController/MotorController.h"
 #include "PuncherUI.h"
-#include "PuncherSchedulerTyping.h"
 
 #include <Arduino.h>
 
-class PuncherScheduler
+class PuncherScheduler : PuncherSchedulerInterface
 {
 private:
     puncher_status_t status;
@@ -24,7 +24,7 @@ private:
     MotorController *Y;
     MotorController *Z;
 
-    PuncherUI *ui;
+    std::vector<PuncherUI *> ui_list;
 
     void motorHandler();
 
@@ -52,30 +52,11 @@ public:
     /* Attach UI before begin() ! */
     inline void attachUI(PuncherUI *ui)
     {
-        this->ui = ui;
+        this->ui_list.push_back(ui);
         ui->addObserver([this](void *param)
                        { this->onUINotify(param); });
     }
-
-    inline bool addHole(scheduler_hole_t h)
-    {
-        holeList.push_back(h);
-        return true;
-    }
-
-    time_t getETA();
-    inline bool startPunch()
-    {
-        if (status)
-            return false;
-
-        reverse(holeList.begin(), holeList.end()); // Reverse the vector so it will be O(1) each time poping a hole
-
-        // TODO
-        status = PUNCHER_RUNNING;
-        return true;
-    }
-
+    
     inline void tick()
     {
         // if (status & PUNCHER_RUNNING)
@@ -89,6 +70,17 @@ public:
     /* Observation callbacks */
     void onMotorNotify(void *param);
     void onUINotify(void *param);
+
+    /* From PuncherSchedulerInterface */
+    int start_workload();
+    int pause_workload();
+    int delete_workload();
+    int add_hole(scheduler_hole_t h);
+    int feed_paper(int gear);
+    int ui_get_menu();
+    unsigned int set_status(unsigned int status_code);
+    unsigned int get_status();
+    time_t get_ETA();
 };
 
 #endif

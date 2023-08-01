@@ -1,3 +1,5 @@
 cmake_minimum_required(VERSION 3.16.0)
+file(STRINGS BuildNumber BUILD_NUMBER)
+set(PROJECT_VER ${BUILD_NUMBER})
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(Project_HolePuncher)

@@ -1,5 +1,5 @@
-#ifndef _PUNCHERSCHEDULERREQUESTS_H_
-#define _PUNCHERSCHEDULERREQUESTS_H_
+#ifndef _PUNCHERSCHEDULERTYPING_H_
+#define _PUNCHERSCHEDULERTYPING_H_
 
 #include <sys/cdefs.h>
 #include <stdint.h>
@@ -23,9 +23,6 @@ enum scheduler_rquest_endpoint_t : uint8_t
     SCHEDULER_REQUEST_NO_TYPE,
     SCHEDULER_REQUEST_SELF_CALIBRATION,
     SCHEDULER_REQUEST_SET_STATUS,
-    SCHEDULER_REQUEST_FEED_PAPER,
-    SCHEDULER_REQUEST_ADD_HOLE,
-    SCHEDULER_REQUEST_CLEAR_HOLE,
 };
 
 struct scheduler_request_t
@@ -36,4 +33,4 @@ struct scheduler_request_t
 };
 
 
-#endif  // _PUNCHERSCHEDULERREQUESTS_H_
+#endif  // _PUNCHERSCHEDULERTYPING_H_

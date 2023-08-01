@@ -1,4 +1,4 @@
-#include "TMC_LEDCMotorController.h"
+#include "MotorController/TMC_LEDCMotorController.h"
 
 const motor_feature_t TMC_LEDCMotorController::_feature = {1, 1, 1, 1, 0, 0};
 

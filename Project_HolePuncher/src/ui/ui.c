@@ -73,7 +73,7 @@ void ui_init(void)
     ui_Home_Screen_screen_init();
     ui_Feed_Screen_screen_init();
     ui_Info_Screen_screen_init();
-    ui_Setting_Screen_screen_init();
+    // ui_Setting_Screen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Home_Screen);
 }
