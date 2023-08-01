@@ -18,6 +18,8 @@ extern "C" {
  *      INCLUDES
  *********************/
 #include <lvgl.h>
+#include "PuncherConf.h"
+#include <driver/gpio.h>
 
 /*********************
  *      DEFINES
@@ -30,7 +32,7 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void lv_port_indev_init(void);
+void lv_pcnt_encoder_indev_init(void);
 
 /**********************
  *      MACROS

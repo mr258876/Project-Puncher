@@ -51,6 +51,8 @@ lv_obj_t * ui_Setting_Menu;
 
 lv_obj_t * ui____initial_actions0;
 
+lv_group_t * ui_group;
+
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 // #if LV_COLOR_DEPTH != 8
 //     #error "LV_COLOR_DEPTH should be 8bit to match SquareLine Studio's settings"
@@ -62,6 +64,38 @@ lv_obj_t * ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+void ui_event_Home_Button1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        ui_event_Home_Button1_onClick(e);
+    }
+}
+void ui_event_Home_Button2(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        ui_event_Home_Button2_onClick(e);
+    }
+}
+void ui_event_Info_Button1(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        ui_event_Info_Button1_onClick(e);
+    }
+}
+void ui_event_Info_Button2(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        ui_event_Info_Button2_onClick(e);
+    }
+}
 
 ///////////////////// SCREENS ////////////////////
 
@@ -69,6 +103,10 @@ void ui_init(void)
 {
     lv_disp_t * dispp = lv_disp_get_default();
     lv_theme_t * theme = lv_theme_basic_init(dispp);
+
+    ui_group = lv_group_create();
+    lv_group_set_default(ui_group);
+
     lv_disp_set_theme(dispp, theme);
     ui_Home_Screen_screen_init();
     ui_Feed_Screen_screen_init();

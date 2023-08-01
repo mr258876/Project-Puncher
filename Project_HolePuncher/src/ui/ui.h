@@ -26,8 +26,10 @@ extern lv_obj_t * ui_Home_Status;
 extern lv_obj_t * ui_Home_ETA;
 extern lv_obj_t * ui_Home_ETA_Value;
 extern lv_obj_t * ui_Home_Button_Panel;
+void ui_event_Home_Button1(lv_event_t * e);
 extern lv_obj_t * ui_Home_Button1;
 extern lv_obj_t * ui_Home_Button1_Label;
+void ui_event_Home_Button2(lv_event_t * e);
 extern lv_obj_t * ui_Home_Button2;
 extern lv_obj_t * ui_Home_Button2_Label;
 // SCREEN: ui_Feed_Screen
@@ -44,8 +46,10 @@ extern lv_obj_t * ui_Info_title;
 extern lv_obj_t * ui_Info_Content_Panel;
 extern lv_obj_t * ui_Info_Text_Label;
 extern lv_obj_t * ui_Info_Button_Panel;
+void ui_event_Info_Button1(lv_event_t * e);
 extern lv_obj_t * ui_Info_Button1;
 extern lv_obj_t * ui_Info_Button1_Label;
+void ui_event_Info_Button2(lv_event_t * e);
 extern lv_obj_t * ui_Info_Button2;
 extern lv_obj_t * ui_Info_Button2_Label;
 // SCREEN: ui_Setting_Screen
@@ -54,6 +58,8 @@ extern lv_obj_t * ui_Setting_Screen;
 extern lv_obj_t * ui_Setting_Menu;
 
 extern lv_obj_t * ui____initial_actions0;
+
+extern lv_group_t * ui_group;
 
 void ui_init(void);
 

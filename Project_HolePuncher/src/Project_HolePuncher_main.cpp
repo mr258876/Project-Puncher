@@ -100,7 +100,7 @@ void lvgl_init()
     disp_drv.hor_res = SCREEN_WIDTH;
     disp_drv.ver_res = SCREEN_HEIGHT;
     disp_drv.flush_cb = disp_flush;
-    // disp_drv.rounder_cb = disp_rounder_cb;
+    disp_drv.rounder_cb = disp_rounder_cb;
     disp_drv.set_px_cb = disp_set_px_cb;
     disp_drv.draw_buf = &draw_buf;
     // disp_drv.direct_mode = true;
@@ -108,7 +108,7 @@ void lvgl_init()
     lv_disp_drv_register(&disp_drv);
 
     /* Initialize input device driver */
-    lv_port_indev_init();
+    lv_pcnt_encoder_indev_init();
 
     ui_init();
 
