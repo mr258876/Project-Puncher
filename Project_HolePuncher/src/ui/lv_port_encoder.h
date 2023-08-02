@@ -19,6 +19,7 @@ extern "C" {
  *********************/
 #include <lvgl.h>
 #include "PuncherConf.h"
+#include "ui.h"
 #include <driver/gpio.h>
 
 /*********************
@@ -32,7 +33,7 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void lv_pcnt_encoder_indev_init(void);
+void lv_encoder_indev_init(void);
 
 /**********************
  *      MACROS

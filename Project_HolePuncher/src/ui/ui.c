@@ -68,7 +68,8 @@ void ui_event_Home_Button1(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
+    LV_LOG_INFO("event code: %d", event_code);
+    if(event_code == LV_EVENT_CLICKED || event_code == LV_EVENT_SHORT_CLICKED) {
         ui_event_Home_Button1_onClick(e);
     }
 }
@@ -103,9 +104,6 @@ void ui_init(void)
 {
     lv_disp_t * dispp = lv_disp_get_default();
     lv_theme_t * theme = lv_theme_basic_init(dispp);
-
-    ui_group = lv_group_create();
-    lv_group_set_default(ui_group);
 
     lv_disp_set_theme(dispp, theme);
     ui_Home_Screen_screen_init();

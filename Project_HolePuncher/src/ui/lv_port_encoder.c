@@ -46,7 +46,7 @@ static lv_indev_state_t encoder_state;
  *   GLOBAL FUNCTIONS
  **********************/
 
-void lv_pcnt_encoder_indev_init(void)
+void lv_encoder_indev_init(void)
 {
     /**
      * Here you will find example implementation of input devices supported by LittelvGL:
@@ -79,6 +79,9 @@ void lv_pcnt_encoder_indev_init(void)
      *add objects to the group with `lv_group_add_obj(group, obj)`
      *and assign this input device to group to navigate in it:
      *`lv_indev_set_group(indev_encoder, group);`*/
+    ui_group = lv_group_create();
+    lv_group_set_default(ui_group);
+    lv_indev_set_group(indev_encoder, ui_group);
 }
 
 /**********************
@@ -98,36 +101,31 @@ static void encoder_init(void)
 
     gpio_set_intr_type(ENCODER_A, GPIO_INTR_NEGEDGE);
     gpio_set_intr_type(ENCODER_B, GPIO_INTR_NEGEDGE);
-    gpio_set_intr_type(ENCODER_BTN, GPIO_INTR_ANYEDGE);
 
-    gpio_install_isr_service(ESP_INTR_FLAG_SHARED | ESP_INTR_FLAG_IRAM);
+    gpio_install_isr_service(ESP_INTR_FLAG_SHARED);
     gpio_isr_handler_add(ENCODER_A, encoder_a_handler, NULL);
     gpio_isr_handler_add(ENCODER_B, encoder_b_handler, NULL);
-    gpio_isr_handler_add(ENCODER_BTN, encoder_btn_handler, NULL);
 }
 
 /*Will be called by the library to read the encoder*/
 static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
+    encoder_state = (gpio_get_level(ENCODER_BTN)) ? LV_INDEV_STATE_REL : LV_INDEV_STATE_PR;
+
     data->enc_diff = encoder_diff;
     data->state = encoder_state;
     encoder_diff = 0;
 }
 
 /*Call this function in an interrupt to process encoder events (turn, press)*/
-static void IRAM_ATTR encoder_a_handler(void* param)
+static void encoder_a_handler(void* param)
 {
-    encoder_diff += (gpio_get_level(ENCODER_B) & gpio_get_level(ENCODER_B)) ? 1 : -1;
+    encoder_diff += (gpio_get_level(ENCODER_B)) ? 1 : -1;
 }
 
-static void IRAM_ATTR encoder_b_handler(void* param)
+static void encoder_b_handler(void* param)
 {
-    encoder_diff += (gpio_get_level(ENCODER_A) & gpio_get_level(ENCODER_A)) ? -1 : 1;
-}
-
-static void IRAM_ATTR encoder_btn_handler(void* param)
-{
-    encoder_state = (gpio_get_level(ENCODER_BTN) | gpio_get_level(ENCODER_BTN)) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+    encoder_diff += (gpio_get_level(ENCODER_A)) ? -1 : 1;
 }
 
 #else /*Enable this file at the top*/

@@ -108,8 +108,8 @@ void lvgl_init()
     lv_disp_drv_register(&disp_drv);
 
     /* Initialize input device driver */
-    lv_pcnt_encoder_indev_init();
-
+    lv_encoder_indev_init();
+    
     ui_init();
 
     LV_LOG_INFO("LVGL Booted.");
