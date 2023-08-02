@@ -105,6 +105,8 @@ void ui_init(void)
     lv_disp_t * dispp = lv_disp_get_default();
     lv_theme_t * theme = lv_theme_basic_init(dispp);
 
+    lv_i18n_init(lv_i18n_language_pack);
+
     lv_disp_set_theme(dispp, theme);
     ui_Home_Screen_screen_init();
     ui_Feed_Screen_screen_init();
