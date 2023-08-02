@@ -18,7 +18,7 @@ static inline uint32_t op_f(uint32_t val) { UNUSED(val); return 0; }
 static inline uint32_t op_t(uint32_t val) { UNUSED(val); return 0; }
 
 static lv_i18n_phrase_t en_us_singulars[] = {
-    {"_feed_roller_options", "Forward 4\\nForward 3\\nForward 2\\nForward 1\\nStop\\nBackward 1\\nBackward 2\\nBackward 3\\nBackward 4"},
+    {"_feed_roller_options", "Forward 4\nForward 3\nForward 2\nForward 1\nFree Move\nBackward 1\nBackward 2\nBackward 3\nBackward 4"},
     {NULL, NULL} // End mark
 };
 
@@ -43,7 +43,7 @@ static const lv_i18n_lang_t en_us_lang = {
 
 static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Feed", "进纸"},
-    {"_feed_roller_options", "前进 4\\n前进 3\\n前进 2\\n 前进 1\\n停止\\n后退 1\\n后退 2\\n后退 3\\n后退 4"},
+    {"_feed_roller_options", "前进 4\n前进 3\n前进 2\n 前进 1\n自由进纸\n后退 1\n后退 2\n后退 3\n后退 4"},
     {"Home", "主页"},
     {"ETA", "剩余"},
     {"Setting", "设置"},
