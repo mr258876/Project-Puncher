@@ -26,7 +26,6 @@
 
 static void encoder_init(void);
 static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
-static void encoder_rotate_handler(void* param);
 
 /**********************
  *  STATIC VARIABLES
@@ -35,7 +34,7 @@ lv_indev_t * indev_encoder;
 
 static int32_t encoder_diff;
 static lv_indev_state_t encoder_state;
-static uint64_t last_rotate_time = 0;
+static uint8_t encoder_A_prev;
 
 /**********************
  *      MACROS
@@ -97,32 +96,26 @@ static void encoder_init(void)
     gpio_set_direction(ENCODER_A, GPIO_MODE_INPUT);
     gpio_set_direction(ENCODER_B, GPIO_MODE_INPUT);
     gpio_set_direction(ENCODER_BTN, GPIO_MODE_INPUT);
-
-    gpio_set_intr_type(ENCODER_A, GPIO_INTR_ANYEDGE);
-
-    gpio_install_isr_service(ESP_INTR_FLAG_SHARED);
-    gpio_isr_handler_add(ENCODER_A, encoder_rotate_handler, NULL);
 }
 
 /*Will be called by the library to read the encoder*/
 static void encoder_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
     encoder_state = (gpio_get_level(ENCODER_BTN)) ? LV_INDEV_STATE_REL : LV_INDEV_STATE_PR;
+    data->state = encoder_state;
+
+    uint8_t _statusA = gpio_get_level(ENCODER_A);
+    uint8_t _statusB = gpio_get_level(ENCODER_B);
+
+    if (_statusA && !encoder_A_prev)
+    {
+        encoder_diff += (_statusA == _statusB) ? 1 : -1;
+    }
+    encoder_A_prev = _statusA;
 
     data->enc_diff = encoder_diff;
-    data->state = encoder_state;
+    
     encoder_diff = 0;
-}
-
-/*Call this function in an interrupt to process encoder events (turn, press)*/
-static void encoder_rotate_handler(void* param)
-{
-    uint64_t now_time = esp_timer_get_time();
-    if (now_time - last_rotate_time > DEBOUNCE_us)
-    {
-        last_rotate_time = now_time;
-        encoder_diff += (gpio_get_level(ENCODER_A) == gpio_get_level(ENCODER_B)) ? 1 : -1;
-    }
 }
 
 #else /*Enable this file at the top*/

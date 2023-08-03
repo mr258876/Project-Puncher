@@ -9,7 +9,7 @@
 #define ENCODER_B   35
 #define ENCODER_BTN 32
 
-#define DEBOUNCE_us 10
+#define DEBOUNCE_us 20000
 
 //---------------- Motor Controls ----------------
 #define MOTOR_STEPS     200

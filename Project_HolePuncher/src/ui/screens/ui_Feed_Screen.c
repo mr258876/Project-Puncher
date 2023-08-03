@@ -33,6 +33,7 @@ void ui_Feed_Screen_screen_init(void)
 
     ui_Feed_Roller = lv_roller_create(ui_Feed_Screen);
     lv_roller_set_options(ui_Feed_Roller, _("_feed_roller_options"), LV_ROLLER_MODE_NORMAL);
+    lv_roller_set_selected(ui_Feed_Roller, 4, LV_ANIM_OFF);
     lv_obj_set_width(ui_Feed_Roller, 128);
     lv_obj_set_height(ui_Feed_Roller, 48);
     lv_obj_set_x(ui_Feed_Roller, 0);
@@ -48,5 +49,8 @@ void ui_Feed_Screen_screen_init(void)
     lv_obj_set_style_text_align(ui_Feed_Roller, LV_TEXT_ALIGN_CENTER, LV_PART_SELECTED | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_Feed_Roller, lv_color_hex(0xFFFFFF), LV_PART_SELECTED | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Feed_Roller, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_Feed_Roller, ui_event_Feed_Roller, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_Feed_Screen, ui_event_Feed_Screen, LV_EVENT_ALL, NULL);
 
 }

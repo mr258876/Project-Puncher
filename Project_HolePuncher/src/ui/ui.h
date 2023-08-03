@@ -34,6 +34,8 @@ extern lv_obj_t * ui_Home_Button2;
 extern lv_obj_t * ui_Home_Button2_Label;
 // SCREEN: ui_Feed_Screen
 void ui_Feed_Screen_screen_init(void);
+void ui_event_Feed_Screen(lv_event_t * e);
+void ui_event_Feed_Roller(lv_event_t * e);
 extern lv_obj_t * ui_Feed_Screen;
 extern lv_obj_t * ui_Feed_Title_Panel;
 extern lv_obj_t * ui_Feed_title;

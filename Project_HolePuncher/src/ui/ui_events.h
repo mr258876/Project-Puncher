@@ -6,7 +6,7 @@
 #ifndef _UI_EVENTS_H
 #define _UI_EVENTS_H
 
-#include "ui.h"
+#include "lvgl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,6 +16,8 @@ void ui_event_Home_Button1_onClick(lv_event_t * e);
 void ui_event_Home_Button2_onClick(lv_event_t * e);
 void ui_event_Info_Button1_onClick(lv_event_t * e);
 void ui_event_Info_Button2_onClick(lv_event_t * e);
+void ui_event_Feed_Screen_onLoad(lv_event_t * e);
+void ui_event_Feed_Roller_onKey(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

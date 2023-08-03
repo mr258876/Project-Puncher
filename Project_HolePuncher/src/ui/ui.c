@@ -26,6 +26,8 @@ lv_obj_t * ui_Home_Button2_Label;
 
 // SCREEN: ui_Feed_Screen
 void ui_Feed_Screen_screen_init(void);
+void ui_event_Feed_Screen(lv_event_t * e);
+void ui_event_Feed_Roller(lv_event_t * e);
 lv_obj_t * ui_Feed_Screen;
 lv_obj_t * ui_Feed_Title_Panel;
 lv_obj_t * ui_Feed_title;
@@ -68,9 +70,9 @@ void ui_event_Home_Button1(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    LV_LOG_INFO("event code: %d", event_code);
-    if(event_code == LV_EVENT_CLICKED || event_code == LV_EVENT_SHORT_CLICKED) {
-        ui_event_Home_Button1_onClick(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        // ui_event_Home_Button1_onClick(e);
+        _ui_screen_change(&ui_Feed_Screen, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Feed_Screen_screen_init);
     }
 }
 void ui_event_Home_Button2(lv_event_t * e)
@@ -80,6 +82,28 @@ void ui_event_Home_Button2(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         ui_event_Home_Button2_onClick(e);
     }
+}
+void ui_event_Feed_Screen(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_SCREEN_LOADED) {
+        ui_event_Feed_Screen_onLoad(e);
+    }
+}
+void ui_event_Feed_Roller(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    LV_LOG_INFO("Event code:%d", event_code);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_delete(&ui_Feed_Screen);
+    }
+    else if (event_code == LV_EVENT_KEY)
+    {
+        ui_event_Feed_Roller_onKey(e);
+    }
+    
 }
 void ui_event_Info_Button1(lv_event_t * e)
 {
@@ -109,8 +133,8 @@ void ui_init(void)
 
     lv_disp_set_theme(dispp, theme);
     ui_Home_Screen_screen_init();
-    ui_Feed_Screen_screen_init();
-    ui_Info_Screen_screen_init();
+    // ui_Feed_Screen_screen_init();
+    // ui_Info_Screen_screen_init();
     // ui_Setting_Screen_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Home_Screen);
