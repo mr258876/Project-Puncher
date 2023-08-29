@@ -41,10 +41,18 @@ private:
     float _speed;
 
 public:
+    /* Begin function */
     virtual motor_res_t begin() = 0;
+    /* Move steps */
     virtual motor_res_t move(long steps) = 0;
+    /* Rotate in a direction */
+    virtual motor_res_t rotate_infinite(int dir) = 0;
+    /* Stop and return steps remains */
+    virtual long stop() = 0;
+    /* Get motor status */
     virtual motor_status_t getStatus() = 0;
-    // virtual long getPosition() = 0;
+    /* Get motor position (steps) */
+    virtual long getPosition() = 0;
     // virtual motor_feature_t getFeature() = 0;
 
     /*  Start calibration process.

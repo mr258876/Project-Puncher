@@ -2,6 +2,7 @@
 
 PuncherScheduler::PuncherScheduler()
 {
+    this->holeListHandle = xSemaphoreCreateMutex();
 }
 
 PuncherScheduler::~PuncherScheduler()
@@ -176,8 +177,13 @@ int PuncherScheduler::pause_workload()
 
 int PuncherScheduler::delete_workload()
 {
-    // TODO
-
+    if (this->status)
+    {
+        return this->status;
+    }
+    
+    xSemaphoreTake
+    this->holeList.clear();
     return 0;
 }
 
@@ -190,6 +196,18 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
 int PuncherScheduler::feed_paper(int gear)
 {
     // TODO
+    if (gear)
+    {
+        if (this->status)
+            return this->status;
+        this->Z->rotate_infinite();
+        this->status |= PUNCHER_FEEDING_PAPER;
+    }
+    else
+    {
+        this->Z->stop();
+        this->status &= (~PUNCHER_FEEDING_PAPER);
+    }
 
     return 0;
 }

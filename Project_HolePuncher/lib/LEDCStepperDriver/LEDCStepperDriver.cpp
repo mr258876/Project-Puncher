@@ -103,7 +103,7 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
         __pcnt_clear_intr(driver->pcnt_unit);
         int16_t count = __pcnt_get_count(driver->pcnt_unit);
         driver->steps_remaining -= count;
-        driver->step_count += count;
+        driver->motor_pos += (dir_state ? count : -count);
 
         if (driver->steps_remaining == 0)
         {
@@ -436,6 +436,7 @@ long LEDCStepperDriver::stop()
     int16_t counter_value;
     pcnt_get_counter_value(pcnt_unit, &counter_value);
     steps_remaining -= counter_value;
+    motor_pos += (dir_state ? count : -counter_value);
     pcnt_counter_pause(pcnt_unit);
     pcnt_counter_clear(pcnt_unit);
 

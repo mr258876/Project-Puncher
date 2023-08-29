@@ -43,6 +43,9 @@ public:
     inline motor_feature_t getFeature() { return _feature; };
     motor_res_t begin();
     motor_res_t move(long steps);
+    motor_res_t rotate_infinite(int dir);
+    long stop();
+    long get_position();
     motor_res_t setSpeed(long stepsPerSec);
     motor_status_t getStatus();
     /*  Start calibration process.

@@ -57,7 +57,7 @@ private:
     /*
      * Movement state
      */
-    long step_count;      // step count
+    long motor_pos;       // position count
     long steps_remaining; // to complete the current move (absolute value)
     long pulse_freq;      // step pulse frequency (hz)
     uint8_t infinite_run;
@@ -164,12 +164,12 @@ public:
      */
     long stop();
     /*
-     * Get the number of completed steps so far.
-     * This is always a positive number
+     * Get motor position.
+     * Not accurate when motor running.
      */
-    long getStepsCompleted(void)
+    long getPosition(void)
     {
-        return step_count;
+        return motor_pos;
     }
     /*
      * Get the number of steps remaining to complete the move

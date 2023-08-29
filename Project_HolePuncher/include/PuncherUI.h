@@ -35,19 +35,13 @@ struct __packed ui_alert_msg_t
     void *button_text;
 };
 
-struct __packed ui_alert_msg_confirm_t : ui_alert_msg_t
-{
-    // Use "calcel \n confirm" for button_text here
-    using ui_menu_item_cb_t = std::function<int(void *)>;
-    ui_menu_item_cb_t cb_on_comfirm;
-};
-
 class PuncherUI : public Observeable
 {
 public:
     virtual void begin() = 0;
+    /* For PuncherScheduler, call this to update values in UI, open a dialog, etc. */
     virtual void alert(ui_alert_msg_t *msg) = 0;
-    virtual void statusUpdate(void *param) = 0;
+    /* For PuncherScheduler, call this to draw menu. */
     virtual void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL) = 0;
 };
 

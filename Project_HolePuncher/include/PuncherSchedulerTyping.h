@@ -15,6 +15,7 @@ enum puncher_status_t : uint8_t
     PUNCHER_IDLE = 0,
     PUNCHER_RUNNING = 0b1,
     PUNCHER_DATA_TRANSMITTING = 0b10,
+    PUNCHER_PEEDING_PAPER = 0B100,
     PUNCHER_ERROR = 128,
 };
 

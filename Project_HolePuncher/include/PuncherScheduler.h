@@ -19,6 +19,7 @@ private:
     puncher_status_t status;
 
     std::vector<scheduler_hole_t> holeList;
+    SemaphoreHandle_t holeListHandle;
 
     MotorController *X;
     MotorController *Y;
@@ -55,6 +56,14 @@ public:
         this->ui_list.push_back(ui);
         ui->addObserver([this](void *param)
                        { this->onUINotify(param); });
+    }
+    /* Notify all UI */
+    inline void notifyUI(ui_alert_msg_t *msg)
+    {
+        for (PuncherUI* p_ui; this->ui_list)
+        {
+            p_ui->alert(msg);
+        }
     }
     
     inline void tick()

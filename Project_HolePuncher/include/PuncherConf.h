@@ -9,6 +9,8 @@
 #define ENCODER_B   35
 #define ENCODER_BTN 32
 
+#define LV_DISP_BUF_SIZE    128*8
+
 #define DEBOUNCE_us 20000
 
 //---------------- Motor Controls ----------------
@@ -19,6 +21,7 @@
 
 #define DRIVER_SERIAL Serial2 // TMC controller Serial Port
 #define R_SENSE 0.11f         // Match to your driver <- ???
+#define DRIVER_UART_BANDRATE    115200
 
 #define xenablePin  5   // x使能控制引脚
 #define xdirPin     2   // x方向控制引脚
