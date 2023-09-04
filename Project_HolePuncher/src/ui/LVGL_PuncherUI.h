@@ -1,3 +1,6 @@
+#ifndef _LVGL_PUNCHERUI_H_
+#define _LVGL_PUNCHERUI_H_
+
 #include "PuncherUI.h"
 #include <lvgl.h>
 
@@ -15,3 +18,5 @@ public:
     void alert(ui_alert_msg_t *msg);
     void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL);
 }
+
+#endif  // _LVGL_PUNCHERUI_H_

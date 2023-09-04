@@ -30,9 +30,10 @@ struct __packed ui_menu_item_t
 
 struct __packed ui_alert_msg_t
 {
-    observe_notify_t msg_type;
+    void *title
     void *msg;
     void *button_text;
+    void *button_cb;
 };
 
 class PuncherUI : public Observeable
