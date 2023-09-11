@@ -7,7 +7,7 @@
 #define _PROJECT_PUNCHER_UI_H
 
 #ifdef __cplusplus
-extern "C" {
+// extern "C" {
 #endif
 
 #include "lvgl.h"
@@ -66,7 +66,7 @@ extern lv_group_t * ui_group;
 void ui_init(void);
 
 #ifdef __cplusplus
-} /*extern "C"*/
+// } /*extern "C"*/
 #endif
 
 #endif

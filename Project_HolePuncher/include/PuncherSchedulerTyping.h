@@ -39,12 +39,12 @@ struct __packed puncher_status_t
     u_connectivity_status connectivity_status;
 };
 
-struct scheduler_request_t
-{
-    scheduler_rquest_endpoint_t endpoint;
-    void *request_data;
-    void *response_data;
-};
+// struct scheduler_request_t
+// {
+//     scheduler_rquest_endpoint_t endpoint;
+//     void *request_data;
+//     void *response_data;
+// };
 
 
 #endif  // _PUNCHERSCHEDULERTYPING_H_

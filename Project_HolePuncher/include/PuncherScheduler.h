@@ -55,26 +55,24 @@ public:
     {
         this->ui_list.push_back(ui);
         ui->addObserver([this](void *param)
-                       { this->onUINotify(param); });
+                        { this->onUINotify(param); });
     }
     /* Notify all UI */
     inline void notifyUI(ui_alert_msg_t *msg)
     {
-        for (PuncherUI* p_ui; this->ui_list)
+        for (PuncherUI *p_ui : this->ui_list)
         {
             p_ui->alert(msg);
         }
     }
-    
+
     inline void tick()
     {
         // if (status & PUNCHER_RUNNING)
-            // motorHandler();
+        // motorHandler();
     }
 
-
-    void ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void* ui_param);
-
+    void ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void *ui_param);
 
     /* Observation callbacks */
     void onMotorNotify(void *param);

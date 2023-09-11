@@ -30,7 +30,7 @@ struct __packed ui_menu_item_t
 
 struct __packed ui_alert_msg_t
 {
-    void *title
+    void *title;
     void *msg;
     void *button_text;
     void *button_cb;

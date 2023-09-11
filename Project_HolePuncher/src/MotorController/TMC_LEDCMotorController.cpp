@@ -41,9 +41,9 @@ motor_res_t TMC_LEDCMotorController::move(long steps)
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::rotate_infinite(int dir);
+motor_res_t TMC_LEDCMotorController::rotate_infinite(int dir)
 {
-    stepper->rotate_infinite(int dir);
+    stepper->rotate_infinite(dir);
     return MOTOR_RES_SUCCESS;
 }
 

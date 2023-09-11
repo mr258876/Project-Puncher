@@ -17,6 +17,6 @@ public:
     void begin();
     void alert(ui_alert_msg_t *msg);
     void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL);
-}
+};
 
 #endif  // _LVGL_PUNCHERUI_H_
