@@ -44,3 +44,5 @@ void LVGLPuncherUI::drawMenu(std::vector<ui_menu_item_t>, void* ui_param)
 {
 
 }
+
+LVGLPuncherUI *lvgl_ui = new LVGLPuncherUI();

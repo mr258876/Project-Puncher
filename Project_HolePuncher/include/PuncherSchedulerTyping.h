@@ -10,34 +10,46 @@ struct __packed scheduler_hole_t
     double z;
 };
 
+struct __packed puncher_basic_status_t
+{
+    uint8_t has_mission : 1;
+    uint8_t is_running : 1;
+    uint8_t is_feeding_paper : 1;
+    uint8_t is_transmitting : 1;
+    uint8_t has_error : 1;
+};
+
+
+struct __packed puncher_connectivity_status_t
+{
+    uint8_t serial_connected : 1;
+    uint8_t wifi_connected : 1;
+};
+
+
 struct __packed puncher_status_t
 {
     // basic status
-    union u_basic_status
+    union puncher_basic_status_u
     {
-        struct basic_status_flags
-        {
-            uint8_t has_mission : 1;
-            uint8_t is_running : 1;
-            uint8_t is_transmitting : 1;
-            uint8_t has_error : 1;
-        };
-        unsigned status_data;
+        puncher_basic_status_t status_flags;
+        uint32_t status_data;
     };
-    u_basic_status basic_status;
+    puncher_basic_status_u basic_status;
 
     // connectivity
-    union u_connectivity_status
+    union puncher_connectivity_status_u
     {
-        struct connectivity_status_flags
-        {
-            uint8_t serial_connected : 1;
-            uint8_t wifi_connected : 1;
-        };
-        unsigned status_data;
+        puncher_connectivity_status_t status_flags;
+        uint32_t status_data;
     };
-    u_connectivity_status connectivity_status;
+    puncher_connectivity_status_u connectivity_status;
 };
+
+inline int puncher_is_busy(puncher_status_t &status)
+{
+    return status.basic_status.status_data & ~(0b1 << 31);
+}
 
 // struct scheduler_request_t
 // {
@@ -46,5 +58,4 @@ struct __packed puncher_status_t
 //     void *response_data;
 // };
 
-
-#endif  // _PUNCHERSCHEDULERTYPING_H_
+#endif // _PUNCHERSCHEDULERTYPING_H_

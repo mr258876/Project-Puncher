@@ -11,7 +11,6 @@ PuncherScheduler::~PuncherScheduler()
 
 void begin()
 {
-    
 }
 
 void PuncherScheduler::ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void *ui_param)
@@ -120,16 +119,6 @@ void PuncherScheduler::onMotorNotify(void *param)
         /* code */
         break;
     }
-    case OBSERVE_NOTIFY_ON_OPERATION:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOFITY_ON_CONFIRM:
-    {
-        /* code */
-        break;
-    }
     case OBSERVE_NOTIFY_ON_INFO:
     {
         /* code */
@@ -157,15 +146,20 @@ void PuncherScheduler::onMotorNotify(void *param)
 
 int PuncherScheduler::start_workload()
 {
-    if (status)
-        return false;
+    if (puncher_is_busy(status))
+        return status.basic_status.status_data;
 
-    reverse(holeList.begin(), holeList.end()); // Reverse the vector so it will be O(1) each time poping a hole
+    if (status.basic_status.status_flags.has_mission)
+    {
+        reverse(holeList.begin(), holeList.end()); // Reverse the vector so it will be O(1) each time poping a hole
 
-    // TODO
-    status = PUNCHER_RUNNING;
+        // TODO
 
-    return 0;
+
+        status.basic_status.status_flags.is_running = 1;
+        return 0;
+    }
+    return 1;
 }
 
 int PuncherScheduler::pause_workload()
@@ -177,12 +171,11 @@ int PuncherScheduler::pause_workload()
 
 int PuncherScheduler::delete_workload()
 {
-    if (this->status)
+    if (puncher_is_busy(this->status))
     {
-        return this->status;
+        return this->status.basic_status.status_data;
     }
-    
-    xSemaphoreTake
+
     this->holeList.clear();
     return 0;
 }
@@ -195,18 +188,21 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
 
 int PuncherScheduler::feed_paper(int gear)
 {
+    if (puncher_is_busy(this->status))
+        return this->status.basic_status.status_data;
+
     // TODO
     if (gear)
     {
-        if (this->status)
-            return this->status;
-        this->Z->rotate_infinite();
-        this->status |= PUNCHER_FEEDING_PAPER;
+        // this->Z.sleep(false);
+        this->Z->rotate_infinite(gear);
+        this->status.basic_status.status_flags.is_feeding_paper = 1;
     }
     else
     {
         this->Z->stop();
-        this->status &= (~PUNCHER_FEEDING_PAPER);
+        // this->Z.sleep(true);
+        this->status.basic_status.status_flags.is_feeding_paper = 0;
     }
 
     return 0;
@@ -223,12 +219,12 @@ unsigned int PuncherScheduler::set_status(unsigned int status_code)
 {
     // TODO
 
-    return status;
+    return status.basic_status.status_data;
 }
 
 unsigned int PuncherScheduler::get_status()
 {
-    return status;
+    return status.basic_status.status_data;
 }
 
 time_t PuncherScheduler::get_ETA()

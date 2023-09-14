@@ -13,8 +13,6 @@
 
 static PuncherScheduler *scheduler;
 
-static LVGLPuncherUI *lvgl_ui;
-
 static TMC_LEDCMotorController *controller_X;
 static TMC_LEDCMotorController *controller_Y;
 static TMC_LEDCMotorController *controller_Z;
@@ -52,6 +50,8 @@ void motor_init()
 {
     ESP_LOGI("Puncher_Main", "Motor initializing...");
 
+    DRIVER_SERIAL.begin(DRIVER_UART_BANDRATE);
+
     controller_X = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_X, xdirPin, xstepPin, xenablePin, X_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b00);
     controller_Y = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Y, ydirPin, ystepPin, yenablePin, Y_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b01);
     controller_Z = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Z, zdirPin, zstepPin, zenablePin, Z_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b10);
@@ -81,8 +81,6 @@ void oled_init()
 void lvgl_init()
 {
     ESP_LOGI("Puncher_Main", "Starting LVGL...");
-
-    lvgl_ui = new LVGLPuncherUI();
 
     lvgl_ui->disp_drv.flush_cb = disp_flush;
     lvgl_ui->disp_drv.rounder_cb = disp_rounder_cb;

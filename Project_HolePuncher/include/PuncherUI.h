@@ -3,6 +3,7 @@
 
 #include "Observe.h"
 #include "ObserveStructs.h"
+#include "PuncherSchedulerAbst.h"
 #include <string>
 
 enum ui_menu_item_type_t
@@ -38,12 +39,23 @@ struct __packed ui_alert_msg_t
 
 class PuncherUI : public Observeable
 {
+private:
+    PuncherSchedulerInterface *scheduler;
 public:
     virtual void begin() = 0;
     /* For PuncherScheduler, call this to update values in UI, open a dialog, etc. */
     virtual void alert(ui_alert_msg_t *msg) = 0;
     /* For PuncherScheduler, call this to draw menu. */
     virtual void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL) = 0;
+    /* For PuncherScheduler */
+    inline void attachScheduler(PuncherSchedulerInterface *scheduler)
+    {
+        this->scheduler = scheduler;
+    }
+    inline PuncherSchedulerInterface *getScheduler()
+    {
+        return scheduler;
+    }
 };
 
 #endif // _PUNCHERUI_H_

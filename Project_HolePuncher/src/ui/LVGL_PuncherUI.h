@@ -19,4 +19,6 @@ public:
     void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL);
 };
 
+extern LVGLPuncherUI *lvgl_ui;
+
 #endif  // _LVGL_PUNCHERUI_H_

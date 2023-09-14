@@ -103,7 +103,7 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
         __pcnt_clear_intr(driver->pcnt_unit);
         int16_t count = __pcnt_get_count(driver->pcnt_unit);
         driver->steps_remaining -= count;
-        driver->motor_pos += (dir_state ? count : -count);
+        driver->motor_pos += (driver->dir_state ? count : -count);
 
         if (driver->steps_remaining == 0)
         {
@@ -228,7 +228,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     config_ledc_timer.speed_mode = ledc_mode;
     config_ledc_timer.timer_num = ledc_timer;
     config_ledc_timer.duty_resolution = LEDC_TIMER_4_BIT;
-    config_ledc_timer.freq_hz = 200;
+    config_ledc_timer.freq_hz = 1000;
     config_ledc_timer.clk_cfg = LEDC_AUTO_CLK;
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
 
@@ -436,7 +436,7 @@ long LEDCStepperDriver::stop()
     int16_t counter_value;
     pcnt_get_counter_value(pcnt_unit, &counter_value);
     steps_remaining -= counter_value;
-    motor_pos += (dir_state ? count : -counter_value);
+    motor_pos += (dir_state ? counter_value : -counter_value);
     pcnt_counter_pause(pcnt_unit);
     pcnt_counter_clear(pcnt_unit);
 

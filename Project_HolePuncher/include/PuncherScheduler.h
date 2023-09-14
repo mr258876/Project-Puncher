@@ -56,6 +56,7 @@ public:
         this->ui_list.push_back(ui);
         ui->addObserver([this](void *param)
                         { this->onUINotify(param); });
+        ui->attachScheduler(this);
     }
     /* Notify all UI */
     inline void notifyUI(ui_alert_msg_t *msg)

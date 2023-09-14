@@ -21,13 +21,8 @@ TMC_LEDCMotorController::~TMC_LEDCMotorController()
 
 motor_res_t TMC_LEDCMotorController::begin()
 {
-    stepper->begin(189, micro_steps);   // 189 = 8mm * pi * 60s
+    stepper->begin(60, micro_steps);
     stepper->setEnableActiveState(LOW);
-
-    if (!driver_serial->baudRate())
-    {
-        driver_serial->begin(DRIVER_UART_BANDRATE);
-    }
 
     driver->begin();
     driver->microsteps(micro_steps);
@@ -52,7 +47,7 @@ long TMC_LEDCMotorController::stop()
     return stepper->stop();
 }
 
-long TMC_LEDCMotorController::get_position()
+long TMC_LEDCMotorController::getPosition()
 {
     return stepper->getPosition();
 }

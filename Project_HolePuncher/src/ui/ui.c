@@ -90,14 +90,18 @@ void ui_event_Feed_Screen(lv_event_t * e)
     if(event_code == LV_EVENT_SCREEN_LOADED) {
         ui_event_Feed_Screen_onLoad(e);
     }
+    else if (event_code == LV_EVENT_SCREEN_UNLOADED)
+    {
+        lv_group_focus_freeze(ui_group, false);
+        lv_group_set_editing(ui_group, false);
+    }
 }
 void ui_event_Feed_Roller(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    LV_LOG_INFO("Event code:%d", event_code);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_delete(&ui_Feed_Screen);
+    if(event_code == LV_EVENT_LONG_PRESSED || event_code == LV_EVENT_LONG_PRESSED_REPEAT) {
+        lv_scr_load_anim(ui_Home_Screen, LV_SCR_LOAD_ANIM_NONE, 500, 0, true);
     }
     else if (event_code == LV_EVENT_KEY)
     {

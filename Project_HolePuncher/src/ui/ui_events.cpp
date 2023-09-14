@@ -1,5 +1,6 @@
 #include "./ui_events.h"
 #include "./ui.h"
+#include "./LVGL_PuncherUI.h"
 
 void ui_event_Home_Button1_onClick(lv_event_t * e)
 {
@@ -30,5 +31,9 @@ void ui_event_Feed_Screen_onLoad(lv_event_t * e)
 
 void ui_event_Feed_Roller_onKey(lv_event_t * e)
 {
-    
+    lv_obj_t *roller = e->target;
+    int selected = lv_roller_get_selected(roller);
+    selected = 4 - selected;
+    LV_LOG_INFO("Selected %d", selected);
+    lvgl_ui->getScheduler()->feed_paper(selected);
 }
