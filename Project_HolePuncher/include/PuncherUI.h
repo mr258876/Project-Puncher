@@ -40,7 +40,7 @@ struct __packed ui_alert_msg_t
 class PuncherUI : public Observeable
 {
 private:
-    PuncherSchedulerInterface *scheduler;
+    PuncherSchedulerInterface *scheduler = NULL;
 public:
     virtual void begin() = 0;
     /* For PuncherScheduler, call this to update values in UI, open a dialog, etc. */
@@ -48,9 +48,9 @@ public:
     /* For PuncherScheduler, call this to draw menu. */
     virtual void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL) = 0;
     /* For PuncherScheduler */
-    inline void attachScheduler(PuncherSchedulerInterface *scheduler)
+    inline void attachScheduler(PuncherSchedulerInterface *p_scheduler)
     {
-        this->scheduler = scheduler;
+        this->scheduler = p_scheduler;
     }
     inline PuncherSchedulerInterface *getScheduler()
     {

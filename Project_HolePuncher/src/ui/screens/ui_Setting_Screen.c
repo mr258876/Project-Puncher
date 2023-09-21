@@ -5,17 +5,18 @@
 
 #include "../ui.h"
 
-lv_obj_t *load_root_page(lv_obj_t *ui_Setting_Menu);
-lv_obj_t *load_about_page(lv_obj_t *parent_menu);
+void load_root_page(lv_obj_t *menu, lv_obj_t *page);
+void load_about_page(lv_obj_t *menu, lv_obj_t *page);
 
 void ui_Setting_Screen_screen_init(void)
 {
     ui_Setting_Screen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Setting_Screen, LV_OBJ_FLAG_SCROLLABLE); /// Flags
-    lv_obj_set_style_bg_color(ui_Setting_Screen, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Setting_Screen, lv_color_hex(0xffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Setting_Screen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     /* Create a menu object */
+    // lv_menu_class.group_def = LV_OBJ_CLASS_GROUP_DEF_TRUE;  // <--
     ui_Setting_Menu = lv_menu_create(ui_Setting_Screen);
     lv_obj_set_size(ui_Setting_Menu, lv_disp_get_hor_res(NULL), lv_disp_get_ver_res(NULL));
     lv_obj_center(ui_Setting_Menu);
@@ -26,17 +27,17 @@ void ui_Setting_Screen_screen_init(void)
     lv_obj_t *back_btn_label = lv_label_create(back_btn);
     lv_label_set_text(back_btn_label, _("Back"));
 
-    lv_obj_t *root_page = load_root_page(ui_Setting_Menu);
+    lv_obj_t *root_page = lv_menu_page_create(ui_Setting_Menu, _("Setting"));
+    load_root_page(ui_Setting_Menu, root_page);
+
     lv_menu_set_page(ui_Setting_Menu, root_page);
 }
 
-lv_obj_t *load_root_page(lv_obj_t *ui_Setting_Menu)
+void load_root_page(lv_obj_t *menu, lv_obj_t *page)
 {
-    /* Create root page */
-    lv_obj_t *root_page = lv_menu_page_create(ui_Setting_Menu, _("Setting"));
-
     /* Load sub pages */
-    lv_obj_t *about_page = load_about_page(root_page);
+    lv_obj_t *about_page = lv_menu_page_create(menu, _("About"));
+    load_about_page(menu, about_page);
 
     lv_obj_t *cont;
     lv_obj_t *label;
@@ -44,36 +45,42 @@ lv_obj_t *load_root_page(lv_obj_t *ui_Setting_Menu)
     // cont = lv_menu_cont_create(root_page);
     // label = lv_label_create(cont);
     // lv_label_set_text(label, "Item 2 (Click me!)");
-    // lv_menu_set_load_page_event(ui_Setting_Menu, cont, sub_2_page);
+    // lv_menu_set_load_page_event(menu, cont, sub_2_page);
 
     // cont = lv_menu_cont_create(root_page);
     // label = lv_label_create(cont);
     // lv_label_set_text(label, "Item 3 (Click me!)");
-    // lv_menu_set_load_page_event(ui_Setting_Menu, cont, wireless_page);
+    // lv_menu_set_load_page_event(menu, cont, wireless_page);
 
-    cont = lv_menu_cont_create(root_page);
+    cont = lv_menu_cont_create(page);
     label = lv_label_create(cont);
     lv_label_set_text(label, _("About"));
-    lv_menu_set_load_page_event(ui_Setting_Menu, cont, about_page);
+    lv_menu_set_load_page_event(menu, cont, about_page);
 
-    return root_page;
+    lv_group_add_obj(ui_group, cont);
+    lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 }
 
-lv_obj_t *load_about_page(lv_obj_t *parent_menu)
+void load_about_page(lv_obj_t *menu, lv_obj_t *page)
 {
-    /* Create root page */
-    lv_obj_t *page = lv_menu_page_create(parent_menu, _("About"));
-
     /* Load sub pages */
 
     /* Link sub pages */
-    lv_obj_t *about_text = lv_label_create(page);
-    lv_obj_set_width(ui_Info_Text_Label, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Info_Text_Label, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Info_Text_Label, LV_ALIGN_CENTER);
-    lv_label_set_text_fmt(ui_Info_Text_Label, _("_about_text"), "NULL");
-    lv_obj_set_style_text_color(ui_Info_Text_Label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Info_Text_Label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t *cont;
+    lv_obj_t *about_text;
 
-    return page;
+    cont = lv_menu_cont_create(page);
+    about_text = lv_label_create(cont);
+
+    lv_obj_set_width(about_text, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(about_text, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(about_text, LV_ALIGN_CENTER);
+    lv_label_set_text_fmt(about_text, _("_about_text"), "NULL");
+    lv_obj_set_style_text_color(about_text, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(about_text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_group_add_obj(ui_group, cont);
+    lv_obj_clear_flag(cont, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 }

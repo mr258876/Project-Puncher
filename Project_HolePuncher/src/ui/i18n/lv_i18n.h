@@ -2,7 +2,7 @@
 #define LV_I18N_H
 
 #ifdef __cplusplus
-// extern "C" {
+extern "C" {
 #endif
 
 #include <stdint.h>
@@ -79,7 +79,7 @@ void __lv_i18n_reset(void);
 
 
 #ifdef __cplusplus
-// } /* extern "C" */
+} /* extern "C" */
 #endif
 
 #endif /*LV_LANG_H*/

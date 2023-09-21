@@ -144,6 +144,11 @@ void PuncherScheduler::onMotorNotify(void *param)
     }
 }
 
+void PuncherScheduler::onUINotify(void *param)
+{
+
+}
+
 int PuncherScheduler::start_workload()
 {
     if (puncher_is_busy(status))

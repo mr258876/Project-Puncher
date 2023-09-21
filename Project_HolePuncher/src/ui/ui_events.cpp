@@ -34,6 +34,10 @@ void ui_event_Feed_Roller_onKey(lv_event_t * e)
     lv_obj_t *roller = e->target;
     int selected = lv_roller_get_selected(roller);
     selected = 4 - selected;
-    LV_LOG_INFO("Selected %d", selected);
+    if (lv_event_get_key(e) == LV_KEY_ENTER)
+    {
+        lv_group_set_editing(ui_group, true);
+    }
+    
     lvgl_ui->getScheduler()->feed_paper(selected);
 }

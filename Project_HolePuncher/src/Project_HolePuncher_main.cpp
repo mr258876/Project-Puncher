@@ -87,6 +87,8 @@ void lvgl_init()
     lvgl_ui->disp_drv.set_px_cb = disp_set_px_cb;
 
     lvgl_ui->begin();
+    scheduler->attachUI(lvgl_ui);
+
     ESP_LOGI("Puncher_Main", "LVGL initialized!");
 }
 
