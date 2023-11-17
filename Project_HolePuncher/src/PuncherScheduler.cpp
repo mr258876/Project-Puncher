@@ -13,6 +13,15 @@ void begin()
 {
 }
 
+std::vector<ConfigurableItem> PuncherScheduler::getConfigurations(bool full=false)
+{
+    std::vector<ConfigurableItem> itemList;
+
+    itemList.push_back(ConfigurableEnum("Language", ([this](void *p) { /* TODO */ return 0; }), 0, "English\n中文"));
+
+    return itemList;
+}
+
 void PuncherScheduler::ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void *ui_param)
 {
     /* TODO: item settings access control */

@@ -13,7 +13,7 @@
 
 #include <Arduino.h>
 
-class PuncherScheduler : PuncherSchedulerInterface
+class PuncherScheduler : PuncherSchedulerInterface, Configurable
 {
 private:
     puncher_status_t status;
@@ -73,6 +73,7 @@ public:
         // motorHandler();
     }
 
+    std::vector<ConfigurableItem> getConfigurations(bool full=false);
     void ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void *ui_param);
 
     /* Observation callbacks */

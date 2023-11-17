@@ -92,13 +92,15 @@ struct __packed ConfigurableSubmenu : ConfigurableItem, ConfigurableItemWithValu
 struct __packed ConfigurableEnum : ConfigurableItem, ConfigurableItemWithValue
 {
     const ConfigurableItem_t _itemType = CONFIGURABLE_ENUM;
-    const char* _value;  // enum items, split with "\n"
+    int _value;
+    const char* _items;  // enum items, split with "\n"
 
-    ConfigurableEnum(const char* name, ItemCallBack cb, const char* value)
+    ConfigurableEnum(const char* name, ItemCallBack cb, int value, const char* items)
     {
         _name = name;
         _callback = cb;
         _value = value;
+        _items = items;
     };
 };
 
