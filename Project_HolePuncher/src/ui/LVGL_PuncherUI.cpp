@@ -2,7 +2,8 @@
 #include "PuncherConf.h"
 
 #include "ui/ui.h"
-#include "ui/lv_port_encoder.h"
+#include "ui/lv_port.h"
+#include "ui/lv_port_indev_ctp.h"
 
 LVGLPuncherUI::LVGLPuncherUI()
 {   
@@ -18,17 +19,10 @@ LVGLPuncherUI::~LVGLPuncherUI()
 
 void LVGLPuncherUI::begin()
 {
-    disp_draw_buf = (lv_color_t *)malloc(LV_DISP_BUF_SIZE);
-
-    lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL, SCREEN_WIDTH * SCREEN_HEIGHT);
-
-    disp_drv.hor_res = SCREEN_WIDTH;
-    disp_drv.ver_res = SCREEN_HEIGHT;
-    disp_drv.draw_buf = &draw_buf;
-    lv_disp_drv_register(&disp_drv);
+    lv_port_init();
 
     /* Initialize input device driver */
-    lv_encoder_indev_init();
+    // lv_encoder_indev_init();
     
     ui_init();
 

@@ -35,17 +35,29 @@ static void IRAM_ATTR __pcnt_clear_intr(uint8_t unit)
 
 static int16_t IRAM_ATTR __pcnt_get_count(uint8_t unit)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     return PCNT.cnt_unit[unit].cnt_val;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    return PCNT.cnt_unit[unit].pulse_cnt_un;
+    #endif
 }
 
 static void IRAM_ATTR __pcnt_set_threshold(uint8_t unit, int16_t value)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf1.cnt_thres0 = value;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    PCNT.conf_unit[unit].conf1.cnt_thres0_un = value;
+    #endif
 }
 
 static void IRAM_ATTR __pcnt_set_threshold_enable(uint8_t unit, uint8_t enable)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf0.thr_thres0_en = enable;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    PCNT.conf_unit[unit].conf0.thr_thres0_en_un = enable;
+    #endif
 }
 
 static void IRAM_ATTR __ledc_timer_pause(uint8_t mode, uint8_t timer)
@@ -154,7 +166,11 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
         driver_id = 0;
     }
 
+    #if SOC_LEDC_SUPPORT_HS_MODE
     ledc_mode_t ledc_mode = (driver_id > 3 ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE);
+    #else
+    ledc_mode_t ledc_mode = LEDC_LOW_SPEED_MODE;
+    #endif
     ledc_timer_t ledc_timer = (driver_id > 3 ? static_cast<ledc_timer_t>(driver_id - 4) : static_cast<ledc_timer_t>(driver_id));
     ledc_channel_t ledc_channel = static_cast<ledc_channel_t>(driver_id);
     pcnt_unit_t pcnt_unit = static_cast<pcnt_unit_t>(driver_id);
@@ -287,7 +303,11 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     /* To use LEDC and PCNT on the same pin
        See https://esp32.com/viewtopic.php?t=18115 */
     gpio_set_direction(static_cast<gpio_num_t>(step_pin), GPIO_MODE_INPUT_OUTPUT);
+    #if SOC_LEDC_SUPPORT_HS_MODE
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (ledc_mode == LEDC_HIGH_SPEED_MODE ? (LEDC_HS_SIG_OUT0_IDX + ledc_channel) : (LEDC_LS_SIG_OUT0_IDX + ledc_channel)), 0, 0);
+    #else
+    gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (LEDC_LS_SIG_OUT0_IDX + ledc_channel), 0, 0);
+    #endif
 
     setRPM(rpm);
     setMicrostep(microsteps);

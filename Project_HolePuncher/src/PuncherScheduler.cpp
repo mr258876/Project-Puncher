@@ -13,7 +13,7 @@ void begin()
 {
 }
 
-std::vector<ConfigurableItem> PuncherScheduler::getConfigurations(bool full=false)
+std::vector<ConfigurableItem> PuncherScheduler::getConfigurations(bool full)
 {
     std::vector<ConfigurableItem> itemList;
 

@@ -9,7 +9,7 @@
 #include "soc/pcnt_struct.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "soc/rtc_wdt.h"
+#include "hal/wdt_hal.h"
 
 #define PIN_UNCONNECTED -1
 #define IS_CONNECTED(pin) (pin != PIN_UNCONNECTED)

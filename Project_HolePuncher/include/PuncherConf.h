@@ -1,25 +1,13 @@
 #ifndef _PUNCHERCONF_H_
 #define _PUNCHERCONF_H_
 
-//---------------- User Interface ----------------
-#define SCREEN_WIDTH    128
-#define SCREEN_HEIGHT   64
-
-#define ENCODER_A   34
-#define ENCODER_B   35
-#define ENCODER_BTN 32
-
-#define LV_DISP_BUF_SIZE    128*8
-
-#define DEBOUNCE_us 20000
-
 //---------------- Motor Controls ----------------
 #define MOTOR_STEPS     200
 #define MICROSTEPS_X    16
 #define MICROSTEPS_Y    8
 #define MICROSTEPS_Z    16
 
-#define DRIVER_SERIAL Serial2 // TMC controller Serial Port
+#define DRIVER_SERIAL Serial // TMC controller Serial Port
 #define R_SENSE 0.11f         // Match to your driver <- ???
 #define DRIVER_UART_BANDRATE    115200
 
