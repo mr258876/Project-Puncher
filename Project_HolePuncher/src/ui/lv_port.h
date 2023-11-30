@@ -15,7 +15,7 @@ extern "C" {
 #define MOSI_PIN        (11)
 #define CS_PIN          (10)
 #define DC_PIN          (17)
-#define RST_PIN         (12)
+#define RST_PIN         (8)
 
 #define SPI_PORT        (SPI2_HOST)
 #define SPI_CLK         (80*1000*1000)

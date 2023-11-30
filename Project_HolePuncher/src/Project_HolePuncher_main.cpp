@@ -22,7 +22,6 @@ void lvgl_init();
 
 void setup()
 {
-    Serial.begin(115200);
     ESP_LOGI("Puncher_Main", "Serial interface init.");
 
     scheduler = new PuncherScheduler();
@@ -30,6 +29,10 @@ void setup()
     motor_init();
 
     lvgl_init();
+
+    ledcSetup(3, 48000, 4);
+    ledcAttachPin(18, 3);
+    ledcWrite(3, 128);
 
     ESP_LOGI("Puncher_Main", "System booted.");
 }
@@ -46,9 +49,9 @@ void motor_init()
 
     scheduler->attachMotors(controller_X, controller_Y, controller_Z);
 
-    controller_X->begin();
-    controller_Y->begin();
-    controller_Z->begin();
+    // controller_X->begin();
+    // controller_Y->begin();
+    // controller_Z->begin();
 
     ESP_LOGI("Puncher_Main", "Motor initialized!");
 }
@@ -71,5 +74,5 @@ void loop()
         lv_timer_handler(); /* let the GUI do its work */
         xSemaphoreGive(LVGLMutex);
     }
-    vTaskDelay(5);
+    vTaskDelay(pdMS_TO_TICKS(5));
 }

@@ -22,6 +22,10 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
+#define CTP_INT     15
+#define CTP_RST     16
+#define CTP_I2C_SCL 6
+#define CTP_I2C_SDA 7
 
 /**********************
  *      TYPEDEFS

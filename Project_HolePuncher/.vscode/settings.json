@@ -68,6 +68,7 @@
         "*.ipp": "cpp",
         "xhash": "cpp",
         "xmemory": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "ft6336.hpp": "c"
     }
 }

@@ -15,6 +15,7 @@
 
 static lv_disp_drv_t disp_drv;
 static const char *TAG = "lv_port";
+static uint8_t *p_disp_buf;
 
 // static void lv_tick_inc_cb()
 // {
@@ -40,7 +41,7 @@ static void disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *co
 static void lv_port_disp_init(void)
 {
     static lv_disp_draw_buf_t draw_buf_dsc;
-    static lv_color_t p_disp_buf[LCD_WIDTH * LCD_BUF_HEIGHT];
+    p_disp_buf = malloc(LCD_WIDTH * LCD_BUF_HEIGHT);
 
     spi_bus_config_t buscfg = {
         .sclk_io_num = SCLK_PIN,

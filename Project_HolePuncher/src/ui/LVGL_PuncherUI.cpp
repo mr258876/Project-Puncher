@@ -22,7 +22,7 @@ void LVGLPuncherUI::begin()
     lv_port_init();
 
     /* Initialize input device driver */
-    // lv_encoder_indev_init();
+    lv_port_indev_init();
     
     ui_init();
 
