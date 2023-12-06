@@ -46,12 +46,12 @@ static void on_touch(TPoint p, TEvent e);
  **********************/
 lv_indev_t *indev_touchpad;
 
-FT6X36 ctp(&Wire, CTP_INT);
+FT6X36 ctp(&Wire1, CTP_INT);
 EventGroupHandle_t eg;
 
 bool has_touch;
-lv_coord_t touch_x;
-lv_coord_t touch_y;
+lv_coord_t touch_x = 0;
+lv_coord_t touch_y = 0;
 
 /**********************
  *      MACROS
@@ -93,15 +93,19 @@ static void touchpad_init(void)
     /*Your code comes here*/
     eg = xEventGroupCreate();
 
+    
     xSemaphoreTake(I2C0Mutex, portMAX_DELAY);
     {
-        Wire.begin(CTP_I2C_SDA, CTP_I2C_SCL, 400000U);
+        Wire1.begin(CTP_I2C_SDA, CTP_I2C_SCL, 400000U);
         ctp.begin();
 
         ctp.registerIsrHandler(touch_isr);
         ctp.registerTouchHandler(on_touch);
     }
     xSemaphoreGive(I2C0Mutex);
+
+    pinMode(CTP_INT, INPUT_PULLUP);
+    attachInterrupt(CTP_INT, touch_isr, FALLING);
 
     xTaskCreatePinnedToCore(TaskProcessTouch, "fTaskProcessTouch", 4096, NULL, 3, NULL, 1);
 }
@@ -136,6 +140,7 @@ void TaskProcessTouch(void *pvParameters)
                 ctp.processTouch();
             }
             xSemaphoreGive(I2C0Mutex);
+            ESP_LOGI("ctp", "touch!");
         }
     }
 }
@@ -157,8 +162,9 @@ void on_touch(TPoint p, TEvent e)
         has_touch = false;
     }
 
-    touch_x = p.x;
-    touch_y = p.y;
+    // x, y is in opposite position
+    touch_x = p.y;
+    touch_y = 240 - p.x;
 }
 
 #else /*Enable this file at the top*/

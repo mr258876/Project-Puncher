@@ -21,6 +21,7 @@ lv_obj_t *ui_Label5;
 lv_obj_t *ui_Label6;
 lv_obj_t *ui_Label7;
 lv_obj_t *ui_Panel3;
+void ui_event_Button1( lv_event_t * e);
 lv_obj_t *ui_Button1;
 lv_obj_t *ui_Label3;
 lv_obj_t *ui_Button2;
@@ -35,6 +36,7 @@ lv_obj_t *ui_Label8;
 
 // SCREEN: ui_FeedScreen
 void ui_FeedScreen_screen_init(void);
+void ui_event_FeedScreen( lv_event_t * e);
 lv_obj_t *ui_FeedScreen;
 lv_obj_t *ui_Panel5;
 void ui_event_Button5( lv_event_t * e);
@@ -42,9 +44,17 @@ lv_obj_t *ui_Button5;
 lv_obj_t *ui_Label12;
 lv_obj_t *ui_Label13;
 lv_obj_t *ui_Panel6;
+lv_obj_t *ui_Panel4;
 lv_obj_t *ui_Button6;
 lv_obj_t *ui_Label14;
+lv_obj_t *ui_Panel7;
+void ui_event_Button8( lv_event_t * e);
+lv_obj_t *ui_Button8;
+lv_obj_t *ui_Label15;
 lv_obj_t *ui_Roller1;
+void ui_event_Button9( lv_event_t * e);
+lv_obj_t *ui_Button9;
+lv_obj_t *ui_Label16;
 lv_obj_t *ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -58,10 +68,34 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
+void ui_event_Button1( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_FeedScreen, LV_SCR_LOAD_ANIM_FADE_ON, 250, 0, &ui_FeedScreen_screen_init);
+}
+}
+void ui_event_FeedScreen( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_SCREEN_LOAD_START) {
+      _ui_roller_set_property(ui_Roller1, _UI_ROLLER_PROPERTY_SELECTED, 4);
+}
+}
 void ui_event_Button5( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_screen_change( &ui_HomeScreen, LV_SCR_LOAD_ANIM_FADE_ON, 250, 0, &ui_HomeScreen_screen_init);
+}
+}
+void ui_event_Button8( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_roller_set_property(ui_Roller1, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, (lv_roller_get_selected(ui_Roller1) <= 0 ? 0 : (lv_roller_get_selected(ui_Roller1) - 1)));
+}
+}
+void ui_event_Button9( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_roller_set_property(ui_Roller1, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, (lv_roller_get_selected(ui_Roller1) >= 8 ? 8 : (lv_roller_get_selected(ui_Roller1) + 1)));
 }
 }
 

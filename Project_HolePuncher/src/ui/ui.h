@@ -7,62 +7,74 @@
 #define _PROJECT_PUNCHER_NG_UI_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #if defined __has_include
-#if __has_include("lvgl.h")
-#include "lvgl.h"
-#elif __has_include("lvgl/lvgl.h")
-#include "lvgl/lvgl.h"
+  #if __has_include("lvgl.h")
+    #include "lvgl.h"
+  #elif __has_include("lvgl/lvgl.h")
+    #include "lvgl/lvgl.h"
+  #else
+    #include "lvgl.h"
+  #endif
 #else
-#include "lvgl.h"
-#endif
-#else
-#include "lvgl.h"
+  #include "lvgl.h"
 #endif
 
 #include "i18n/lv_i18n.h"
 #include "ui_helpers.h"
 #include "ui_events.h"
-  // SCREEN: ui_HomeScreen
-  void ui_HomeScreen_screen_init(void);
-  extern lv_obj_t *ui_HomeScreen;
-  extern lv_obj_t *ui_Panel1;
-  extern lv_obj_t *ui_Label1;
-  extern lv_obj_t *ui_Label2;
-  extern lv_obj_t *ui_Panel2;
-  extern lv_obj_t *ui_Label4;
-  extern lv_obj_t *ui_Label5;
-  extern lv_obj_t *ui_Label6;
-  extern lv_obj_t *ui_Label7;
-  extern lv_obj_t *ui_Panel3;
-  extern lv_obj_t *ui_Button1;
-  extern lv_obj_t *ui_Label3;
-  extern lv_obj_t *ui_Button2;
-  extern lv_obj_t *ui_Label9;
-  extern lv_obj_t *ui_Button3;
-  extern lv_obj_t *ui_Label10;
-  extern lv_obj_t *ui_Button4;
-  extern lv_obj_t *ui_Label11;
-  extern lv_obj_t *ui_Button7;
-  extern lv_obj_t *ui_Label8;
-  // SCREEN: ui_FeedScreen
-  void ui_FeedScreen_screen_init(void);
-  extern lv_obj_t *ui_FeedScreen;
-  extern lv_obj_t *ui_Panel5;
-  void ui_event_Button5(lv_event_t *e);
-  extern lv_obj_t *ui_Button5;
-  extern lv_obj_t *ui_Label12;
-  extern lv_obj_t *ui_Label13;
-  extern lv_obj_t *ui_Panel6;
-  extern lv_obj_t *ui_Button6;
-  extern lv_obj_t *ui_Label14;
-  extern lv_obj_t *ui_Roller1;
-  extern lv_obj_t *ui____initial_actions0;
+// SCREEN: ui_HomeScreen
+void ui_HomeScreen_screen_init(void);
+extern lv_obj_t *ui_HomeScreen;
+extern lv_obj_t *ui_Panel1;
+extern lv_obj_t *ui_Label1;
+extern lv_obj_t *ui_Label2;
+extern lv_obj_t *ui_Panel2;
+extern lv_obj_t *ui_Label4;
+extern lv_obj_t *ui_Label5;
+extern lv_obj_t *ui_Label6;
+extern lv_obj_t *ui_Label7;
+extern lv_obj_t *ui_Panel3;
+void ui_event_Button1( lv_event_t * e);
+extern lv_obj_t *ui_Button1;
+extern lv_obj_t *ui_Label3;
+extern lv_obj_t *ui_Button2;
+extern lv_obj_t *ui_Label9;
+extern lv_obj_t *ui_Button3;
+extern lv_obj_t *ui_Label10;
+extern lv_obj_t *ui_Button4;
+extern lv_obj_t *ui_Label11;
+extern lv_obj_t *ui_Button7;
+extern lv_obj_t *ui_Label8;
+// SCREEN: ui_FeedScreen
+void ui_FeedScreen_screen_init(void);
+void ui_event_FeedScreen( lv_event_t * e);
+extern lv_obj_t *ui_FeedScreen;
+extern lv_obj_t *ui_Panel5;
+void ui_event_Button5( lv_event_t * e);
+extern lv_obj_t *ui_Button5;
+extern lv_obj_t *ui_Label12;
+extern lv_obj_t *ui_Label13;
+extern lv_obj_t *ui_Panel6;
+extern lv_obj_t *ui_Panel4;
+extern lv_obj_t *ui_Button6;
+extern lv_obj_t *ui_Label14;
+extern lv_obj_t *ui_Panel7;
+void ui_event_Button8( lv_event_t * e);
+extern lv_obj_t *ui_Button8;
+extern lv_obj_t *ui_Label15;
+extern lv_obj_t *ui_Roller1;
+void ui_event_Button9( lv_event_t * e);
+extern lv_obj_t *ui_Button9;
+extern lv_obj_t *ui_Label16;
+extern lv_obj_t *ui____initial_actions0;
 
-  void ui_init(void);
+
+
+
+void ui_init(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

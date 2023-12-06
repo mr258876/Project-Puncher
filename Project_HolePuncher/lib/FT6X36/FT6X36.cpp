@@ -142,7 +142,7 @@ void FT6X36::readData(void)
 
 	_wire->requestFrom((uint8_t)FT6X36_ADDR, size);
 	for (uint8_t i = 0; i < size; i++)
-		data[i] = Wire.read();
+		data[i] = _wire->read();
 
 #ifdef FT6X36_DEBUG
 	Serial.println("REGISTERS:");

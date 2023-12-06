@@ -18,7 +18,7 @@ extern "C" {
 #define RST_PIN         (8)
 
 #define SPI_PORT        (SPI2_HOST)
-#define SPI_CLK         (80*1000*1000)
+#define SPI_CLK         (120*1000*1000)
 
 #define LCD_DIRECTION   (90)
 

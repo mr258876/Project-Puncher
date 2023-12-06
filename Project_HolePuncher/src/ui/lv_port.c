@@ -16,6 +16,7 @@
 static lv_disp_drv_t disp_drv;
 static const char *TAG = "lv_port";
 static uint8_t *p_disp_buf;
+static uint8_t *p_disp_buf2;
 
 // static void lv_tick_inc_cb()
 // {
@@ -41,7 +42,8 @@ static void disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *co
 static void lv_port_disp_init(void)
 {
     static lv_disp_draw_buf_t draw_buf_dsc;
-    p_disp_buf = malloc(LCD_WIDTH * LCD_BUF_HEIGHT);
+    p_disp_buf = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
+    p_disp_buf2 = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
 
     spi_bus_config_t buscfg = {
         .sclk_io_num = SCLK_PIN,
@@ -111,13 +113,14 @@ static void lv_port_disp_init(void)
         esp_lcd_panel_disp_on_off(panel_handle,true);
     }
     
-    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, NULL, LCD_WIDTH * LCD_BUF_HEIGHT);
+    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, p_disp_buf2, LCD_WIDTH * LCD_BUF_HEIGHT);
     lv_disp_drv_init(&disp_drv);
     disp_drv.hor_res = LCD_WIDTH;
     disp_drv.ver_res = LCD_HEIGHT;
     disp_drv.flush_cb = disp_flush;
     disp_drv.draw_buf = &draw_buf_dsc;
     disp_drv.user_data = panel_handle;
+    disp_drv.full_refresh = false;
     lv_disp_drv_register(&disp_drv);
 }
 

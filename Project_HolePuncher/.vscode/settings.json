@@ -69,6 +69,7 @@
         "xhash": "cpp",
         "xmemory": "cpp",
         "xutility": "cpp",
-        "ft6336.hpp": "c"
+        "ft6336.hpp": "c",
+        "ui.h": "c"
     }
 }

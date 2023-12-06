@@ -244,7 +244,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     config_ledc_timer.speed_mode = ledc_mode;
     config_ledc_timer.timer_num = ledc_timer;
     config_ledc_timer.duty_resolution = LEDC_TIMER_4_BIT;
-    config_ledc_timer.freq_hz = 1000;
+    config_ledc_timer.freq_hz = 20000;
     config_ledc_timer.clk_cfg = LEDC_AUTO_CLK;
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
 

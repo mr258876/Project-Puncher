@@ -168,4 +168,6 @@ lv_obj_set_height( ui_Label8, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label8, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label8,_("Settings_SIGN"));
 
+lv_obj_add_event_cb(ui_Button1, ui_event_Button1, LV_EVENT_ALL, NULL);
+
 }
