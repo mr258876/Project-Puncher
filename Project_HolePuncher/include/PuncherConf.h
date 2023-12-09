@@ -30,4 +30,6 @@
 #define Y_CONTROL_CHANNEL 1
 #define Z_CONTROL_CHANNEL 2
 
+#define LCD_LEDC_CHANNEL 7
+
 #endif

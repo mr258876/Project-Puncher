@@ -140,7 +140,6 @@ void TaskProcessTouch(void *pvParameters)
                 ctp.processTouch();
             }
             xSemaphoreGive(I2C0Mutex);
-            ESP_LOGI("ctp", "touch!");
         }
     }
 }

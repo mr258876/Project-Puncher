@@ -5,6 +5,8 @@
 #include "ui/lv_port.h"
 #include "ui/lv_port_indev_ctp.h"
 
+#include <Arduino.h>
+
 LVGLPuncherUI::LVGLPuncherUI()
 {   
     lv_init();
@@ -27,6 +29,10 @@ void LVGLPuncherUI::begin()
     ui_init();
 
     LV_LOG_INFO("LVGL Booted.");
+
+    ledcSetup(LCD_LEDC_CHANNEL, 48000, 8);
+    ledcAttachPin(BL_PIN, LCD_LEDC_CHANNEL);
+    this->setBrightness(128);
 }
 
 void LVGLPuncherUI::alert(ui_alert_msg_t *msg)
@@ -37,6 +43,11 @@ void LVGLPuncherUI::alert(ui_alert_msg_t *msg)
 void LVGLPuncherUI::drawMenu(std::vector<ui_menu_item_t>, void* ui_param)
 {
 
+}
+
+void LVGLPuncherUI::setBrightness(int brightness)
+{
+    ledcWrite(LCD_LEDC_CHANNEL, brightness);
 }
 
 LVGLPuncherUI *lvgl_ui = new LVGLPuncherUI();

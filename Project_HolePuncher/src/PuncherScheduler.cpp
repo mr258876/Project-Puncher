@@ -17,7 +17,7 @@ std::vector<ConfigurableItem> PuncherScheduler::getConfigurations(bool full)
 {
     std::vector<ConfigurableItem> itemList;
 
-    itemList.push_back(ConfigurableEnum("Language", ([this](void *p) { /* TODO */ return 0; }), 0, "English\n中文"));
+    // itemList.push_back(ConfigurableEnum("Language", ([this](void *p) { /* TODO */ return 0; }), 0, "English\n中文"));
 
     return itemList;
 }

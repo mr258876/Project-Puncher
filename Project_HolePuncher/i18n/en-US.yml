@@ -1,11 +1,36 @@
 en-US:
-  Feed: ~
-  _feed_roller_options: Forward 4\nForward 3\nForward 2\nForward 1\nFree Move\nBackward 1\nBackward 2\nBackward 3\nBackward 4
-  Home: ~
+  Project Puncher: ~
+  Next Gen: ~
+  Status: ~
   ETA: ~
+  Feed: ~
   Setting: ~
   Info: ~
+  Warning: ~
+  Error: ~
   Back: ~
   OK: ~
   About: ~
-  _about_text: Proj.Puncher\n@mr_258876\nRev.%s
+  STOP: ~
+  Connectivity: ~
+  Motors: ~
+  Display: ~
+  Disp.: ~
+  Others: ~
+  Brightness: ~
+  Wi-Fi: ~
+  BLE: ~
+  X Axis: ~
+  Y Axis: ~
+  Z Axis: ~
+  Mechanical: ~
+  Lead Length (mm): ~
+  Reverse Axis: ~
+  Electrical: ~
+  Operational Current (mA): "Operational\nCurrent (mA)"
+  Idle Behavior: ~
+  _idle_behavior_options: "Keep Current\nReduce Current\nCut Power"
+  Zeroing: ~
+  Auto Zeroing: ~
+  Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
+  Zeroing Current (mA): ~

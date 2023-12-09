@@ -30,10 +30,6 @@ void setup()
 
     lvgl_init();
 
-    ledcSetup(7, 48000, 4);
-    ledcAttachPin(18, 7);
-    ledcWrite(7, 128);
-
     ESP_LOGI("Puncher_Main", "System booted.");
 }
 
@@ -74,5 +70,5 @@ void loop()
         lv_timer_handler(); /* let the GUI do its work */
         xSemaphoreGive(LVGLMutex);
     }
-    vTaskDelay(pdMS_TO_TICKS(5));
+    taskYIELD();
 }

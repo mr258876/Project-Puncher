@@ -10,6 +10,10 @@
 extern "C" {
 #endif
 
+#include "ui.h"
+
+void ui_event_BrightnessSlider(lv_event_t * e);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

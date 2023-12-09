@@ -18,7 +18,9 @@ static inline uint32_t op_f(uint32_t val) { UNUSED(val); return 0; }
 static inline uint32_t op_t(uint32_t val) { UNUSED(val); return 0; }
 
 static lv_i18n_phrase_t en_us_singulars[] = {
-    {"_feed_roller_options", "Forward 4\nForward 3\nForward 2\nForward 1\nFree Move\nBackward 1\nBackward 2\nBackward 3\nBackward 4"},
+    {"Operational Current (mA)", "Operational\nCurrent (mA)"},
+    {"_idle_behavior_options", "Keep Current\nReduce Current\nCut Power"},
+    {"Zeroing Torch Threshold", "Zeroing Torch\nThreshold"},
     {NULL, NULL} // End mark
 };
 
@@ -42,14 +44,37 @@ static const lv_i18n_lang_t en_us_lang = {
 };
 
 static lv_i18n_phrase_t zh_cn_singulars[] = {
+    {"Status", "状态"},
+    {"ETA", "预计剩余时间"},
     {"Feed", "进纸"},
-    {"_feed_roller_options", "前进 4\n前进 3\n前进 2\n 前进 1\n自由进纸\n后退 1\n后退 2\n后退 3\n后退 4"},
-    {"Home", "主页"},
-    {"ETA", "剩余"},
     {"Setting", "设置"},
     {"Info", "信息"},
+    {"Warning", "警告"},
+    {"Error", "错误"},
     {"Back", "返回"},
     {"About", "关于"},
+    {"STOP", "停止"},
+    {"Connectivity", "连接"},
+    {"Motors", "电机"},
+    {"Display", "显示"},
+    {"Disp.", "显示"},
+    {"Others", "其他"},
+    {"Brightness", "亮度"},
+    {"BLE", "蓝牙"},
+    {"X Axis", "X轴"},
+    {"Y Axis", "Y轴"},
+    {"Z Axis", "Z轴"},
+    {"Mechanical", "机械"},
+    {"Lead Length (mm)", "导程长度(mm)"},
+    {"Reverse Axis", "反转方向"},
+    {"Electrical", "电气"},
+    {"Operational Current(mA)", "运行电流(mA)"},
+    {"Idle Behavior", "空闲行为"},
+    {"_idle_behavior_options", "保持电流\n减小电流\n切断电源"},
+    {"Zeroing", "归位"},
+    {"Auto Zeroing", "自动归位"},
+    {"Zeroing Torch Threshold", "归位力矩阈值"},
+    {"Zeroing Current (mA)", "归位电流"},
     {NULL, NULL} // End mark
 };
 

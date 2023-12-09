@@ -1,11 +1,36 @@
 zh-CN:
+  Project Puncher: ~
+  Next Gen: ~
+  Status: 状态
+  ETA: 预计剩余时间
   Feed: 进纸
-  _feed_roller_options: 前进 4\n前进 3\n前进 2\n 前进 1\n自由进纸\n后退 1\n后退 2\n后退 3\n后退 4
-  Home: 主页
-  ETA: 剩余
   Setting: 设置
   Info: 信息
+  Warning: 警告
+  Error: 错误
   Back: 返回
   OK: ~
   About: 关于
-  _about_text: ~
+  STOP: 停止
+  Connectivity: 连接
+  Motors: 电机
+  Display: 显示
+  Disp.: 显示
+  Others: 其他
+  Brightness: 亮度
+  Wi-Fi: ~
+  BLE: 蓝牙
+  X Axis: X轴
+  Y Axis: Y轴
+  Z Axis: Z轴
+  Mechanical: 机械
+  Lead Length (mm): 导程长度(mm)
+  Reverse Axis: 反转方向
+  Electrical: 电气
+  Operational Current(mA): 运行电流(mA)
+  Idle Behavior: 空闲行为
+  _idle_behavior_options: "保持电流\n减小电流\n切断电源"
+  Zeroing: 归位
+  Auto Zeroing: 自动归位
+  Zeroing Torch Threshold: 归位力矩阈值
+  Zeroing Current (mA): 归位电流
