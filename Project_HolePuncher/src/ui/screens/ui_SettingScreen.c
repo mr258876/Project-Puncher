@@ -1,6 +1,53 @@
 #include "../ui.h"
 #include "../ui_events.h"
 
+lv_obj_t * ui_setting_root_page;
+lv_obj_t * ui_setting_wifi_page;
+lv_obj_t * ui_setting_ble_page;
+lv_obj_t * ui_setting_usb_page;
+lv_obj_t * ui_setting_x_axis_page;
+lv_obj_t * ui_setting_y_axis_page;
+lv_obj_t * ui_setting_z_axis_page;
+lv_obj_t * ui_setting_power_page;
+lv_obj_t * ui_setting_display_page;
+lv_obj_t * ui_setting_about_page;
+
+lv_obj_t * ui_setting_wifi_switch;
+
+lv_obj_t * ui_setting_x_lead_length;
+lv_obj_t * ui_setting_x_operational_speed;
+lv_obj_t * ui_setting_x_reverse_axis;
+lv_obj_t * ui_setting_x_operational_current;
+lv_obj_t * ui_setting_x_idle_behavior;
+lv_obj_t * ui_setting_x_sleep_current;
+lv_obj_t * ui_setting_x_auto_zreoing;
+lv_obj_t * ui_setting_x_zeroing_torch_thres;
+lv_obj_t * ui_setting_x_zeroing_current;
+lv_obj_t * ui_setting_x_zeroing_speed;
+
+lv_obj_t * ui_setting_y_lead_length;
+lv_obj_t * ui_setting_y_operational_speed;
+lv_obj_t * ui_setting_y_reverse_axis;
+lv_obj_t * ui_setting_y_operational_current;
+lv_obj_t * ui_setting_y_idle_behavior;
+lv_obj_t * ui_setting_y_sleep_current;
+lv_obj_t * ui_setting_y_auto_zreoing;
+lv_obj_t * ui_setting_y_zeroing_torch_thres;
+lv_obj_t * ui_setting_y_zeroing_current;
+lv_obj_t * ui_setting_y_zeroing_speed;
+
+lv_obj_t * ui_setting_z_lead_length;
+lv_obj_t * ui_setting_z_operational_speed;
+lv_obj_t * ui_setting_z_reverse_axis;
+lv_obj_t * ui_setting_z_operational_current;
+lv_obj_t * ui_setting_z_idle_behavior;
+lv_obj_t * ui_setting_z_sleep_current;
+
+lv_obj_t * ui_setting_power_voltage;
+
+lv_obj_t * ui_setting_display_brightness;
+lv_obj_t * ui_setting_display_language;
+
 enum
 {
     LV_MENU_ITEM_BUILDER_VARIANT_1,
@@ -205,125 +252,146 @@ void ui_SettingScreen_screen_init(void)
     lv_obj_t *section;
 
     /*Create wifi page*/
-    lv_obj_t *sub_wifi_page = lv_menu_page_create(menu, _("Wi-Fi"));
-    lv_obj_set_style_pad_hor(sub_wifi_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_wifi_page);
-    section = lv_menu_section_create(sub_wifi_page);
-    create_switch(section, LV_SYMBOL_WIFI, _("Wi-Fi"), false, NULL);
+    ui_setting_wifi_page = lv_menu_page_create(menu, _("Wi-Fi"));
+    lv_obj_set_style_pad_hor(ui_setting_wifi_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_wifi_page);
+    section = lv_menu_section_create(ui_setting_wifi_page);
+    ui_setting_wifi_switch = create_switch(section, LV_SYMBOL_WIFI, _("Wi-Fi"), false, NULL);
 
     /*Create x axis page*/
-    lv_obj_t *sub_x_axis_page = lv_menu_page_create(menu, _("X Axis"));
-    lv_obj_set_style_pad_hor(sub_x_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_x_axis_page);
+    ui_setting_x_axis_page = lv_menu_page_create(menu, _("X Axis"));
+    lv_obj_set_style_pad_hor(ui_setting_x_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_x_axis_page);
 
-    create_text(sub_x_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_x_axis_page);
-    create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
-    create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    create_text(ui_setting_x_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_x_axis_page);
+    ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_x_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
+    ui_setting_x_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
-    create_text(sub_x_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_x_axis_page);
-    create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
+    create_text(ui_setting_x_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_x_axis_page);
+    ui_setting_x_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
+    ui_setting_x_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
+    ui_setting_x_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
 
-    create_text(sub_x_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_x_axis_page);
-    create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
-    create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
-    create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    create_text(ui_setting_x_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_x_axis_page);
+    ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
+    ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
+    ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
 
 
     /*Create y axis page*/
-    lv_obj_t *sub_y_axis_page = lv_menu_page_create(menu, _("Y Axis"));
-    lv_obj_set_style_pad_hor(sub_y_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_y_axis_page);
+    ui_setting_y_axis_page = lv_menu_page_create(menu, _("Y Axis"));
+    lv_obj_set_style_pad_hor(ui_setting_y_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_y_axis_page);
 
-    create_text(sub_y_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_y_axis_page);
-    create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
-    create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    create_text(ui_setting_y_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_y_axis_page);
+    ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
+    ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
-    create_text(sub_y_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_y_axis_page);
-    create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
+    create_text(ui_setting_y_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_y_axis_page);
+    ui_setting_y_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
+    ui_setting_y_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
+    ui_setting_y_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
 
-    create_text(sub_y_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_y_axis_page);
-    create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
-    create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
-    create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    create_text(ui_setting_y_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_y_axis_page);
+    ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
+    ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
+    ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
     
     /*Create z aixs page*/
-    lv_obj_t *sub_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));
-    lv_obj_set_style_pad_hor(sub_z_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_z_axis_page);
+    ui_setting_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));
+    lv_obj_set_style_pad_hor(ui_setting_z_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_z_axis_page);
     
-    create_text(sub_z_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_z_axis_page);
-    create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
-    create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    create_text(ui_setting_z_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_z_axis_page);
+    ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_z_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
+    ui_setting_z_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
-    create_text(sub_z_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(sub_z_axis_page);
-    create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    create_text(ui_setting_z_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_z_axis_page);
+    ui_setting_z_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
+    ui_setting_z_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
+    ui_setting_z_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+
+
+    /*Create power page*/
+    ui_setting_power_page = lv_menu_page_create(menu, _("Power"));
+    lv_obj_set_style_pad_hor(ui_setting_power_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_power_page);
+    // create_text(sub_power_page, NULL, _("Volatge"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_power_page);
+    ui_setting_power_voltage = create_dropdown(section, NULL, _("Motor Volatge"), _("_motor_voltage_options"), 0, NULL);
+
 
     /*Create display page*/
-    lv_obj_t *sub_display_page = lv_menu_page_create(menu, _("Display"));
-    lv_obj_set_style_pad_hor(sub_display_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_display_page);
-    section = lv_menu_section_create(sub_display_page);
-    create_slider(section, LV_SYMBOL_SETTINGS, _("Brightness"), 1, 255, 128, ui_event_BrightnessSlider);
+    ui_setting_display_page = lv_menu_page_create(menu, _("Display"));
+    lv_obj_set_style_pad_hor(ui_setting_display_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_display_page);
+    create_text(ui_setting_display_page, NULL, _("Screen"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_display_page);
+    ui_setting_display_brightness = create_slider(section, LV_SYMBOL_SETTINGS, _("Brightness"), 1, 255, 128, ui_event_BrightnessSlider);
+    create_text(ui_setting_display_page, NULL, _("System"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_display_page);
+    ui_setting_display_language = create_dropdown(section, NULL, _("Language"), _("_idle_behavior_options"), 0, NULL);
 
     /*Create about page*/
-    lv_obj_t *sub_about_page = lv_menu_page_create(menu, _("About"));
-    lv_obj_set_style_pad_hor(sub_about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
-    lv_menu_separator_create(sub_about_page);
-    section = lv_menu_section_create(sub_about_page);
+    ui_setting_about_page = lv_menu_page_create(menu, _("About"));
+    lv_obj_set_style_pad_hor(ui_setting_about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_about_page);
+    section = lv_menu_section_create(ui_setting_about_page);
     cont = create_text(section, NULL, "Project Puncher\nNext Gen", LV_MENU_ITEM_BUILDER_VARIANT_1);
     cont = create_text(section, NULL, "Version 0.0", LV_MENU_ITEM_BUILDER_VARIANT_1);
 
     /*Create a root page*/
-    root_page = lv_menu_page_create(menu, _("Setting"));
-    lv_obj_set_style_pad_hor(root_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    ui_setting_root_page = lv_menu_page_create(menu, _("Setting"));
+    lv_obj_set_style_pad_hor(ui_setting_root_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
 
-    create_text(root_page, NULL, _("Connectivity"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(root_page);
+    create_text(ui_setting_root_page, NULL, _("Connectivity"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_root_page);
     cont = create_text(section, LV_SYMBOL_WIFI, _("Wi-Fi"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_wifi_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_wifi_page);
     cont = create_text(section, LV_SYMBOL_BLUETOOTH, _("BLE"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    // lv_menu_set_load_page_event(menu, cont, ui_setting_ble_page);
     cont = create_text(section, LV_SYMBOL_USB, _("USB"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    // lv_menu_set_load_page_event(menu, cont, ui_setting_usb_page);
 
-    create_text(root_page, NULL, _("Motors"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(root_page);
+    create_text(ui_setting_root_page, NULL, _("Motors"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_root_page);
     cont = create_text(section, LV_SYMBOL_SETTINGS, _("X Axis"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_x_axis_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_x_axis_page);
     cont = create_text(section, LV_SYMBOL_SETTINGS, _("Y Axis"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_y_axis_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_y_axis_page);
     cont = create_text(section, LV_SYMBOL_SETTINGS, _("Z Axis"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_z_axis_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_z_axis_page);
+    cont = create_text(section, LV_SYMBOL_CHARGE, _("Power"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_power_page);
 
-    create_text(root_page, NULL, _("Display"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(root_page);
+    create_text(ui_setting_root_page, NULL, _("Display"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_root_page);
     cont = create_text(section, LV_SYMBOL_IMAGE, _("Disp."), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_display_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_display_page);
 
-    create_text(root_page, NULL, _("Others"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    section = lv_menu_section_create(root_page);
+    create_text(ui_setting_root_page, NULL, _("Others"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_root_page);
     cont = create_text(section, LV_SYMBOL_FILE, _("About"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    lv_menu_set_load_page_event(menu, cont, sub_about_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_about_page);
 
-    lv_menu_set_sidebar_page(menu, root_page);
+    lv_menu_set_sidebar_page(menu, ui_setting_root_page);
 
     // increase header height
     lv_obj_t *sidebar_header = lv_menu_get_sidebar_header(menu);
     lv_obj_set_height(sidebar_header, lv_pct(14));
     // change sidebar width
-    lv_obj_set_width(lv_obj_get_parent(root_page), lv_pct(34));
+    lv_obj_set_width(lv_obj_get_parent(ui_setting_root_page), lv_pct(34));
 
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(menu), 1), 0), LV_EVENT_CLICKED, NULL);
 }

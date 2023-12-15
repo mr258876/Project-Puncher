@@ -104,17 +104,3 @@ motor_res_t TMC_LEDCMotorController::setRunningCurrent(int rms_current)
     running_current = rms_current;
     return MOTOR_RES_SUCCESS;
 }
-
-
-std::vector<ConfigurableItem> TMC_LEDCMotorController::getConfigurations(bool full)
-{
-    std::vector<ConfigurableItem> itemList = MotorController::getConfigurations(full);
-
-    itemList.push_back(ConfigurableInteger("Runing Current (mA)", ([this](void *p) { return this->setRunningCurrent(*(int *)p); }), running_current));
-    itemList.push_back(ConfigurableBoolean("Auto sleep", ([this](void *p) { return this->setAutoSleep(*(int *)p); }), use_auto_sleep));
-    itemList.push_back(ConfigurableBoolean("Auto calibrate", ([this](void *p) { return this->setAutoCal(*(int *)p); }), use_calibration));
-    itemList.push_back(ConfigurableInteger("Calibrate Threshold", ([this](void *p) { return this->setCalThres(*(int *)p); }), calibration_threshold, 255, 0));
-    itemList.push_back(ConfigurableCallback("Manual calibrate", ([this](void*) { return this->calibrate(); })));
-
-    return itemList;
-}

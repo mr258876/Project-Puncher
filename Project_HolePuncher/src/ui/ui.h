@@ -25,6 +25,7 @@ extern "C" {
 #include "i18n/lv_i18n.h"
 #include "ui_helpers.h"
 #include "ui_events.h"
+#include "ui_setting_menu.h"
 // SCREEN: ui_HomeScreen
 void ui_HomeScreen_screen_init(void);
 extern lv_obj_t *ui_HomeScreen;

@@ -60,9 +60,6 @@ public:
     motor_res_t setActiveState(uint8_t activeState);
 
     motor_res_t setRunningCurrent(int rms_current);
-
-    /* For user interface */
-    std::vector<ConfigurableItem> getConfigurations(bool full=false);
 };
 
 #endif // _TMC_LEDCMOTORCONTROLLER_H_

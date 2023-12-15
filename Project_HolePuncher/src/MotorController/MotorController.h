@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 #include "Observe.h"
-#include "Configurable.h"
 
 enum motor_status_t
 {
@@ -29,7 +28,7 @@ struct motor_feature_t
     uint8_t closedLoopPID : 1;
 };
 
-class MotorController : public Observeable, Configurable
+class MotorController
 {
 private:
     /* feature settings */
@@ -67,17 +66,6 @@ public:
 
     inline float getLength() { return _length; };
     inline float getSpeed() { return _speed; };
-
-    inline std::vector<ConfigurableItem> getConfigurations(bool full=false)
-    {
-        std::vector<ConfigurableItem> itemList;
-
-        itemList.push_back(ConfigurableFloat("Length", ([this](void *p) { return this->setLength(*(float*)p); }), _length));
-        itemList.push_back(ConfigurableBoolean("Length is circumference", ([this](void *p) { return this->setLengthCircumference(*(int *)p); }), length_is_circumference, CONFIGURABLE_BOOLEAN_CHECKBOX));
-        itemList.push_back(ConfigurableFloat("Speed", ([this](void *p) { return this->setSpeed(*(float*)p); }), _speed));
-
-        return itemList;
-    };
 };
 
 #endif // _MOTORCONTROL_H_

@@ -37,7 +37,7 @@ struct __packed ui_alert_msg_t
     void *button_cb;
 };
 
-class PuncherUI : public Observeable
+class PuncherUI
 {
 private:
     PuncherSchedulerInterface *scheduler = NULL;

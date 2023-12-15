@@ -18,9 +18,12 @@ static inline uint32_t op_f(uint32_t val) { UNUSED(val); return 0; }
 static inline uint32_t op_t(uint32_t val) { UNUSED(val); return 0; }
 
 static lv_i18n_phrase_t en_us_singulars[] = {
+    {"Operational Speed (mm/s)", "Operational\nSpeed (mm/s)"},
     {"Operational Current (mA)", "Operational\nCurrent (mA)"},
     {"_idle_behavior_options", "Keep Current\nReduce Current\nCut Power"},
     {"Zeroing Torch Threshold", "Zeroing Torch\nThreshold"},
+    {"_motor_voltage_options", "5V\n9V\n12V\n15V\n20V"},
+    {"_language_options", "English\n简体中文"},
     {NULL, NULL} // End mark
 };
 
@@ -66,15 +69,23 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Z Axis", "Z轴"},
     {"Mechanical", "机械"},
     {"Lead Length (mm)", "导程长度(mm)"},
+    {"Operational Speed (mm/s)", "运行速度(mm/s)"},
     {"Reverse Axis", "反转方向"},
     {"Electrical", "电气"},
-    {"Operational Current(mA)", "运行电流(mA)"},
+    {"Operational Current (mA)", "运行电流(mA)"},
     {"Idle Behavior", "空闲行为"},
     {"_idle_behavior_options", "保持电流\n减小电流\n切断电源"},
     {"Zeroing", "归位"},
     {"Auto Zeroing", "自动归位"},
     {"Zeroing Torch Threshold", "归位力矩阈值"},
     {"Zeroing Current (mA)", "归位电流"},
+    {"Power", "供电"},
+    {"Voltage", "电压"},
+    {"Motor_Voltage", "电机电压"},
+    {"Screen", "屏幕"},
+    {"System", "系统"},
+    {"Language", "语言"},
+    {"_language_options", "English\n简体中文"},
     {NULL, NULL} // End mark
 };
 

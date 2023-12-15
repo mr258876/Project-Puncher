@@ -25,6 +25,7 @@ en-US:
   Z Axis: ~
   Mechanical: ~
   Lead Length (mm): ~
+  Operational Speed (mm/s): "Operational\nSpeed (mm/s)"
   Reverse Axis: ~
   Electrical: ~
   Operational Current (mA): "Operational\nCurrent (mA)"
@@ -34,3 +35,11 @@ en-US:
   Auto Zeroing: ~
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
   Zeroing Current (mA): ~
+  Power: ~
+  Voltage: ~
+  Motor_Voltage: ~
+  _motor_voltage_options: "5V\n9V\n12V\n15V\n20V"
+  Screen: ~
+  System: ~
+  Language: ~
+  _language_options: "English\n简体中文"

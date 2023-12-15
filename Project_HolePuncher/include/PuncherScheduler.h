@@ -13,7 +13,7 @@
 
 #include <Arduino.h>
 
-class PuncherScheduler : PuncherSchedulerInterface, Configurable
+class PuncherScheduler : PuncherSchedulerInterface
 {
 private:
     puncher_status_t status;
@@ -41,21 +41,19 @@ public:
     inline void attachMotors(MotorController *X, MotorController *Y, MotorController *Z)
     {
         this->X = X;
-        X->addObserver([this](void *param)
-                       { this->onMotorNotify(param); });
+        // X->addObserver([this](void *param)
+        //                { this->onMotorNotify(param); });
         this->Y = Y;
-        Y->addObserver([this](void *param)
-                       { this->onMotorNotify(param); });
+        // Y->addObserver([this](void *param)
+        //                { this->onMotorNotify(param); });
         this->Z = Z;
-        Z->addObserver([this](void *param)
-                       { this->onMotorNotify(param); });
+        // Z->addObserver([this](void *param)
+        //                { this->onMotorNotify(param); });
     }
     /* Attach UI before begin() ! */
     inline void attachUI(PuncherUI *ui)
     {
         this->ui_list.push_back(ui);
-        ui->addObserver([this](void *param)
-                        { this->onUINotify(param); });
         ui->attachScheduler(this);
     }
     /* Notify all UI */
@@ -72,9 +70,6 @@ public:
         // if (status & PUNCHER_RUNNING)
         // motorHandler();
     }
-
-    std::vector<ConfigurableItem> getConfigurations(bool full=false);
-    void ui_cb_draw_configurable_menu(PuncherUI *ui, Configurable *item, void *ui_param);
 
     /* Observation callbacks */
     void onMotorNotify(void *param);

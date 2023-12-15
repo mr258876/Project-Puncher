@@ -94,7 +94,7 @@ static void touchpad_init(void)
     eg = xEventGroupCreate();
 
     
-    xSemaphoreTake(I2C0Mutex, portMAX_DELAY);
+    xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
     {
         Wire1.begin(CTP_I2C_SDA, CTP_I2C_SCL, 400000U);
         ctp.begin();
@@ -102,7 +102,7 @@ static void touchpad_init(void)
         ctp.registerIsrHandler(touch_isr);
         ctp.registerTouchHandler(on_touch);
     }
-    xSemaphoreGive(I2C0Mutex);
+    xSemaphoreGive(I2C1Mutex);
 
     pinMode(CTP_INT, INPUT_PULLUP);
     attachInterrupt(CTP_INT, touch_isr, FALLING);
@@ -129,28 +129,28 @@ static void touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
     data->point.y = touch_y;
 }
 
-void TaskProcessTouch(void *pvParameters)
+static void TaskProcessTouch(void *pvParameters)
 {
     for (;;)
     {
         xEventGroupWaitBits(eg, TouchEvent, pdTRUE, pdTRUE, portMAX_DELAY);
         {
-            xSemaphoreTake(I2C0Mutex, portMAX_DELAY);
+            xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
             {
                 ctp.processTouch();
             }
-            xSemaphoreGive(I2C0Mutex);
+            xSemaphoreGive(I2C1Mutex);
         }
     }
 }
 
-void IRAM_ATTR touch_isr()
+static void IRAM_ATTR touch_isr()
 {
     BaseType_t xHigherPriorityTaskWoken;
     xEventGroupSetBitsFromISR(eg, TouchEvent, &xHigherPriorityTaskWoken);
 }
 
-void on_touch(TPoint p, TEvent e)
+static void on_touch(TPoint p, TEvent e)
 {
     if (e == TEvent::TouchStart || e == TEvent::DragStart)
     {
