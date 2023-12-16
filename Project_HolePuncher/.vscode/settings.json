@@ -73,6 +73,10 @@
         "ui.h": "c",
         "ui_events.h": "c",
         "ui_setting_menu_mapping.h": "c",
-        "ui_setting_menu_helpers.h": "c"
+        "ui_setting_menu_helpers.h": "c",
+        "variant": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "iostream": "cpp"
     }
 }

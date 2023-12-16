@@ -8,8 +8,10 @@
 
 #include <Arduino.h>
 
+#include <any>
+
 LVGLPuncherUI::LVGLPuncherUI()
-{   
+{
     lv_init();
 
     /* Initialize the display */
@@ -26,7 +28,7 @@ void LVGLPuncherUI::begin()
 
     /* Initialize input device driver */
     lv_port_indev_init();
-    
+
     ui_init();
 
     LV_LOG_INFO("LVGL Booted.");
@@ -40,9 +42,8 @@ void LVGLPuncherUI::onEvent(puncher_event_t *msg)
 {
     if (msg->code == PUNCHER_EVENT_SETTING_VALUE_CHANGED)
     {
-        this->onSettingValueChange((puncher_event_setting_change_t*) msg->data);
+        this->onSettingValueChange(std::any_cast<puncher_event_setting_change_t *>(msg->data));
     }
-    
 }
 
 void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)

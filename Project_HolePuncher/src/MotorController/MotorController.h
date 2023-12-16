@@ -1,8 +1,8 @@
 #ifndef _MOTOR_CONTROL_H_
 #define _MOTOR_CONTROL_H_
 
+#include <stdint.h>
 #include <stddef.h>
-#include "Observe.h"
 
 enum motor_status_t
 {
@@ -18,26 +18,11 @@ enum motor_res_t
     MOTOR_RES_FAIL,
 };
 
-struct motor_feature_t
-{
-    uint8_t setSpeed : 1;
-    uint8_t calibrate : 1;
-    uint8_t autoSleep : 1;
-    uint8_t setCurrent : 1;
-    uint8_t closedLoop : 1;
-    uint8_t closedLoopPID : 1;
-};
-
 class MotorController
 {
 private:
-    /* feature settings */
-    uint8_t length_is_circumference : 1;
-
-    // uint8_t use_closed_loop : 1;
     /* basic values */
-    float _length;
-    float _speed;
+    uint32_t _speed; // in pulse
 
 public:
     /* Begin function */
@@ -52,20 +37,20 @@ public:
     virtual motor_status_t getStatus() = 0;
     /* Get motor position (steps) */
     virtual long getPosition() = 0;
-    // virtual motor_feature_t getFeature() = 0;
+    /* Set motor in sleep state */
+    virtual motor_res_t sleep(bool sleep) = 0;
+    /* Set motor sleep io active behavior */
+    virtual motor_res_t setActiveState(uint8_t activeState) = 0;
 
-    /*  Start calibration process.
-        Scheduler will monitor motor status, so return an idle state after calibration process.
-        Remeber to update motor position.
-     */
-    virtual motor_res_t calibrate() { return MOTOR_RES_NOT_IMPLEMENTED; };
+    /* Set motor speed */
+    virtual motor_res_t setSpeed(uint32_t s) = 0;
+    /* Set motor current */
+    virtual motor_res_t setCurrent(uint32_t current) = 0;
 
-    inline motor_res_t setLength(float l) { _length = l; return MOTOR_RES_SUCCESS; };
-    inline motor_res_t setLengthCircumference(int is_circumference) { length_is_circumference = is_circumference; return MOTOR_RES_SUCCESS; }
-    inline motor_res_t setSpeed(float s) { _speed = s; return MOTOR_RES_SUCCESS; };
-
-    inline float getLength() { return _length; };
-    inline float getSpeed() { return _speed; };
+    /* Check driver existance */
+    virtual motor_res_t pingDriver() = 0;
+    /* Check motor existance */
+    virtual motor_res_t pingMotor() = 0;
 };
 
 #endif // _MOTORCONTROL_H_

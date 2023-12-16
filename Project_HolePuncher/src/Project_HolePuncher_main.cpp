@@ -26,6 +26,7 @@ void setup()
     ESP_LOGI("Puncher_Main", "Serial interface init.");
 
     scheduler = new PuncherScheduler();
+    scheduler->begin();
 
     motor_init();
 

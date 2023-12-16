@@ -4,12 +4,13 @@
 #include "lvgl.h"
 #include "ui_setting_menu.h"
 #include "ui_setting_menu_helpers.h"
+#include <any>
 
 struct ui_setting_menu_mapping_t
 {
     const char *obj_name;
     lv_obj_t *obj;
-    void (*call_back)(lv_obj_t *obj, void *param);
+    void (*call_back)(lv_obj_t *obj, std::any param);
 };
 
 

@@ -51,11 +51,4 @@ inline int puncher_is_busy(puncher_status_t &status)
     return status.basic_status.status_data & ~(0b1 << 31);
 }
 
-// struct scheduler_request_t
-// {
-//     scheduler_rquest_endpoint_t endpoint;
-//     void *request_data;
-//     void *response_data;
-// };
-
 #endif // _PUNCHERSCHEDULERTYPING_H_

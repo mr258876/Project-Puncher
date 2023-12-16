@@ -1,9 +1,7 @@
 #include "MotorController/TMC_LEDCMotorController.h"
 #include "PuncherConf.h"
 
-const motor_feature_t TMC_LEDCMotorController::_feature = {1, 1, 1, 1, 0, 0};
-
-TMC_LEDCMotorController::TMC_LEDCMotorController(int motor_steps, int micro_steps, int dir_pin, int step_pin, int enable_pin, int ledc_pcnt_channel, HardwareSerial * SerialPort, float RS, uint8_t addr)
+TMC_LEDCMotorController::TMC_LEDCMotorController(int motor_steps, int micro_steps, int dir_pin, int step_pin, int enable_pin, int ledc_pcnt_channel, HardwareSerial *SerialPort, float RS, uint8_t addr)
 {
     stepper = new LEDCStepperDriver(motor_steps, dir_pin, step_pin, enable_pin, ledc_pcnt_channel);
     driver = new TMC2209Stepper(SerialPort, RS, addr);
@@ -24,8 +22,12 @@ motor_res_t TMC_LEDCMotorController::begin()
     stepper->begin(60, micro_steps);
     stepper->setEnableActiveState(LOW);
 
-    driver->begin();
-    driver->microsteps(micro_steps);
+    xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
+    {
+        driver->begin();
+        driver->microsteps(micro_steps);
+    }
+    xSemaphoreGive(*DUARTMutex);
 
     return MOTOR_RES_SUCCESS;
 }
@@ -52,22 +54,9 @@ long TMC_LEDCMotorController::getPosition()
     return stepper->getPosition();
 }
 
-motor_res_t TMC_LEDCMotorController::setSpeed(long stepsPerSec)
-{
-    stepper->setPulseFreq(stepsPerSec);
-    return MOTOR_RES_SUCCESS;
-}
-
 motor_status_t TMC_LEDCMotorController::getStatus()
 {
     return stepper->isRunning() ? MOTOR_RUNNING : MOTOR_IDLE;
-}
-
-motor_res_t TMC_LEDCMotorController::setAutoSleep(bool autoSleep)
-{   
-    use_auto_sleep = autoSleep;
-    stepper->setAutoSleep(autoSleep);
-    return MOTOR_RES_SUCCESS;
 }
 
 motor_res_t TMC_LEDCMotorController::setActiveState(uint8_t activeState)
@@ -76,31 +65,50 @@ motor_res_t TMC_LEDCMotorController::setActiveState(uint8_t activeState)
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::calibrate()
+motor_res_t TMC_LEDCMotorController::sleep(bool sleep)
 {
-    if (stepper->isRunning()) return MOTOR_RES_FAIL;
-    stepper->rotate_infinite(this->calibration_direction);
-
-    // TODO
-
+    if (sleep)
+        stepper->disable();
+    else
+        stepper->enable();
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::setAutoCal(bool autoCal)
+motor_res_t TMC_LEDCMotorController::setSpeed(uint32_t stepsPerSec)
 {
-    use_calibration = autoCal;
+    stepper->setPulseFreq(stepsPerSec);
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::setCalThres(uint8_t thres)
-{   
-    // TODO
-
+motor_res_t TMC_LEDCMotorController::setCurrent(uint32_t rms_current)
+{
+    xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
+    {
+        driver->rms_current(rms_current);
+    }
+    xSemaphoreGive(*DUARTMutex);
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::setRunningCurrent(int rms_current)
+motor_res_t TMC_LEDCMotorController::pingDriver()
 {
-    running_current = rms_current;
+    uint8_t __state = digitalRead(enable_pin);
+
+    stepper->disable();
+    uint8_t en_state = 0;
+    xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
+    {
+        en_state = driver->IOIN() & 0x01;
+    }
+    xSemaphoreGive(*DUARTMutex);
+
+    digitalWrite(enable_pin, __state); // write the original state back
+
+    return en_state ? MOTOR_RES_SUCCESS : MOTOR_RES_FAIL;
+}
+
+motor_res_t TMC_LEDCMotorController::pingMotor()
+{
+    // running_current = rms_current;
     return MOTOR_RES_SUCCESS;
 }

@@ -1,6 +1,8 @@
 #ifndef _PUNCHER_EVENTS_H_
 #define _PUNCHER_EVENTS_H_
 
+#include <any>
+
 enum puncher_event_code_t
 {
     PUNCHER_EVENT_ERROR = -1,
@@ -29,14 +31,14 @@ enum puncher_event_code_t
 struct puncher_event_t
 {
     puncher_event_code_t code;
-    void *data;
+    std::any data;
 };
 
 
 struct puncher_event_setting_change_t
 {
     const char* item_name;
-    void *data;
+    std::any data;
 };
 
 #endif  // _PUNCHER_EVENTS_H_
