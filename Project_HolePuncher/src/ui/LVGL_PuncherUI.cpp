@@ -2,6 +2,7 @@
 #include "PuncherConf.h"
 
 #include "ui/ui.h"
+#include "ui/ui_setting_menu_mapping.h"
 #include "ui/lv_port.h"
 #include "ui/lv_port_indev_ctp.h"
 
@@ -35,14 +36,18 @@ void LVGLPuncherUI::begin()
     this->setBrightness(128);
 }
 
-void LVGLPuncherUI::alert(ui_alert_msg_t *msg)
+void LVGLPuncherUI::onEvent(puncher_event_t *msg)
 {
+    if (msg->code == PUNCHER_EVENT_SETTING_VALUE_CHANGED)
+    {
+        this->onSettingValueChange((puncher_event_setting_change_t*) msg->data);
+    }
     
 }
 
-void LVGLPuncherUI::drawMenu(std::vector<ui_menu_item_t>, void* ui_param)
+void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)
 {
-
+    ui_menu_on_val_change(msg);
 }
 
 void LVGLPuncherUI::setBrightness(int brightness)

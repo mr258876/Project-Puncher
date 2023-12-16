@@ -2,6 +2,7 @@
 #define _PUNCHERSCHEDULERABST_H_
 
 #include "PuncherSchedulerTyping.h"
+#include <time.h>
 
 class PuncherSchedulerInterface
 {

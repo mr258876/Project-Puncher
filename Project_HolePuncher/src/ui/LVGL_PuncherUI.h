@@ -15,9 +15,9 @@ public:
     ~LVGLPuncherUI();
 
     void begin();
-    void alert(ui_alert_msg_t *msg);
-    void drawMenu(std::vector<ui_menu_item_t>, void* ui_param=NULL);
-
+    void onEvent(puncher_event_t *msg);
+    
+    void onSettingValueChange(puncher_event_setting_change_t *msg);
     void setBrightness(int brightness);
 };
 

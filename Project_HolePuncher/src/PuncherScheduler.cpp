@@ -13,46 +13,6 @@ void begin()
 {
 }
 
-void PuncherScheduler::onMotorNotify(void *param)
-{
-    observe_notify_t *p = (observe_notify_t *)(param);
-    switch (*p)
-    {
-    case OBSERVE_NOTIFY_NO_TYPE:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOTIFY_ON_VALUE_CHANGE:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOTIFY_ON_INFO:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOTIFY_ON_WARNING:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOTIFY_ON_ERROR:
-    {
-        /* code */
-        break;
-    }
-    case OBSERVE_NOTIFY_ON_CRITICAL:
-    {
-        /* code */
-        break;
-    }
-    default:
-        break;
-    }
-}
-
 void PuncherScheduler::onUINotify(void *param)
 {
 

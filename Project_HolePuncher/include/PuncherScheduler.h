@@ -57,11 +57,11 @@ public:
         ui->attachScheduler(this);
     }
     /* Notify all UI */
-    inline void notifyUI(ui_alert_msg_t *msg)
+    inline void notifyUI(puncher_event_t *msg)
     {
         for (PuncherUI *p_ui : this->ui_list)
         {
-            p_ui->alert(msg);
+            p_ui->onEvent(msg);
         }
     }
 

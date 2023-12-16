@@ -1,7 +1,7 @@
 #ifndef _PUNCHER_EVENTS_H_
 #define _PUNCHER_EVENTS_H_
 
-enum puncher_event_t
+enum puncher_event_code_t
 {
     PUNCHER_EVENT_ERROR = -1,
     PUNCHER_EVENT_SUCCESS = 0,
@@ -21,9 +21,22 @@ enum puncher_event_t
 
     PUNCHER_ERROR_INVALID_OPERATION = 500,
     PUNCHER_ERROR_MOTOR_STUCK = 501,
-    PUNCHER_ERROR_SLIP_PAGE = 502,
+    PUNCHER_ERROR_SLIP_TAPE = 502,
 
     
+};
+
+struct puncher_event_t
+{
+    puncher_event_code_t code;
+    void *data;
+};
+
+
+struct puncher_event_setting_change_t
+{
+    const char* item_name;
+    void *data;
 };
 
 #endif  // _PUNCHER_EVENTS_H_

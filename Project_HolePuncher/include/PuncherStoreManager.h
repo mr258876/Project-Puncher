@@ -1,7 +1,0 @@
-#ifndef _PUNCHERSTOREMANAGER_H_
-#define _PUNCHERSTOREMANAGER_H_
-
-#include <string>
-
-
-#endif // _PUNCHERSTOREMANAGER_H_
