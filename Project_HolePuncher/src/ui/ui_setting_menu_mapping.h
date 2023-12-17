@@ -49,6 +49,8 @@ ui_setting_menu_mapping_t setting_mapping[] = {
 
     {"power_voltage", NULL, _ui_menu_dropdown_set_value},
 
+    {"display_brightness", NULL, NULL},
+    {"display_language", NULL, _ui_menu_set_language},
 };
 
 
@@ -113,6 +115,9 @@ void ui_menu_ptr_update()
     setting_mapping[26].obj = ui_setting_z_sleep_current;
 
     setting_mapping[27].obj = ui_setting_power_voltage;
+
+    setting_mapping[28].obj = ui_setting_display_brightness;
+    setting_mapping[29].obj = ui_setting_display_language;
 }
 
 #endif

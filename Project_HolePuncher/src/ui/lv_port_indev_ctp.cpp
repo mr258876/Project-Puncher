@@ -163,7 +163,7 @@ static void on_touch(TPoint p, TEvent e)
 
     // x, y is in opposite position
     touch_x = p.y;
-    touch_y = 240 - p.x;
+    touch_y = 239 - p.x;
 }
 
 #else /*Enable this file at the top*/

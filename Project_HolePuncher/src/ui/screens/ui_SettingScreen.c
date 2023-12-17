@@ -331,7 +331,7 @@ void ui_SettingScreen_screen_init(void)
     lv_menu_separator_create(ui_setting_power_page);
     // create_text(sub_power_page, NULL, _("Volatge"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_power_page);
-    ui_setting_power_voltage = create_dropdown(section, NULL, _("Motor Volatge"), _("_motor_voltage_options"), 0, NULL);
+    ui_setting_power_voltage = create_dropdown(section, NULL, _("Motor Volatge"), _("_motor_voltage_options"), 0, ui_event_VoltageDropDown);
 
 
     /*Create display page*/

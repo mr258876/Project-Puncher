@@ -12,6 +12,7 @@
 #include "MotorController/MotorController.h"
 #include "StoreManager/StorageManager.h"
 #include "PuncherUI.h"
+#include "PowerManager/PowerManager.h"
 
 #include <Arduino.h>
 
@@ -68,9 +69,8 @@ private:
     struct puncher_setting_mapping_t
     {
         puncher_setting_mapping_t() : obj(_any) {}
-        puncher_setting_mapping_t(const char *name, std::any &obj, puncher_storage_type_t val_type, std::function<void(std::any)> cb) : obj_name(name), obj(obj), type(val_type), call_back(cb) {}
+        puncher_setting_mapping_t(std::any &obj, puncher_storage_type_t val_type, std::function<void(std::any)> cb) : obj(obj), type(val_type), call_back(cb) {}
 
-        std::string obj_name;
         std::any &obj;
         puncher_storage_type_t type;
         std::function<void(std::any)> call_back;
@@ -78,13 +78,17 @@ private:
         std::any _any;
     };
 
-    std::vector<puncher_setting_mapping_t> setting_mapping;
+    std::unordered_map<std::string, puncher_setting_mapping_t> setting_mapping;
 
     /* NVS storage */
     PuncherStorageManager *storage;
     void loadSettings();
     void initSettings();
-    void saveValue(puncher_setting_mapping_t item);
+    void saveValue(std::string name, puncher_setting_mapping_t item);
+
+    // /* event loop task & event queue */
+    // QueueHandle_t evt_queue;
+    // friend void evtQueueHandleLoop(void *param);
 
 public:
     PuncherScheduler();
@@ -134,6 +138,9 @@ public:
     time_t get_ETA();
     void set_setting_value(puncher_event_setting_change_t *evt);
     void get_setting_values(void *ui);
+
+    /* setters */
+    void setPowerVoltage(std::any option);
 };
 
 #endif

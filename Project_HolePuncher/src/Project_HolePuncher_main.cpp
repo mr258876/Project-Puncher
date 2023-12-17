@@ -8,7 +8,6 @@
 // #include "SerialCommand.h"
 
 #include "MotorController/TMC_LEDCMotorController.h"
-#include "PowerManager/PowerManager.h"
 #include "ui/LVGL_PuncherUI.h"
 
 static PuncherScheduler *scheduler;
@@ -23,7 +22,9 @@ void lvgl_init();
 
 void setup()
 {
-    ESP_LOGI("Puncher_Main", "Serial interface init.");
+    ESP_LOGI("Puncher_Main", "Initializing...");
+
+    pm_init();
 
     scheduler = new PuncherScheduler();
     scheduler->begin();
@@ -31,9 +32,6 @@ void setup()
     motor_init();
 
     lvgl_init();
-
-    pm_init();
-    pm_acquire_voltage(PM_VOLTAGE_15V);
 
     ESP_LOGI("Puncher_Main", "System booted.");
 }
