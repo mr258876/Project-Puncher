@@ -30,6 +30,7 @@ void LVGLPuncherUI::begin()
     lv_port_indev_init();
 
     ui_init();
+    ui_menu_ptr_update();
 
     LV_LOG_INFO("LVGL Booted.");
 
@@ -40,10 +41,18 @@ void LVGLPuncherUI::begin()
 
 void LVGLPuncherUI::onEvent(puncher_event_t *msg)
 {
+    ESP_LOGI("LVGLPuncherUI", "onEvent: %d", msg->code);
     if (msg->code == PUNCHER_EVENT_SETTING_VALUE_CHANGED)
     {
+        ESP_LOGI("LVGLPuncherUI", "Setting value changed");
         this->onSettingValueChange(std::any_cast<puncher_event_setting_change_t *>(msg->data));
     }
+}
+
+void LVGLPuncherUI::attachScheduler(PuncherSchedulerInterface *p_scheduler)
+{
+    this->scheduler = p_scheduler;
+    p_scheduler->get_setting_values(this);
 }
 
 void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)

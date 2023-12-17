@@ -31,39 +31,39 @@ private:
     std::vector<PuncherUI *> ui_list;
 
     /* Setting Values */
-    std::any x_lead_length = 2000;       // last 2 digits for decimal
-    std::any x_operational_speed = 2000; // last 2 digits for decimal
-    std::any x_reverse_axis = 0;
-    std::any x_operational_current = 1000;
-    std::any x_idle_behavior = 0;
-    std::any x_sleep_current = 500;
-    std::any x_auto_zreoing = 0;
-    std::any x_zeroing_torch_thres = 128;
-    std::any x_zeroing_current = 500;
-    std::any x_zeroing_speed = 1000;
+    std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
+    std::any x_operational_speed = std::any(static_cast<int32_t>(800)); // 8mm, last 2 digits for decimal
+    std::any x_reverse_axis = std::any(static_cast<uint8_t>(0));
+    std::any x_operational_current = std::any(static_cast<int32_t>(1000));
+    std::any x_idle_behavior = std::any(static_cast<uint16_t>(0));
+    std::any x_sleep_current = std::any(static_cast<int32_t>(500));
+    std::any x_auto_zreoing = std::any(static_cast<uint8_t>(0));
+    std::any x_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
+    std::any x_zeroing_current = std::any(static_cast<int32_t>(500));
+    std::any x_zeroing_speed = std::any(static_cast<int32_t>(1000));
 
-    std::any y_lead_length = 800;
-    std::any y_operational_speed = 800;
-    std::any y_reverse_axis = 0;
-    std::any y_operational_current = 1000;
-    std::any y_idle_behavior = 0;
-    std::any y_sleep_current = 500;
-    std::any y_auto_zreoing = 0;
-    std::any y_zeroing_torch_thres = 128;
-    std::any y_zeroing_current = 500;
-    std::any y_zeroing_speed = 1000;
+    std::any y_lead_length = std::any(static_cast<int32_t>(800));
+    std::any y_operational_speed = std::any(static_cast<int32_t>(800));
+    std::any y_reverse_axis = std::any(static_cast<uint8_t>(0));
+    std::any y_operational_current = std::any(static_cast<int32_t>(1000));
+    std::any y_idle_behavior = std::any(static_cast<uint16_t>(0));
+    std::any y_sleep_current = std::any(static_cast<int32_t>(500));
+    std::any y_auto_zreoing = std::any(static_cast<uint8_t>(0));
+    std::any y_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
+    std::any y_zeroing_current = std::any(static_cast<int32_t>(500));
+    std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
 
-    std::any z_lead_length = 2000;
-    std::any z_operational_speed = 2000;
-    std::any z_reverse_axis = 0;
-    std::any z_operational_current = 1000;
-    std::any z_idle_behavior = 0;
-    std::any z_sleep_current = 500;
+    std::any z_lead_length = std::any(static_cast<int32_t>(2000));
+    std::any z_operational_speed = std::any(static_cast<int32_t>(2000));
+    std::any z_reverse_axis = std::any(static_cast<uint8_t>(0));
+    std::any z_operational_current = std::any(static_cast<int32_t>(1000));
+    std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
+    std::any z_sleep_current = std::any(static_cast<int32_t>(500));
 
-    std::any power_voltage = 4;
+    std::any power_voltage = std::any(static_cast<uint16_t>(3));    // 15V
 
-    std::any display_brightness = 128;
-    std::any display_language = 0;
+    std::any display_brightness = std::any(static_cast<int32_t>(128));
+    std::any display_language = std::any(static_cast<uint16_t>(4));
 
     struct puncher_setting_mapping_t
     {
@@ -133,6 +133,7 @@ public:
     unsigned int get_status();
     time_t get_ETA();
     void set_setting_value(puncher_event_setting_change_t *evt);
+    void get_setting_values(void *ui);
 };
 
 #endif

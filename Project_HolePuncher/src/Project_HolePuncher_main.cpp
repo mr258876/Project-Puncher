@@ -62,9 +62,14 @@ void lvgl_init()
     ESP_LOGI("Puncher_Main", "Starting LVGL...");
 
     lvgl_ui->begin();
-    scheduler->attachUI(lvgl_ui);
 
     ESP_LOGI("Puncher_Main", "LVGL initialized!");
+
+    ESP_LOGI("Puncher_Main", "Configuring LVGL UI");
+
+    scheduler->attachUI(lvgl_ui);
+
+    ESP_LOGI("Puncher_Main", "LVGL UI ready!");
 }
 
 void loop()

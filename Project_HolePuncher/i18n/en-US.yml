@@ -35,6 +35,7 @@ en-US:
   Auto Zeroing: ~
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
   Zeroing Current (mA): ~
+  Zeroing Speed (mm/s): "Zeroing\nSpeed (mm/s)"
   Power: ~
   Voltage: ~
   Motor_Voltage: ~

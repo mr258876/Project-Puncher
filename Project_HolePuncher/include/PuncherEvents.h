@@ -25,20 +25,20 @@ enum puncher_event_code_t
     PUNCHER_ERROR_MOTOR_STUCK = 501,
     PUNCHER_ERROR_SLIP_TAPE = 502,
 
-    
 };
 
 struct puncher_event_t
 {
+    puncher_event_t(puncher_event_code_t c, std::any d) : code(c), data(d) {}
     puncher_event_code_t code;
     std::any data;
 };
 
-
 struct puncher_event_setting_change_t
 {
-    const char* item_name;
+    puncher_event_setting_change_t(const char *n, std::any d) : item_name(n), data(d) {}
+    const char *item_name;
     std::any data;
 };
 
-#endif  // _PUNCHER_EVENTS_H_
+#endif // _PUNCHER_EVENTS_H_

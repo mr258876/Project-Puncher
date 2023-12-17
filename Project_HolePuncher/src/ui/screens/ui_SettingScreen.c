@@ -265,7 +265,7 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_x_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
-    ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_x_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_x_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
@@ -280,6 +280,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
     ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
     ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, NULL);
 
 
     /*Create y axis page*/
@@ -289,7 +290,7 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_y_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
-    ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
@@ -304,6 +305,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
     ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
     ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, NULL);
     
     /*Create z aixs page*/
     ui_setting_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));
@@ -312,7 +314,7 @@ void ui_SettingScreen_screen_init(void)
     
     create_text(ui_setting_z_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_z_axis_page);
-    ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 4000, 2000, 4, 2, NULL);
+    ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_z_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
     ui_setting_z_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
 
@@ -341,7 +343,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_display_brightness = create_slider(section, LV_SYMBOL_SETTINGS, _("Brightness"), 1, 255, 128, ui_event_BrightnessSlider);
     create_text(ui_setting_display_page, NULL, _("System"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_display_page);
-    ui_setting_display_language = create_dropdown(section, NULL, _("Language"), _("_idle_behavior_options"), 0, NULL);
+    ui_setting_display_language = create_dropdown(section, NULL, _("Language"), _("_language_options"), 0, NULL);
 
     /*Create about page*/
     ui_setting_about_page = lv_menu_page_create(menu, _("About"));

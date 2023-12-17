@@ -18,6 +18,7 @@ public:
     virtual unsigned int get_status() = 0;
     virtual time_t get_ETA() = 0;
     virtual void set_setting_value(puncher_event_setting_change_t *evt) = 0;
+    virtual void get_setting_values(void *ui) = 0;
 };
 
 #endif

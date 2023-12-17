@@ -6,6 +6,10 @@
 
 class LVGLPuncherUI : public PuncherUI
 {
+private:
+    PuncherSchedulerInterface *scheduler = NULL;
+
+    void lvglEventLoop(void *param);
 public:
     lv_disp_drv_t disp_drv;
     lv_disp_draw_buf_t draw_buf;
@@ -16,7 +20,8 @@ public:
 
     void begin();
     void onEvent(puncher_event_t *msg);
-    
+    void attachScheduler(PuncherSchedulerInterface *p_scheduler);
+
     void onSettingValueChange(puncher_event_setting_change_t *msg);
     void setBrightness(int brightness);
 };
