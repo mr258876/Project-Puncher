@@ -185,6 +185,9 @@ static lv_obj_t *create_spinbox(lv_obj_t *parent, const char *icon, const char *
     // Adujst spinbox width
     lv_obj_set_flex_grow(spinbox, 1);
 
+    // Move Cursor to first non-decimal digit
+    lv_spinbox_set_cursor_pos(spinbox, separator_position);
+
     if (event_cb != NULL)
     {
         lv_obj_add_event_cb(spinbox, event_cb, LV_EVENT_ALL, NULL);
@@ -265,22 +268,22 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_x_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
-    ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_x_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_x_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_XLeadLength);
+    ui_setting_x_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_XOperationalSpeed);
+    ui_setting_x_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_XReverseAxis);
 
     create_text(ui_setting_x_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
-    ui_setting_x_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    ui_setting_x_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    ui_setting_x_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
+    ui_setting_x_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, ui_event_XOperationalCurrent);
+    ui_setting_x_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_XIdleBehavior);
+    ui_setting_x_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, ui_event_XSleepCurrent);
 
     create_text(ui_setting_x_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
-    ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
-    ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
-    ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
-    ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, NULL);
+    ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_XAutoZreoing);
+    ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_XZeroingTorchThres);
+    ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_XZeroingCurrent);
+    ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, ui_event_XZeroingSpeed);
 
 
     /*Create y axis page*/
@@ -290,22 +293,22 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_y_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
-    ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_YLeadLength);
+    ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YOperationalSpeed);
+    ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_YReverseAxis);
 
     create_text(ui_setting_y_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
-    ui_setting_y_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    ui_setting_y_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    ui_setting_y_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, NULL);
+    ui_setting_y_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, ui_event_YOperationalCurrent);
+    ui_setting_y_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_YIdleBehavior);
+    ui_setting_y_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, ui_event_YSleepCurrent);
 
     create_text(ui_setting_y_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
-    ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, NULL);
-    ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, NULL);
-    ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, NULL);
-    ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, NULL);
+    ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_YAutoZreoing);
+    ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_YZeroingTorchThres);
+    ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_YZeroingCurrent);
+    ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, ui_event_YZeroingSpeed);
     
     /*Create z aixs page*/
     ui_setting_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));
@@ -314,15 +317,15 @@ void ui_SettingScreen_screen_init(void)
     
     create_text(ui_setting_z_axis_page, NULL, _("Mechanical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_z_axis_page);
-    ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_z_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, NULL);
-    ui_setting_z_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, NULL);
+    ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_ZLeadLength);
+    ui_setting_z_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_ZOperationalSpeed);
+    ui_setting_z_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_ZReverseAxis);
 
     create_text(ui_setting_z_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_z_axis_page);
-    ui_setting_z_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, NULL);
-    ui_setting_z_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, NULL);
-    ui_setting_z_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, NULL);
+    ui_setting_z_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, ui_event_ZOperationalCurrent);
+    ui_setting_z_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_ZIdleBehavior);
+    ui_setting_z_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, ui_event_ZSleepCurrent);
 
 
     /*Create power page*/

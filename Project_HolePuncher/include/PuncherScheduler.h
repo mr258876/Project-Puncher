@@ -61,7 +61,7 @@ private:
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
     std::any z_sleep_current = std::any(static_cast<int32_t>(500));
 
-    std::any power_voltage = std::any(static_cast<uint16_t>(3));    // 15V
+    std::any power_voltage = std::any(static_cast<uint16_t>(3)); // 0->5V 1->9V 2->12V 3->15V 4->20V
 
     std::any display_brightness = std::any(static_cast<int32_t>(128));
     std::any display_language = std::any(static_cast<uint16_t>(4));
@@ -140,6 +140,35 @@ public:
     void get_setting_values(void *ui);
 
     /* setters */
+    void setXLeadLength(std::any val);
+    void setXOperationalSpeed(std::any val);
+    void setXReverseAxis(std::any val);
+    void setXOperationalCurrent(std::any val);
+    void setXIdleBehavior(std::any val);
+    void setXSleepCurrent(std::any val);
+    void setXAutoZreoing(std::any val);
+    void setXZeroingTorchThres(std::any val);
+    void setXZeroingCurrent(std::any val);
+    void setXZeroingSpeed(std::any val);
+
+    void setYLeadLength(std::any val);
+    void setYOperationalSpeed(std::any val);
+    void setYReverseAxis(std::any val);
+    void setYOperationalCurrent(std::any val);
+    void setYIdleBehavior(std::any val);
+    void setYSleepCurrent(std::any val);
+    void setYAutoZreoing(std::any val);
+    void setYZeroingTorchThres(std::any val);
+    void setYZeroingCurrent(std::any val);
+    void setYZeroingSpeed(std::any val);
+
+    void setZLeadLength(std::any val);
+    void setZOperationalSpeed(std::any val);
+    void setZReverseAxis(std::any val);
+    void setZOperationalCurrent(std::any val);
+    void setZIdleBehavior(std::any val);
+    void setZSleepCurrent(std::any val);
+
     void setPowerVoltage(std::any option);
 };
 

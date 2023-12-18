@@ -33,62 +33,62 @@ PuncherScheduler::PuncherScheduler()
 
     // setting_mapping
     setting_mapping.emplace("x_lead_length", puncher_setting_mapping_t(x_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                                 { this->x_lead_length = val; }));
+                                                                       { this->setXLeadLength(val); }));
     setting_mapping.emplace("x_operational_speed", puncher_setting_mapping_t(x_operational_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                                       { this->x_operational_speed = val; }));
+                                                                             { this->setXOperationalSpeed(val); }));
     setting_mapping.emplace("x_reverse_axis", puncher_setting_mapping_t(x_reverse_axis, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                        { this->x_reverse_axis = val; }));
+                                                                        { this->setXReverseAxis(val); }));
     setting_mapping.emplace("x_operational_current", puncher_setting_mapping_t(x_operational_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->x_operational_current = val; }));
+                                                                               { this->setXOperationalCurrent(val); }));
     setting_mapping.emplace("x_idle_behavior", puncher_setting_mapping_t(x_idle_behavior, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
-                                                        { this->x_idle_behavior = val; }));
+                                                                         { this->setXIdleBehavior(val); }));
     setting_mapping.emplace("x_sleep_current", puncher_setting_mapping_t(x_sleep_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->x_sleep_current = val; }));
+                                                                         { this->setXSleepCurrent(val); }));
     setting_mapping.emplace("x_auto_zreoing", puncher_setting_mapping_t(x_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                        { this->x_auto_zreoing = val; }));
+                                                                        { this->setXAutoZreoing(val); }));
     setting_mapping.emplace("x_zeroing_torch_thres", puncher_setting_mapping_t(x_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->x_zeroing_torch_thres = val; }));
+                                                                               { this->setXZeroingTorchThres(val); }));
     setting_mapping.emplace("x_zeroing_current", puncher_setting_mapping_t(x_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->x_zeroing_current = val; }));
+                                                                           { this->setXZeroingCurrent(val); }));
     setting_mapping.emplace("x_zeroing_speed", puncher_setting_mapping_t(x_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->x_zeroing_speed = val; }));
+                                                                         { this->setXZeroingSpeed(val); }));
 
     setting_mapping.emplace("y_lead_length", puncher_setting_mapping_t(y_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_lead_length = val; }));
+                                                                       { this->setYLeadLength(val); }));
     setting_mapping.emplace("y_operational_speed", puncher_setting_mapping_t(y_operational_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_operational_speed = val; }));
+                                                                             { this->setYOperationalSpeed(val); }));
     setting_mapping.emplace("y_reverse_axis", puncher_setting_mapping_t(y_reverse_axis, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                        { this->y_reverse_axis = val; }));
+                                                                        { this->setYReverseAxis(val); }));
     setting_mapping.emplace("y_operational_current", puncher_setting_mapping_t(y_operational_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_operational_current = val; }));
+                                                                               { this->setYOperationalCurrent(val); }));
     setting_mapping.emplace("y_idle_behavior", puncher_setting_mapping_t(y_idle_behavior, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
-                                                        { this->y_idle_behavior = val; }));
+                                                                         { this->setYIdleBehavior(val); }));
     setting_mapping.emplace("y_sleep_current", puncher_setting_mapping_t(y_sleep_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_sleep_current = val; }));
+                                                                         { this->setYSleepCurrent(val); }));
     setting_mapping.emplace("y_auto_zreoing", puncher_setting_mapping_t(y_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                        { this->y_auto_zreoing = val; }));
+                                                                        { this->setYAutoZreoing(val); }));
     setting_mapping.emplace("y_zeroing_torch_thres", puncher_setting_mapping_t(y_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_zeroing_torch_thres = val; }));
+                                                                               { this->setYZeroingTorchThres(val); }));
     setting_mapping.emplace("y_zeroing_current", puncher_setting_mapping_t(y_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_zeroing_current = val; }));
+                                                                           { this->setYZeroingCurrent(val); }));
     setting_mapping.emplace("y_zeroing_speed", puncher_setting_mapping_t(y_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->y_zeroing_speed = val; }));
+                                                                         { this->setYZeroingSpeed(val); }));
 
     setting_mapping.emplace("z_lead_length", puncher_setting_mapping_t(z_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->z_lead_length = val; }));
+                                                                       { this->setZLeadLength(val); }));
     setting_mapping.emplace("z_operational_speed", puncher_setting_mapping_t(z_operational_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->z_operational_speed = val; }));
+                                                                             { this->setZOperationalSpeed(val); }));
     setting_mapping.emplace("z_reverse_axis", puncher_setting_mapping_t(z_reverse_axis, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                        { this->z_reverse_axis = val; }));
+                                                                        { this->setZReverseAxis(val); }));
     setting_mapping.emplace("z_operational_current", puncher_setting_mapping_t(z_operational_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->z_operational_current = val; }));
+                                                                               { this->setZOperationalCurrent(val); }));
     setting_mapping.emplace("z_idle_behavior", puncher_setting_mapping_t(z_idle_behavior, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
-                                                        { this->z_idle_behavior = val; }));
+                                                                         { this->setZIdleBehavior(val); }));
     setting_mapping.emplace("z_sleep_current", puncher_setting_mapping_t(z_sleep_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                        { this->z_sleep_current = val; }));
+                                                                         { this->setZSleepCurrent(val); }));
 
     setting_mapping.emplace("power_voltage", puncher_setting_mapping_t(power_voltage, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
-                                                        { this->setPowerVoltage(val); }));
+                                                                       { this->setPowerVoltage(val); }));
 
     ESP_LOGI("PuncherScheduler", "Values len: %d", setting_mapping.size());
 }
@@ -100,7 +100,7 @@ PuncherScheduler::~PuncherScheduler()
 void PuncherScheduler::begin()
 {
     this->storage->begin();
-    
+
     if (storage->get_uint8("initialized") == 0)
     {
         this->initSettings();
