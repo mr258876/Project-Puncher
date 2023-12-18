@@ -34,6 +34,7 @@ private:
     /* Setting Values */
     std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
     std::any x_operational_speed = std::any(static_cast<int32_t>(800)); // 8mm, last 2 digits for decimal
+    std::any x_length_type = std::any(static_cast<uint16_t>(0));
     std::any x_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any x_operational_current = std::any(static_cast<int32_t>(1000));
     std::any x_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -45,6 +46,7 @@ private:
 
     std::any y_lead_length = std::any(static_cast<int32_t>(800));
     std::any y_operational_speed = std::any(static_cast<int32_t>(800));
+    std::any y_length_type = std::any(static_cast<uint16_t>(0));
     std::any y_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any y_operational_current = std::any(static_cast<int32_t>(1000));
     std::any y_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -56,6 +58,7 @@ private:
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(2000));
+    std::any z_length_type = std::any(static_cast<uint16_t>(0));
     std::any z_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any z_operational_current = std::any(static_cast<int32_t>(1000));
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -64,16 +67,16 @@ private:
     std::any power_voltage = std::any(static_cast<uint16_t>(3)); // 0->5V 1->9V 2->12V 3->15V 4->20V
 
     std::any display_brightness = std::any(static_cast<int32_t>(128));
-    std::any display_language = std::any(static_cast<uint16_t>(4));
+    std::any display_language = std::any(static_cast<uint16_t>(0));
 
     struct puncher_setting_mapping_t
     {
         puncher_setting_mapping_t() : obj(_any) {}
-        puncher_setting_mapping_t(std::any &obj, puncher_storage_type_t val_type, std::function<void(std::any)> cb) : obj(obj), type(val_type), call_back(cb) {}
+        puncher_setting_mapping_t(std::any &obj, puncher_storage_type_t val_type, std::function<bool(std::any)> cb) : obj(obj), type(val_type), call_back(cb) {}
 
         std::any &obj;
         puncher_storage_type_t type;
-        std::function<void(std::any)> call_back;
+        std::function<bool(std::any)> call_back;
 
         std::any _any;
     };
@@ -118,6 +121,7 @@ public:
         {
             p_ui->onEvent(msg);
         }
+        delete msg;
     }
 
     inline void tick()
@@ -140,36 +144,42 @@ public:
     void get_setting_values(void *ui);
 
     /* setters */
-    void setXLeadLength(std::any val);
-    void setXOperationalSpeed(std::any val);
-    void setXReverseAxis(std::any val);
-    void setXOperationalCurrent(std::any val);
-    void setXIdleBehavior(std::any val);
-    void setXSleepCurrent(std::any val);
-    void setXAutoZreoing(std::any val);
-    void setXZeroingTorchThres(std::any val);
-    void setXZeroingCurrent(std::any val);
-    void setXZeroingSpeed(std::any val);
+    bool setXLeadLength(std::any val);
+    bool setXOperationalSpeed(std::any val);
+    bool setXLengthType(std::any val);
+    bool setXReverseAxis(std::any val);
+    bool setXOperationalCurrent(std::any val);
+    bool setXIdleBehavior(std::any val);
+    bool setXSleepCurrent(std::any val);
+    bool setXAutoZreoing(std::any val);
+    bool setXZeroingTorchThres(std::any val);
+    bool setXZeroingCurrent(std::any val);
+    bool setXZeroingSpeed(std::any val);
 
-    void setYLeadLength(std::any val);
-    void setYOperationalSpeed(std::any val);
-    void setYReverseAxis(std::any val);
-    void setYOperationalCurrent(std::any val);
-    void setYIdleBehavior(std::any val);
-    void setYSleepCurrent(std::any val);
-    void setYAutoZreoing(std::any val);
-    void setYZeroingTorchThres(std::any val);
-    void setYZeroingCurrent(std::any val);
-    void setYZeroingSpeed(std::any val);
+    bool setYLeadLength(std::any val);
+    bool setYOperationalSpeed(std::any val);
+    bool setYLengthType(std::any val);
+    bool setYReverseAxis(std::any val);
+    bool setYOperationalCurrent(std::any val);
+    bool setYIdleBehavior(std::any val);
+    bool setYSleepCurrent(std::any val);
+    bool setYAutoZreoing(std::any val);
+    bool setYZeroingTorchThres(std::any val);
+    bool setYZeroingCurrent(std::any val);
+    bool setYZeroingSpeed(std::any val);
 
-    void setZLeadLength(std::any val);
-    void setZOperationalSpeed(std::any val);
-    void setZReverseAxis(std::any val);
-    void setZOperationalCurrent(std::any val);
-    void setZIdleBehavior(std::any val);
-    void setZSleepCurrent(std::any val);
+    bool setZLeadLength(std::any val);
+    bool setZOperationalSpeed(std::any val);
+    bool setZLengthType(std::any val);
+    bool setZReverseAxis(std::any val);
+    bool setZOperationalCurrent(std::any val);
+    bool setZIdleBehavior(std::any val);
+    bool setZSleepCurrent(std::any val);
 
-    void setPowerVoltage(std::any option);
+    bool setPowerVoltage(std::any option);
+
+    bool setDisplayBrightness(std::any option);
+    bool setDisplayLanguage(std::any option);
 };
 
 #endif

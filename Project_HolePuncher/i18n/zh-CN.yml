@@ -26,6 +26,8 @@ zh-CN:
   Mechanical: 机械
   Lead Length (mm): 导程长度(mm)
   Operational Speed (mm/s): "运行速度(mm/s)"
+  Length Type: 长度类型
+  _length_type_options: "直径\n周长"
   Reverse Axis: 反转方向
   Electrical: 电气
   Operational Current (mA): 运行电流(mA)

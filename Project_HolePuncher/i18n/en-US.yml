@@ -26,6 +26,8 @@ en-US:
   Mechanical: ~
   Lead Length (mm): ~
   Operational Speed (mm/s): "Operational\nSpeed (mm/s)"
+  Length Type: ~
+  _length_type_options: "Diameter\nPerimeter"
   Reverse Axis: ~
   Electrical: ~
   Operational Current (mA): "Operational\nCurrent (mA)"

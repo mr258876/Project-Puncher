@@ -130,4 +130,5 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_add_event_cb(ui_FeedPlusButton, ui_event_FeedPlusButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedMinusButton, ui_event_FeedMinusButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedScreen, ui_event_FeedScreen, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_FeedRoller, ui_event_FeedRoller, LV_EVENT_ALL, NULL);
 }

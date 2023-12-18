@@ -3,15 +3,7 @@
 #include "./LVGL_PuncherUI.h"
 #include "PuncherEvents.h"
 
-void ui_event_BrightnessSlider(lv_event_t *e)
-{
-    lv_obj_t *slider = e->target;
 
-    if (e->code == LV_EVENT_VALUE_CHANGED)
-    {
-        lvgl_ui->setBrightness(lv_slider_get_value(slider));
-    }
-}
 
 void ui_event_XLeadLength(lv_event_t *e)
 {
@@ -30,6 +22,16 @@ void ui_event_XOperationalSpeed(lv_event_t *e)
     if (e->code == LV_EVENT_VALUE_CHANGED)
     {
         puncher_event_setting_change_t evt = {"x_operational_speed", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_XLengthType(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"x_length_type", lv_dropdown_get_selected(obj)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
@@ -134,6 +136,16 @@ void ui_event_YOperationalSpeed(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_YLengthType(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"y_length_type", lv_dropdown_get_selected(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 void ui_event_YReverseAxis(lv_event_t *e)
 {
     lv_obj_t *obj = e->target;
@@ -235,6 +247,16 @@ void ui_event_ZOperationalSpeed(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_ZLengthType(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"z_length_type", lv_dropdown_get_selected(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 void ui_event_ZReverseAxis(lv_event_t *e)
 {
     lv_obj_t *obj = e->target;
@@ -285,4 +307,36 @@ void ui_event_VoltageDropDown(lv_event_t *e)
         puncher_event_setting_change_t evt = {"power_voltage", lv_dropdown_get_selected(dp)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
+}
+
+void ui_event_BrightnessSlider(lv_event_t *e)
+{
+    lv_obj_t *slider = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"display_brightness", lv_slider_get_value(slider)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_LanguageDropDown(lv_event_t *e)
+{
+    lv_obj_t *dp = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"display_language", lv_dropdown_get_selected(dp)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+
+void ui_event_FeedRoller(lv_event_t *e)
+{
+    // lv_obj_t *slider = e->target;
+
+    // if (e->code == LV_EVENT_VALUE_CHANGED)
+    // {
+    //     puncher_event_setting_change_t evt = {"display_brightness", lv_slider_get_value(slider)};
+    //     lvgl_ui->getScheduler()->set_setting_value(&evt);
+    // }
 }

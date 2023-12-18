@@ -5,6 +5,8 @@ lv_obj_t * ui_setting_root_page;
 lv_obj_t * ui_setting_wifi_page;
 lv_obj_t * ui_setting_ble_page;
 lv_obj_t * ui_setting_usb_page;
+lv_obj_t * ui_setting_ble_page;
+lv_obj_t * ui_setting_usb_page;
 lv_obj_t * ui_setting_x_axis_page;
 lv_obj_t * ui_setting_y_axis_page;
 lv_obj_t * ui_setting_z_axis_page;
@@ -16,6 +18,7 @@ lv_obj_t * ui_setting_wifi_switch;
 
 lv_obj_t * ui_setting_x_lead_length;
 lv_obj_t * ui_setting_x_operational_speed;
+lv_obj_t * ui_setting_x_length_type;
 lv_obj_t * ui_setting_x_reverse_axis;
 lv_obj_t * ui_setting_x_operational_current;
 lv_obj_t * ui_setting_x_idle_behavior;
@@ -27,6 +30,7 @@ lv_obj_t * ui_setting_x_zeroing_speed;
 
 lv_obj_t * ui_setting_y_lead_length;
 lv_obj_t * ui_setting_y_operational_speed;
+lv_obj_t * ui_setting_y_length_type;
 lv_obj_t * ui_setting_y_reverse_axis;
 lv_obj_t * ui_setting_y_operational_current;
 lv_obj_t * ui_setting_y_idle_behavior;
@@ -38,6 +42,7 @@ lv_obj_t * ui_setting_y_zeroing_speed;
 
 lv_obj_t * ui_setting_z_lead_length;
 lv_obj_t * ui_setting_z_operational_speed;
+lv_obj_t * ui_setting_z_length_type;
 lv_obj_t * ui_setting_z_reverse_axis;
 lv_obj_t * ui_setting_z_operational_current;
 lv_obj_t * ui_setting_z_idle_behavior;
@@ -261,6 +266,18 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_wifi_page);
     ui_setting_wifi_switch = create_switch(section, LV_SYMBOL_WIFI, _("Wi-Fi"), false, NULL);
 
+    /*Create ble page*/
+    ui_setting_ble_page = lv_menu_page_create(menu, _("BLE"));
+    lv_obj_set_style_pad_hor(ui_setting_ble_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_ble_page);
+    section = lv_menu_section_create(ui_setting_ble_page);
+
+    /*Create usb page*/
+    ui_setting_usb_page = lv_menu_page_create(menu, _("USB"));
+    lv_obj_set_style_pad_hor(ui_setting_usb_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_usb_page);
+    section = lv_menu_section_create(ui_setting_usb_page);
+
     /*Create x axis page*/
     ui_setting_x_axis_page = lv_menu_page_create(menu, _("X Axis"));
     lv_obj_set_style_pad_hor(ui_setting_x_axis_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
@@ -270,6 +287,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_x_axis_page);
     ui_setting_x_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_XLeadLength);
     ui_setting_x_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_XOperationalSpeed);
+    ui_setting_x_length_type = create_dropdown(section, NULL, _("Length Type"), _("_length_type_options"), 0, ui_event_XLengthType);
     ui_setting_x_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_XReverseAxis);
 
     create_text(ui_setting_x_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -295,6 +313,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_y_axis_page);
     ui_setting_y_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_YLeadLength);
     ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YOperationalSpeed);
+    ui_setting_y_length_type = create_dropdown(section, NULL, _("Length Type"), _("_length_type_options"), 0, ui_event_YLengthType);
     ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_YReverseAxis);
 
     create_text(ui_setting_y_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -319,6 +338,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_z_axis_page);
     ui_setting_z_lead_length = create_spinbox(section, NULL, _("Lead Length (mm)"), 1, 9999, 2000, 4, 2, ui_event_ZLeadLength);
     ui_setting_z_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_ZOperationalSpeed);
+    ui_setting_z_length_type = create_dropdown(section, NULL, _("Length Type"), _("_length_type_options"), 0, ui_event_ZLengthType);
     ui_setting_z_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_ZReverseAxis);
 
     create_text(ui_setting_z_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -346,7 +366,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_display_brightness = create_slider(section, LV_SYMBOL_SETTINGS, _("Brightness"), 1, 255, 128, ui_event_BrightnessSlider);
     create_text(ui_setting_display_page, NULL, _("System"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_display_page);
-    ui_setting_display_language = create_dropdown(section, NULL, _("Language"), _("_language_options"), 0, NULL);
+    ui_setting_display_language = create_dropdown(section, NULL, _("Language"), _("_language_options"), 0, ui_event_LanguageDropDown);
 
     /*Create about page*/
     ui_setting_about_page = lv_menu_page_create(menu, _("About"));
@@ -365,9 +385,9 @@ void ui_SettingScreen_screen_init(void)
     cont = create_text(section, LV_SYMBOL_WIFI, _("Wi-Fi"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_menu_set_load_page_event(menu, cont, ui_setting_wifi_page);
     cont = create_text(section, LV_SYMBOL_BLUETOOTH, _("BLE"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    // lv_menu_set_load_page_event(menu, cont, ui_setting_ble_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_ble_page);
     cont = create_text(section, LV_SYMBOL_USB, _("USB"), LV_MENU_ITEM_BUILDER_VARIANT_1);
-    // lv_menu_set_load_page_event(menu, cont, ui_setting_usb_page);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_usb_page);
 
     create_text(ui_setting_root_page, NULL, _("Motors"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_root_page);

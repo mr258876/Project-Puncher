@@ -7,10 +7,11 @@ extern "C" {
 
 #include "ui.h"
 
-void ui_event_BrightnessSlider(lv_event_t * e);
+void ui_event_FeedRoller(lv_event_t *e);
 
 void ui_event_XLeadLength(lv_event_t *e);
 void ui_event_XOperationalSpeed(lv_event_t *e);
+void ui_event_XLengthType(lv_event_t *e);
 void ui_event_XReverseAxis(lv_event_t *e);
 void ui_event_XOperationalCurrent(lv_event_t *e);
 void ui_event_XIdleBehavior(lv_event_t *e);
@@ -22,6 +23,7 @@ void ui_event_XZeroingSpeed(lv_event_t *e);
 
 void ui_event_YLeadLength(lv_event_t *e);
 void ui_event_YOperationalSpeed(lv_event_t *e);
+void ui_event_YLengthType(lv_event_t *e);
 void ui_event_YReverseAxis(lv_event_t *e);
 void ui_event_YOperationalCurrent(lv_event_t *e);
 void ui_event_YIdleBehavior(lv_event_t *e);
@@ -33,12 +35,16 @@ void ui_event_YZeroingSpeed(lv_event_t *e);
 
 void ui_event_ZLeadLength(lv_event_t *e);
 void ui_event_ZOperationalSpeed(lv_event_t *e);
+void ui_event_ZLengthType(lv_event_t *e);
 void ui_event_ZReverseAxis(lv_event_t *e);
 void ui_event_ZOperationalCurrent(lv_event_t *e);
 void ui_event_ZIdleBehavior(lv_event_t *e);
 void ui_event_ZSleepCurrent(lv_event_t *e);
 
 void ui_event_VoltageDropDown(lv_event_t * e);
+
+void ui_event_BrightnessSlider(lv_event_t * e);
+void ui_event_LanguageDropDown(lv_event_t *e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -59,7 +59,7 @@ void LVGLPuncherUI::begin()
 
     ledcSetup(LCD_LEDC_CHANNEL, 48000, 8);
     ledcAttachPin(BL_PIN, LCD_LEDC_CHANNEL);
-    this->setBrightness(128);
+    this->setBrightness(1);
 
     this->evt_queue = xQueueCreate(16, sizeof(puncher_event_t));
     xTaskCreate(evtQueueHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
@@ -68,7 +68,6 @@ void LVGLPuncherUI::begin()
 void LVGLPuncherUI::onEvent(puncher_event_t *msg)
 {
     xQueueSend(evt_queue, msg, portMAX_DELAY);
-    delete msg;
 }
 
 void LVGLPuncherUI::attachScheduler(PuncherSchedulerInterface *p_scheduler)

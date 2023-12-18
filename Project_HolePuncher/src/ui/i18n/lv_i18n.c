@@ -19,6 +19,7 @@ static inline uint32_t op_t(uint32_t val) { UNUSED(val); return 0; }
 
 static lv_i18n_phrase_t en_us_singulars[] = {
     {"Operational Speed (mm/s)", "Operational\nSpeed (mm/s)"},
+    {"_length_type_options", "Diameter\nPerimeter"},
     {"Operational Current (mA)", "Operational\nCurrent (mA)"},
     {"_idle_behavior_options", "Keep Current\nReduce Current\nCut Power"},
     {"Zeroing Torch Threshold", "Zeroing Torch\nThreshold"},
@@ -71,6 +72,8 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Mechanical", "机械"},
     {"Lead Length (mm)", "导程长度(mm)"},
     {"Operational Speed (mm/s)", "运行速度(mm/s)"},
+    {"Length Type", "长度类型"},
+    {"_length_type_options", "直径\n周长"},
     {"Reverse Axis", "反转方向"},
     {"Electrical", "电气"},
     {"Operational Current (mA)", "运行电流(mA)"},

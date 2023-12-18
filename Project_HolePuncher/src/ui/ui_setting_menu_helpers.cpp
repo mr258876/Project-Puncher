@@ -1,6 +1,8 @@
 #include "ui_setting_menu_helpers.h"
 #include "PuncherSemaphore.h"
 #include "i18n/lv_i18n.h"
+#include "LVGL_PuncherUI.h"
+
 
 void _ui_menu_switch_set_value(lv_obj_t *obj, std::any param)
 {
@@ -27,6 +29,16 @@ void _ui_menu_roller_set_value(lv_obj_t *obj, std::any param)
     xSemaphoreGive(LVGLMutex);
 }
 
+void _ui_menu_slider_set_value(lv_obj_t *obj, std::any param)
+{
+    lv_obj_t *slider = lv_obj_get_child(obj, -1);
+
+    int32_t val = std::any_cast<int32_t>(param);
+    xSemaphoreTake(LVGLMutex, portMAX_DELAY);
+    lv_slider_set_value(slider, val, LV_ANIM_ON);
+    xSemaphoreGive(LVGLMutex);
+}
+
 void _ui_menu_dropdown_set_value(lv_obj_t *obj, std::any param)
 {
     lv_obj_t *dp = lv_obj_get_child(obj, -1);
@@ -48,6 +60,15 @@ void _ui_menu_spinbox_set_value(lv_obj_t *obj, std::any param)
     xSemaphoreGive(LVGLMutex);
 }
 
+
+void _ui_menu_set_brightness(lv_obj_t *obj, std::any param)
+{
+    int32_t val = std::any_cast<int32_t>(param);
+    lvgl_ui->setBrightness(val);
+    _ui_menu_slider_set_value(obj, val);
+}
+
+
 void _ui_menu_set_language(lv_obj_t *obj, std::any param)
 {
     uint16_t val = std::any_cast<uint16_t>(param);
@@ -56,4 +77,5 @@ void _ui_menu_set_language(lv_obj_t *obj, std::any param)
     lv_i18n_set_locale(locale);
     lv_obj_invalidate(lv_scr_act());
     xSemaphoreGive(LVGLMutex);
+    _ui_menu_dropdown_set_value(obj, val);
 }
