@@ -105,6 +105,8 @@ public:
         this->X = X;
         this->Y = Y;
         this->Z = Z;
+
+        ESP_LOGI("PuncherScheduler", "Z axis: %p", Z);
     }
 
     /* Attach UI before begin() ! */

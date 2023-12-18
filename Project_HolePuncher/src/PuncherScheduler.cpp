@@ -288,20 +288,21 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
 
 int PuncherScheduler::feed_paper(int gear)
 {
-    if (puncher_is_busy(this->status))
-        return this->status.basic_status.status_data;
+    // if (puncher_is_busy(this->status))
+    //     return this->status.basic_status.status_data;
 
+    ESP_LOGI("PuncherScheduler", "Z axis: %p", Z);
     // TODO
     if (gear)
     {
-        // this->Z.sleep(false);
+        this->Z->sleep(false);
         this->Z->rotate_infinite(gear);
         this->status.basic_status.status_flags.is_feeding_paper = 1;
     }
     else
     {
         this->Z->stop();
-        // this->Z.sleep(true);
+        this->Z->sleep(true);
         this->status.basic_status.status_flags.is_feeding_paper = 0;
     }
 

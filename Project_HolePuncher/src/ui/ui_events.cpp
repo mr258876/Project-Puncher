@@ -2,8 +2,7 @@
 #include "./ui.h"
 #include "./LVGL_PuncherUI.h"
 #include "PuncherEvents.h"
-
-
+#include "esp_log.h"
 
 void ui_event_XLeadLength(lv_event_t *e)
 {
@@ -332,11 +331,10 @@ void ui_event_LanguageDropDown(lv_event_t *e)
 
 void ui_event_FeedRoller(lv_event_t *e)
 {
-    // lv_obj_t *slider = e->target;
-
-    // if (e->code == LV_EVENT_VALUE_CHANGED)
-    // {
-    //     puncher_event_setting_change_t evt = {"display_brightness", lv_slider_get_value(slider)};
-    //     lvgl_ui->getScheduler()->set_setting_value(&evt);
-    // }
+    lv_obj_t *roller = e->target;
+    
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        lvgl_ui->getScheduler()->feed_paper(4 - lv_roller_get_selected(roller));
+    }
 }

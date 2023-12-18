@@ -5,6 +5,7 @@
 #include <lvgl.h>
 
 #include "PuncherScheduler.h"
+#include "PuncherMotors.h"
 // #include "SerialCommand.h"
 
 #include "MotorController/TMC_LEDCMotorController.h"
@@ -12,9 +13,7 @@
 
 static PuncherScheduler *scheduler;
 
-static TMC_LEDCMotorController *controller_X;
-static TMC_LEDCMotorController *controller_Y;
-static TMC_LEDCMotorController *controller_Z;
+
 
 // ---------- Function declarations
 void motor_init();
@@ -51,6 +50,10 @@ void motor_init()
     controller_X->begin();
     controller_Y->begin();
     controller_Z->begin();
+
+    controller_X->setActiveState(LOW);
+    controller_Y->setActiveState(LOW);
+    controller_Z->setActiveState(LOW);
 
     ESP_LOGI("Puncher_Main", "Motor initialized!");
 }

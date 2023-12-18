@@ -115,6 +115,7 @@ void ui_event_FeedStopButton(lv_event_t *e)
     if (event_code == LV_EVENT_CLICKED)
     {
         _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, 4);
+        lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
 void ui_event_FeedPlusButton(lv_event_t *e)
@@ -124,6 +125,7 @@ void ui_event_FeedPlusButton(lv_event_t *e)
     if (event_code == LV_EVENT_CLICKED)
     {
         _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, (lv_roller_get_selected(ui_FeedRoller) <= 0 ? 0 : (lv_roller_get_selected(ui_FeedRoller) - 1)));
+        lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
 void ui_event_FeedMinusButton(lv_event_t *e)
@@ -133,6 +135,7 @@ void ui_event_FeedMinusButton(lv_event_t *e)
     if (event_code == LV_EVENT_CLICKED)
     {
         _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, (lv_roller_get_selected(ui_FeedRoller) >= 8 ? 8 : (lv_roller_get_selected(ui_FeedRoller) + 1)));
+        lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
 
