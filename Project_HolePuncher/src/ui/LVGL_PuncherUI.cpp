@@ -35,10 +35,6 @@ void LVGLPuncherUI::handleEvent(puncher_event_t *msg)
 
 LVGLPuncherUI::LVGLPuncherUI()
 {
-    lv_init();
-
-    /* Initialize the display */
-    lv_disp_drv_init(&disp_drv);
 }
 
 LVGLPuncherUI::~LVGLPuncherUI()
@@ -51,6 +47,10 @@ void LVGLPuncherUI::begin()
 
     /* Initialize input device driver */
     lv_port_indev_init();
+
+    /* Initialize Multilanguage */
+    lv_i18n_init(lv_i18n_language_pack);
+    lv_i18n_set_locale(lv_i18n_language_pack[lang_id]->locale_name);
 
     ui_init();
     ui_menu_ptr_update();
@@ -84,6 +84,11 @@ void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)
 void LVGLPuncherUI::setBrightness(int brightness)
 {
     ledcWrite(LCD_LEDC_CHANNEL, brightness);
+}
+
+void LVGLPuncherUI::setLanguage(uint16_t lang_id)
+{
+    this->lang_id = lang_id;
 }
 
 LVGLPuncherUI *lvgl_ui = new LVGLPuncherUI();

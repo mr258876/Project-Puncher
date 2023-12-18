@@ -15,11 +15,8 @@ private:
     QueueHandle_t evt_queue;
     friend void evtQueueHandleLoop(void *param);
     void handleEvent(puncher_event_t *msg);
+    uint16_t lang_id = 0;
 public:
-    lv_disp_drv_t disp_drv;
-    lv_disp_draw_buf_t draw_buf;
-    lv_color_t *disp_draw_buf;
-
     LVGLPuncherUI();
     ~LVGLPuncherUI();
 
@@ -29,7 +26,9 @@ public:
     inline PuncherSchedulerInterface *getScheduler() { return scheduler; }
 
     void onSettingValueChange(puncher_event_setting_change_t *msg);
+
     void setBrightness(int brightness);
+    void setLanguage(uint16_t lang_id);
 };
 
 extern LVGLPuncherUI *lvgl_ui;

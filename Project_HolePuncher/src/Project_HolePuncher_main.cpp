@@ -59,6 +59,7 @@ void lvgl_init()
 {
     ESP_LOGI("Puncher_Main", "Starting LVGL...");
 
+    lvgl_ui->setLanguage(scheduler->getDisplayLanguage());
     lvgl_ui->begin();
 
     ESP_LOGI("Puncher_Main", "LVGL initialized!");

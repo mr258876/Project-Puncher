@@ -180,6 +180,8 @@ public:
 
     bool setDisplayBrightness(std::any option);
     bool setDisplayLanguage(std::any option);
+
+    inline uint16_t getDisplayLanguage() { return std::any_cast<uint16_t>(display_language); }
 };
 
 #endif

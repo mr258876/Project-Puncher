@@ -140,7 +140,7 @@ void ui_event_FeedMinusButton(lv_event_t *e)
 
 void ui_init(void)
 {
-    lv_i18n_init(lv_i18n_language_pack);
+    
 
     lv_disp_t *dispp = lv_disp_get_default();
     lv_theme_t *theme = lv_theme_default_init(dispp,                                                   /*Use the DPI, size, etc from this display*/
