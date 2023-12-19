@@ -26,27 +26,27 @@ private:
     SemaphoreHandle_t holeListHandle;
 
     /* Motor related */
-    MotorController *X;
-    MotorController *Y;
-    MotorController *Z;
+    MotorController *X = NULL;
+    MotorController *Y = NULL;
+    MotorController *Z = NULL;
 
-    uint32_t calcMotorSpeedPulse(int32_t length10UM, uint16_t length_type, int32_t speed10UMpS);
-    uint32_t calcMotorSpeedPulse(std::any length10UM, std::any length_type, std::any speed10UMpS);
+    uint32_t calcMotorSpeedPulse(int32_t length10UM, uint16_t length_type, int32_t speed10UMpS, int32_t microSteps);
+    uint32_t calcMotorSpeedPulse(std::any length10UM, std::any length_type, std::any speed10UMpS, std::any microSteps);
 
     inline void updateXspeed()
     {
         if (this->X)
-            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed));
+            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed, 16));
     }
     inline void updateYspeed()
     {
         if (this->Y)
-            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed));
+            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed, 8));
     }
     inline void updateZspeed()
     {
         if (this->Z)
-            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed));
+            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed, 16));
     }
 
     /* user interfaces */

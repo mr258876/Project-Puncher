@@ -23,10 +23,10 @@ void evtQueueHandleLoop(void *param)
 
 void LVGLPuncherUI::handleEvent(puncher_event_t *msg)
 {
-    ESP_LOGI("LVGLPuncherUI", "onEvent: %d", msg->code);
+    ESP_LOGD("LVGLPuncherUI", "onEvent: %d", msg->code);
     if (msg->code == PUNCHER_EVENT_SETTING_VALUE_CHANGED)
     {
-        ESP_LOGI("LVGLPuncherUI", "Setting value changed");
+        ESP_LOGD("LVGLPuncherUI", "Setting value changed");
         puncher_event_setting_change_t *data = std::any_cast<puncher_event_setting_change_t *>(msg->data);
         this->onSettingValueChange(data);
         delete data;

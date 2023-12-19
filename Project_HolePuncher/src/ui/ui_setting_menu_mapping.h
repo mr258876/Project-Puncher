@@ -25,15 +25,13 @@ void ui_menu_on_val_change(puncher_event_setting_change_t *data)
     auto it = ui_setting_mapping.find(data->item_name);
     if (it == ui_setting_mapping.end())
     {
-        ESP_LOGI("ui_menu", "name: %s does not exist!", data->item_name);
+        ESP_LOGD("ui_menu", "name: %s does not exist!", data->item_name);
     }
     else
     {
-        ESP_LOGI("ui_menu", "name: %s", data->item_name);
-        ESP_LOGI("ui_menu", "addr: %p", it->second.obj);
-        ESP_LOGI("ui_menu", "changing value");
+        ESP_LOGD("ui_menu", "changing value: name: %s, addr: %p", data->item_name, it->second.obj);
         it->second.call_back(it->second.obj, data->data);
-        ESP_LOGI("ui_menu", "value changed");
+        ESP_LOGD("ui_menu", "value changed");
     }
 }
 

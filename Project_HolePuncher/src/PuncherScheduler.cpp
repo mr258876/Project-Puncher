@@ -293,11 +293,15 @@ int PuncherScheduler::feed_paper(int gear)
 
     if (gear)
     {
+        int32_t z_speed = std::any_cast<int32_t>(this->z_operational_speed);
+        z_speed = z_speed * abs(gear) / 2;
+
         this->Z->sleep(false);
         this->Z->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->z_lead_length), 
             std::any_cast<uint16_t>(this->z_length_type), 
-            std::any_cast<int32_t>(this->z_operational_speed) * (abs(gear) / 2)
+            z_speed,
+            16
             ));
         this->Z->rotate_infinite(gear);
         this->status.basic_status.status_flags.is_feeding_paper = 1;
@@ -372,10 +376,10 @@ void PuncherScheduler::get_setting_values(void *p_ui)
 {
     PuncherUI *ui = (PuncherUI *)p_ui;
 
-    ESP_LOGI("PuncherScheduler", "Values len: %d", setting_mapping.size());
+    ESP_LOGD("PuncherScheduler", "Values len: %d", setting_mapping.size());
     for (auto &pair : setting_mapping)
     {
-        ESP_LOGI("PuncherScheduler", "Pushing value %s", pair.first.c_str());
+        ESP_LOGD("PuncherScheduler", "Pushing value %s", pair.first.c_str());
 
         std::any val_change = new puncher_event_setting_change_t(pair.first.c_str(), pair.second.obj);
         puncher_event_t *evt = new puncher_event_t(PUNCHER_EVENT_SETTING_VALUE_CHANGED, val_change);
@@ -385,5 +389,5 @@ void PuncherScheduler::get_setting_values(void *p_ui)
         /* Notice: You MUST delete these val_change object manually in UI! */
         delete evt;
     }
-    ESP_LOGI("PuncherScheduler", "Setting values pushed to ui");
+    ESP_LOGD("PuncherScheduler", "Setting values pushed to ui");
 }
