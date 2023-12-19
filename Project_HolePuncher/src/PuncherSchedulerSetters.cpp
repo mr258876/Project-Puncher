@@ -6,6 +6,7 @@ bool PuncherScheduler::setXLeadLength(std::any val)
         return false;
 
     this->x_lead_length = val;
+    updateXspeed();
     return true;
 }
 bool PuncherScheduler::setXOperationalSpeed(std::any val)
@@ -14,6 +15,7 @@ bool PuncherScheduler::setXOperationalSpeed(std::any val)
         return false;
 
     this->x_operational_speed = val;
+    updateXspeed();
     return true;
 }
 bool PuncherScheduler::setXLengthType(std::any val)
@@ -22,6 +24,7 @@ bool PuncherScheduler::setXLengthType(std::any val)
         return false;
 
     this->x_length_type = val;
+    updateXspeed();
     return true;
 }
 bool PuncherScheduler::setXReverseAxis(std::any val)
@@ -95,6 +98,7 @@ bool PuncherScheduler::setYLeadLength(std::any val)
         return false;
 
     this->y_lead_length = val;
+    updateYspeed();
     return true;
 }
 bool PuncherScheduler::setYOperationalSpeed(std::any val)
@@ -103,6 +107,7 @@ bool PuncherScheduler::setYOperationalSpeed(std::any val)
         return false;
 
     this->y_operational_speed = val;
+    updateYspeed();
     return true;
 }
 bool PuncherScheduler::setYLengthType(std::any val)
@@ -111,6 +116,7 @@ bool PuncherScheduler::setYLengthType(std::any val)
         return false;
 
     this->y_length_type = val;
+    updateYspeed();
     return true;
 }
 bool PuncherScheduler::setYReverseAxis(std::any val)
@@ -184,6 +190,7 @@ bool PuncherScheduler::setZLeadLength(std::any val)
         return false;
 
     this->z_lead_length = val;
+    updateZspeed();
     return true;
 }
 bool PuncherScheduler::setZOperationalSpeed(std::any val)
@@ -192,6 +199,7 @@ bool PuncherScheduler::setZOperationalSpeed(std::any val)
         return false;
 
     this->z_operational_speed = val;
+    updateZspeed();
     return true;
 }
 bool PuncherScheduler::setZLengthType(std::any val)
@@ -200,6 +208,7 @@ bool PuncherScheduler::setZLengthType(std::any val)
         return false;
 
     this->z_length_type = val;
+    updateZspeed();
     return true;
 }
 bool PuncherScheduler::setZReverseAxis(std::any val)

@@ -25,10 +25,31 @@ private:
     std::vector<scheduler_hole_t> holeList;
     SemaphoreHandle_t holeListHandle;
 
+    /* Motor related */
     MotorController *X;
     MotorController *Y;
     MotorController *Z;
 
+    uint32_t calcMotorSpeedPulse(int32_t length10UM, uint16_t length_type, int32_t speed10UMpS);
+    uint32_t calcMotorSpeedPulse(std::any length10UM, std::any length_type, std::any speed10UMpS);
+
+    inline void updateXspeed()
+    {
+        if (this->X)
+            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed));
+    }
+    inline void updateYspeed()
+    {
+        if (this->Y)
+            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed));
+    }
+    inline void updateZspeed()
+    {
+        if (this->Z)
+            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed));
+    }
+
+    /* user interfaces */
     std::vector<PuncherUI *> ui_list;
 
     /* Setting Values */
@@ -105,8 +126,6 @@ public:
         this->X = X;
         this->Y = Y;
         this->Z = Z;
-
-        ESP_LOGI("PuncherScheduler", "Z axis: %p", Z);
     }
 
     /* Attach UI before begin() ! */

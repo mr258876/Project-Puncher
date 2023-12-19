@@ -294,6 +294,11 @@ int PuncherScheduler::feed_paper(int gear)
     if (gear)
     {
         this->Z->sleep(false);
+        this->Z->setSpeed(calcMotorSpeedPulse(
+            std::any_cast<int32_t>(this->z_lead_length), 
+            std::any_cast<uint16_t>(this->z_length_type), 
+            std::any_cast<int32_t>(this->z_operational_speed) * (abs(gear) / 2)
+            ));
         this->Z->rotate_infinite(gear);
         this->status.basic_status.status_flags.is_feeding_paper = 1;
     }
@@ -301,6 +306,7 @@ int PuncherScheduler::feed_paper(int gear)
     {
         this->Z->stop();
         this->Z->sleep(true);
+        updateZspeed();
         this->status.basic_status.status_flags.is_feeding_paper = 0;
     }
 

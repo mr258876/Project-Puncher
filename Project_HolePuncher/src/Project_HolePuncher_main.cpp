@@ -23,7 +23,7 @@ void setup()
 {
     ESP_LOGI("Puncher_Main", "Initializing...");
 
-    pm_init();
+    pm_init();  // Init power manager first or voltage acquire will fail
 
     scheduler = new PuncherScheduler();
     scheduler->begin();

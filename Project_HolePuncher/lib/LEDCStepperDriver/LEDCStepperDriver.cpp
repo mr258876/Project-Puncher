@@ -380,7 +380,7 @@ void LEDCStepperDriver::rotate(double deg)
 void LEDCStepperDriver::rotate_infinite(int dir)
 {
     infinite_run = 1;
-    startMove(dir * PCNT_THRES_VAL);
+    startMove(((dir > 0) ? 1 : -1) * PCNT_THRES_VAL);
     __pcnt_pause(pcnt_unit);
 }
 void LEDCStepperDriver::startMove(long steps)
