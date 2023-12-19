@@ -291,8 +291,6 @@ int PuncherScheduler::feed_paper(int gear)
     // if (puncher_is_busy(this->status))
     //     return this->status.basic_status.status_data;
 
-    ESP_LOGI("PuncherScheduler", "Z axis: %p", Z);
-    // TODO
     if (gear)
     {
         this->Z->sleep(false);
