@@ -7,7 +7,7 @@
 #define MICROSTEPS_Y    8
 #define MICROSTEPS_Z    16
 
-#define DRIVER_SERIAL Serial2 // TMC controller Serial Port
+#define DRIVER_SERIAL Serial // TMC controller Serial Port
 #define R_SENSE 0.11f         // Match to your driver <- ???
 #define DRIVER_UART_BANDRATE    115200
 

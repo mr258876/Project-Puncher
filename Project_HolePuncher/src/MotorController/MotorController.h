@@ -46,6 +46,8 @@ public:
     virtual motor_res_t setSpeed(uint32_t s) = 0;
     /* Set motor current */
     virtual motor_res_t setCurrent(uint32_t current) = 0;
+    /* Set motor microstep */
+    virtual motor_res_t setMicroSteps(uint32_t microSteps) = 0;
 
     /* Check driver existance */
     virtual motor_res_t pingDriver() = 0;

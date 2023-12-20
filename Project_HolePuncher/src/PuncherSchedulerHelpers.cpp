@@ -6,6 +6,7 @@ uint32_t PuncherScheduler::calcMotorSpeedPulse(int32_t length10UM, uint16_t leng
     double res = speed10UMpS * 1.0;
     res = res / length10UM * (length_type ? 1 : 3.14159265358979) * MOTOR_STEPS * microSteps;
     res += 0.5;
+    ESP_LOGI("SchedulerHelper", "pulse %d", (int32_t)res);
     return (int32_t)res;
 }
 

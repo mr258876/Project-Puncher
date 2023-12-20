@@ -414,7 +414,7 @@ void ui_SettingScreen_screen_init(void)
 
     // increase header height
     lv_obj_t *sidebar_header = lv_menu_get_sidebar_header(menu);
-    lv_obj_set_height(sidebar_header, lv_pct(14));
+    lv_obj_set_height(sidebar_header, lv_pct(16));
     // change sidebar width
     lv_obj_set_width(lv_obj_get_parent(ui_setting_root_page), lv_pct(34));
 

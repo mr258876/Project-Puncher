@@ -16,20 +16,22 @@ void evtQueueHandleLoop(void *param)
     uint8_t evt_tmp[sizeof(puncher_event_t)];
     while (1)
     {
-        xQueueReceive(ui->evt_queue, evt_tmp, portMAX_DELAY);
-        ui->handleEvent((puncher_event_t *)evt_tmp);
-    }
-}
+        uint32_t evt_bits = xEventGroupWaitBits(ui->evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
 
-void LVGLPuncherUI::handleEvent(puncher_event_t *msg)
-{
-    ESP_LOGD("LVGLPuncherUI", "onEvent: %d", msg->code);
-    if (msg->code == PUNCHER_EVENT_SETTING_VALUE_CHANGED)
-    {
-        ESP_LOGD("LVGLPuncherUI", "Setting value changed");
-        puncher_event_setting_change_t *data = std::any_cast<puncher_event_setting_change_t *>(msg->data);
-        this->onSettingValueChange(data);
-        delete data;
+        if (evt_bits & OnEventCode)
+        {
+            // TODO
+        }
+
+        if (evt_bits & OnSettingValueChange)
+        {
+            xQueueReceive(ui->setting_value_queue, evt_tmp, portMAX_DELAY);
+            ui->handleSettingValueChange((puncher_event_setting_change_t *)evt_tmp);
+        }
+
+        /* If there's still data in queue */
+        if (uxQueueMessagesWaiting(ui->event_code_queue))  xEventGroupSetBits(ui->evt_group, OnEventCode);
+        if (uxQueueMessagesWaiting(ui->setting_value_queue))  xEventGroupSetBits(ui->evt_group, OnSettingValueChange);
     }
 }
 
@@ -61,13 +63,22 @@ void LVGLPuncherUI::begin()
     ledcAttachPin(BL_PIN, LCD_LEDC_CHANNEL);
     this->setBrightness(1);
 
-    this->evt_queue = xQueueCreate(16, sizeof(puncher_event_t));
+    this->event_code_queue = xQueueCreate(16, sizeof(puncher_event_code_t));
+    this->setting_value_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
+    this->evt_group = xEventGroupCreate();
     xTaskCreate(evtQueueHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
 }
 
-void LVGLPuncherUI::onEvent(puncher_event_t *msg)
+void LVGLPuncherUI::onStatusCode(puncher_event_code_t *msg)
 {
-    xQueueSend(evt_queue, msg, portMAX_DELAY);
+    xQueueSend(event_code_queue, msg, portMAX_DELAY);
+    xEventGroupSetBits(evt_group, OnEventCode);
+}
+
+void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)
+{
+    xQueueSend(setting_value_queue, msg, portMAX_DELAY);
+    xEventGroupSetBits(evt_group, OnSettingValueChange);
 }
 
 void LVGLPuncherUI::attachScheduler(PuncherSchedulerInterface *p_scheduler)
@@ -76,8 +87,9 @@ void LVGLPuncherUI::attachScheduler(PuncherSchedulerInterface *p_scheduler)
     p_scheduler->get_setting_values(this);
 }
 
-void LVGLPuncherUI::onSettingValueChange(puncher_event_setting_change_t *msg)
+void LVGLPuncherUI::handleSettingValueChange(puncher_event_setting_change_t *msg)
 {
+    ESP_LOGI("LVGLPuncherUI", "Value %s has changed.", msg->item_name);
     ui_menu_on_val_change(msg);
 }
 

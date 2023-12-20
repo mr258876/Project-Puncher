@@ -52,6 +52,8 @@ public:
     motor_res_t setSpeed(uint32_t s);
     /* Set motor current */
     motor_res_t setCurrent(uint32_t current);
+    /* Set motor microstep */
+    motor_res_t setMicroSteps(uint32_t microSteps);
 
     /* Check driver existance */
     motor_res_t pingDriver();

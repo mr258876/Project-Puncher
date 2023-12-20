@@ -36,17 +36,42 @@ private:
     inline void updateXspeed()
     {
         if (this->X)
-            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed, 16));
+            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed, 64));
     }
     inline void updateYspeed()
     {
         if (this->Y)
-            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed, 8));
+            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed, 64));
     }
     inline void updateZspeed()
     {
         if (this->Z)
-            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed, 16));
+            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed, 64));
+    }
+
+    inline void updateXdriver()
+    {
+        if (this->X)
+        {
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
+            this->X->setMicroSteps(64);
+        }
+    }
+    inline void updateYdriver()
+    {
+        if (this->Y)
+        {
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
+            this->Y->setMicroSteps(64);
+        }
+    }
+    inline void updateZdriver()
+    {
+        if (this->Z)
+        {
+            this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
+            this->Z->setMicroSteps(64);
+        }
     }
 
     /* user interfaces */
@@ -85,7 +110,7 @@ private:
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
     std::any z_sleep_current = std::any(static_cast<int32_t>(500));
 
-    std::any power_voltage = std::any(static_cast<uint16_t>(3)); // 0->5V 1->9V 2->12V 3->15V 4->20V
+    std::any power_voltage = std::any(static_cast<uint16_t>(0)); // 0->5V 1->9V 2->12V 3->15V 4->20V
 
     std::any display_brightness = std::any(static_cast<int32_t>(128));
     std::any display_language = std::any(static_cast<uint16_t>(0));
@@ -126,6 +151,18 @@ public:
         this->X = X;
         this->Y = Y;
         this->Z = Z;
+
+        ESP_LOGI("PuncherScheduler", "X driver status: %d", X->pingDriver());
+        ESP_LOGI("PuncherScheduler", "Y driver status: %d", Y->pingDriver());
+        ESP_LOGI("PuncherScheduler", "Z driver status: %d", Z->pingDriver());
+
+        updateXspeed();
+        updateYspeed();
+        updateZspeed();
+
+        updateXdriver();
+        updateYdriver();
+        updateZdriver();
     }
 
     /* Attach UI before begin() ! */
@@ -136,11 +173,11 @@ public:
     }
 
     /* Notify all UI */
-    inline void notifyUI(puncher_event_t *msg)
+    inline void notifyUI(puncher_event_code_t *msg)
     {
         for (PuncherUI *p_ui : this->ui_list)
         {
-            p_ui->onEvent(msg);
+            p_ui->onStatusCode(msg);
         }
         delete msg;
     }

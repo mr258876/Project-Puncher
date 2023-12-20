@@ -301,7 +301,7 @@ int PuncherScheduler::feed_paper(int gear)
             std::any_cast<int32_t>(this->z_lead_length), 
             std::any_cast<uint16_t>(this->z_length_type), 
             z_speed,
-            16
+            64
             ));
         this->Z->rotate_infinite(gear);
         this->status.basic_status.status_flags.is_feeding_paper = 1;
@@ -364,10 +364,10 @@ void PuncherScheduler::set_setting_value(puncher_event_setting_change_t *evt)
         saveValue(evt->item_name, item_mapping);
 
         /* Notify all UI after value change */
-        std::any val_change = new puncher_event_setting_change_t(evt->item_name, item_mapping.obj);
-        puncher_event_t *evt = new puncher_event_t(PUNCHER_EVENT_SETTING_VALUE_CHANGED, val_change);
-
-        this->notifyUI(evt);
+        for (auto &ui: this->ui_list)
+        {
+            ui->onSettingValueChange(evt);
+        }
     }
 }
 
@@ -381,13 +381,9 @@ void PuncherScheduler::get_setting_values(void *p_ui)
     {
         ESP_LOGD("PuncherScheduler", "Pushing value %s", pair.first.c_str());
 
-        std::any val_change = new puncher_event_setting_change_t(pair.first.c_str(), pair.second.obj);
-        puncher_event_t *evt = new puncher_event_t(PUNCHER_EVENT_SETTING_VALUE_CHANGED, val_change);
+        puncher_event_setting_change_t evt = puncher_event_setting_change_t(pair.first.c_str(), pair.second.obj);
 
-        ui->onEvent(evt);
-
-        /* Notice: You MUST delete these val_change object manually in UI! */
-        delete evt;
+        ui->onSettingValueChange(&evt);
     }
     ESP_LOGD("PuncherScheduler", "Setting values pushed to ui");
 }

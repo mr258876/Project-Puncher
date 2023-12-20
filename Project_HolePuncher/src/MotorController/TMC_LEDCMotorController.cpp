@@ -90,15 +90,41 @@ motor_res_t TMC_LEDCMotorController::setCurrent(uint32_t rms_current)
     return MOTOR_RES_SUCCESS;
 }
 
+motor_res_t TMC_LEDCMotorController::setMicroSteps(uint32_t microSteps)
+{
+    xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
+    {
+        ESP_LOGI("PuncherScheduler", "ms: %d", driver->microsteps());
+        ESP_LOGI("PuncherScheduler", "target: %d", driver->microsteps());
+        driver->mstep_reg_select(1);
+        // The function in TMCStepper is not working, wtf
+        switch(microSteps) {
+            case 256: driver->mres(0); break;
+            case 128: driver->mres(1); break;
+            case  64: driver->mres(2); break;
+            case  32: driver->mres(3); break;
+            case  16: driver->mres(4); break;
+            case   8: driver->mres(5); break;
+            case   4: driver->mres(6); break;
+            case   2: driver->mres(7); break;
+            case   0: driver->mres(8); break;
+            default: break;
+        }
+        ESP_LOGI("PuncherScheduler", "ms new: %d", driver->microsteps());
+    }
+    xSemaphoreGive(*DUARTMutex);
+    return MOTOR_RES_SUCCESS;
+}
+
 motor_res_t TMC_LEDCMotorController::pingDriver()
 {
     uint8_t __state = digitalRead(enable_pin);
 
-    stepper->disable();
-    uint8_t en_state = 0;
+    digitalWrite(enable_pin, HIGH);
+    uint32_t en_state = 0;
     xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
     {
-        en_state = driver->IOIN() & 0x01;
+        en_state = driver->enn();
     }
     xSemaphoreGive(*DUARTMutex);
 

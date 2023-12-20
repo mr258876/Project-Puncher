@@ -9,4 +9,4 @@ SemaphoreHandle_t *LCDMutexptr = &SPI2Mutex;
 SemaphoreHandle_t UART0Mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t UART1Mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t UART2Mutex = xSemaphoreCreateMutex();
-SemaphoreHandle_t *DUARTMutex = &UART2Mutex;
+SemaphoreHandle_t *DUARTMutex = &UART0Mutex;

@@ -41,6 +41,7 @@ bool PuncherScheduler::setXOperationalCurrent(std::any val)
         return false;
 
     this->x_operational_current = val;
+    updateXdriver();
     return true;
 }
 bool PuncherScheduler::setXIdleBehavior(std::any val)
@@ -133,6 +134,7 @@ bool PuncherScheduler::setYOperationalCurrent(std::any val)
         return false;
 
     this->y_operational_current = val;
+    updateYdriver();
     return true;
 }
 bool PuncherScheduler::setYIdleBehavior(std::any val)
@@ -225,6 +227,7 @@ bool PuncherScheduler::setZOperationalCurrent(std::any val)
         return false;
 
     this->z_operational_current = val;
+    updateZdriver();
     return true;
 }
 bool PuncherScheduler::setZIdleBehavior(std::any val)
