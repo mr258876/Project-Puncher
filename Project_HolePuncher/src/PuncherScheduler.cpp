@@ -1,4 +1,5 @@
 #include "PuncherScheduler.h"
+#include "PuncherConf.h"
 
 void evtHandleLoop(void *param)
 {
@@ -8,11 +9,20 @@ void evtHandleLoop(void *param)
         uint32_t evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
 
         if (evt & OnFinishX)
+        {
+            scheduler->Xsleep();
             scheduler->x_finished = 1;
+        }
         if (evt & OnFinishY)
+        {
+            scheduler->Ysleep();
             scheduler->y_finished = 1;
+        }
         if (evt & OnFinishZ)
+        {
+            scheduler->Zsleep();
             scheduler->z_finished = 1;
+        }
 
         if (scheduler->status.basic_status.status_flags.is_running)
         {
@@ -217,7 +227,7 @@ void PuncherScheduler::saveValue(std::string name, puncher_setting_mapping_t ite
     size_t hashVal = hashStr(name);
 
     const char *hexString = uint32ToHex(hashVal).c_str();
-    ESP_LOGI("PuncherScheduler", "Save hash: %s", hexString);
+    ESP_LOGD("PuncherScheduler", "Save hash: %s", hexString);
 
     switch (item.type)
     {
@@ -309,37 +319,28 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
 
 int PuncherScheduler::feed_paper(int gear)
 {
-    if (puncher_is_busy(this->status))
-        return this->status.basic_status.status_data;
+    if (this->status.basic_status.status_data & (~0b1000))
+        return 1;
 
     if (gear)
     {
         int32_t z_speed = std::any_cast<int32_t>(this->z_operational_speed);
-        z_speed = z_speed * abs(gear) / 2;
+        z_speed = z_speed * abs(gear) / 3;
 
         this->Z->sleep(false);
         this->Z->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->z_lead_length),
             std::any_cast<uint16_t>(this->z_length_type),
             z_speed,
-            64));
+            MICROSTEPS_Z));
         this->Z->rotate_infinite(gear);
-        this->status.basic_status.status_flags.is_feeding_paper = 1;
     }
     else
     {
         this->Z->stop();
         this->Z->sleep(true);
         updateZspeed();
-        this->status.basic_status.status_flags.is_feeding_paper = 0;
     }
-
-    return 0;
-}
-
-int PuncherScheduler::ui_get_menu()
-{
-    // TODO
 
     return 0;
 }
@@ -415,7 +416,9 @@ void PuncherScheduler::handleMotorFinish()
         if (y_finished == 0)
         {
             // Move down Y
-            /* TODO */
+            Yawake();
+            Y->move(calc_Y_steps(Y_PUNCH_MOVEMENT_LENGTH));
+
             y_status = 1;
             y_finished = 0;
         }
@@ -424,7 +427,9 @@ void PuncherScheduler::handleMotorFinish()
             if (y_status == 1)
             {
                 // Y movoed down, now move back
-                /* TODO */
+                Yawake();
+                Y->move(calc_Y_steps(-Y_PUNCH_MOVEMENT_LENGTH));
+
                 y_status = 2;
                 y_finished = 0;
             }
@@ -441,14 +446,15 @@ void PuncherScheduler::handleMotorFinish()
 
 int PuncherScheduler::nextHole()
 {
-    if (!status.basic_status.status_flags.is_running) return 1;
-    
+    if (!status.basic_status.status_flags.is_running)
+        return 1;
+
     if (holeList.size() < 1)
     {
         status.basic_status.status_flags.is_running = 0;
         return 0;
     }
-    
+
     scheduler_hole_t hole = holeList.front();
 
     x_finished = 0;
@@ -457,11 +463,12 @@ int PuncherScheduler::nextHole()
 
     if (hole.x > 0)
     {
-        // X->move();
+        Xawake();
+        X->move(calc_X_steps((30 - hole.x) * 1.0 * 2 - x_pos));
     }
-    double z_steps = (hole.z - z_pos) / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 200 * 64;
-    z_steps += 0.5;
-    Z->move((int32_t)z_steps);
+
+    Zawake();
+    Z->move(calc_Z_steps(hole.z - z_pos));
 
     holeList.erase(holeList.begin());
 

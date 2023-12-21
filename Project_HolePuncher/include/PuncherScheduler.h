@@ -13,6 +13,7 @@
 #include "StoreManager/StorageManager.h"
 #include "PuncherUI.h"
 #include "PowerManager/PowerManager.h"
+#include "PuncherConf.h"
 
 #include <Arduino.h>
 
@@ -29,15 +30,18 @@ private:
     bool y_finished = 1;
     uint8_t y_status = 0; // 0->Idle, 1->Moved down, 2->Moved up
     bool z_finished = 1;
-    
+
     /* Positions */
     double z_pos = 0;
+    // by measurements, 14mm from base at top
+    // 6.5mm from base at ready state
+    // 3.5mm ftom base at full down
+    double y_pos = -7.5;
     // Count from positioning pillar on the right
     // 20.50mm base + 0.05 tape gap - 21mm cart
     // Hence it will be 0.45mm inside the tape
     // 5.55mm from the E3 line
     double x_pos = -5.55;
-    
 
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
@@ -56,17 +60,17 @@ private:
     inline void updateXspeed()
     {
         if (this->X)
-            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed, 64));
+            this->X->setSpeed(calcMotorSpeedPulse(this->x_lead_length, this->x_length_type, this->x_operational_speed, MICROSTEPS_X));
     }
     inline void updateYspeed()
     {
         if (this->Y)
-            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed, 64));
+            this->Y->setSpeed(calcMotorSpeedPulse(this->y_lead_length, this->y_length_type, this->y_operational_speed, MICROSTEPS_Y));
     }
     inline void updateZspeed()
     {
         if (this->Z)
-            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed, 64));
+            this->Z->setSpeed(calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, this->z_operational_speed, MICROSTEPS_Z));
     }
 
     inline void updateXdriver()
@@ -74,7 +78,6 @@ private:
         if (this->X)
         {
             this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
-            this->X->setMicroSteps(64);
         }
     }
     inline void updateYdriver()
@@ -82,7 +85,6 @@ private:
         if (this->Y)
         {
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
-            this->Y->setMicroSteps(64);
         }
     }
     inline void updateZdriver()
@@ -90,8 +92,93 @@ private:
         if (this->Z)
         {
             this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
-            this->Z->setMicroSteps(64);
         }
+    }
+
+    // Enter idle mode
+    inline void Xsleep()
+    {
+        switch (std::any_cast<uint16_t>(x_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->X->setCurrent(std::any_cast<int32_t>(this->x_sleep_current)); break;
+        case 2: this->X->sleep(true); break;
+        default: break;
+        }
+    }
+    // Leave idle mode
+    inline void Xawake()
+    {
+        switch (std::any_cast<uint16_t>(x_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current)); break;
+        case 2: this->X->sleep(false); break;
+        default: break;
+        }
+    }
+    // Enter idle mode
+    inline void Ysleep()
+    {
+        switch (std::any_cast<uint16_t>(y_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->Y->setCurrent(std::any_cast<int32_t>(this->y_sleep_current)); break;
+        case 2: this->Y->sleep(true); break;
+        default: break;
+        }
+    }
+    // Leave idle mode
+    inline void Yawake()
+    {
+        switch (std::any_cast<uint16_t>(y_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current)); break;
+        case 2: this->Y->sleep(false); break;
+        default: break;
+        }
+    }
+    // Enter idle mode
+    inline void Zsleep()
+    {
+        switch (std::any_cast<uint16_t>(z_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->Z->setCurrent(std::any_cast<int32_t>(this->z_sleep_current)); break;
+        case 2: this->Z->sleep(true); break;
+        default: break;
+        }
+    }
+    // Leave idle mode
+    inline void Zawake()
+    {
+        switch (std::any_cast<uint16_t>(z_idle_behavior))
+        {
+        case 0: break;
+        case 1: this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current)); break;
+        case 2: this->Z->sleep(false); break;
+        default: break;
+        }
+    }
+
+    inline int32_t calc_X_steps(double mm)
+    {
+        double steps = mm / (std::any_cast<int32_t>(x_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(x_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_X;
+        steps += 0.5;
+        return (int32_t)steps;
+    }
+    inline int32_t calc_Y_steps(double mm)
+    {
+        double steps = mm / (std::any_cast<int32_t>(y_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(y_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_Y;
+        steps += 0.5;
+        return (int32_t)steps;
+    }
+    inline int32_t calc_Z_steps(double mm)
+    {
+        double steps = mm / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_Z;
+        steps += 0.5;
+        return (int32_t)steps;
     }
 
     /* user interfaces */
@@ -100,7 +187,7 @@ private:
     /* Setting Values */
     std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
     std::any x_operational_speed = std::any(static_cast<int32_t>(800)); // 8mm, last 2 digits for decimal
-    std::any x_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
+    std::any x_length_type = std::any(static_cast<uint16_t>(0));        // 0->diameter 1->perimeter
     std::any x_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any x_operational_current = std::any(static_cast<int32_t>(1000));
     std::any x_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -112,7 +199,7 @@ private:
 
     std::any y_lead_length = std::any(static_cast<int32_t>(800));
     std::any y_operational_speed = std::any(static_cast<int32_t>(800));
-    std::any y_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
+    std::any y_length_type = std::any(static_cast<uint16_t>(0)); // 0->diameter 1->perimeter
     std::any y_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any y_operational_current = std::any(static_cast<int32_t>(1000));
     std::any y_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -124,7 +211,7 @@ private:
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(2000));
-    std::any z_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
+    std::any z_length_type = std::any(static_cast<uint16_t>(0)); // 0->diameter 1->perimeter
     std::any z_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any z_operational_current = std::any(static_cast<int32_t>(1000));
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -191,6 +278,10 @@ public:
                                        { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishY, &xHigherPriorityTaskWoken); });
         this->Z->setMoveFinishCallBack([this]()
                                        { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishZ, &xHigherPriorityTaskWoken); });
+
+        Xsleep();
+        Ysleep();
+        Zsleep();
     }
 
     /* Attach UI before begin() ! */
@@ -214,7 +305,7 @@ public:
     int start_workload();
     int pause_workload();
     int delete_workload();
-    inline int data_transmit_mode(int transmit_mode)
+    inline int data_transmit_mode(bool transmit_mode)
     {
         if (status.basic_status.status_data & (~0b100))
             return 1;
@@ -222,9 +313,27 @@ public:
         status.basic_status.status_flags.is_transmitting_data = transmit_mode;
         return 0;
     }
+    int feed_paper_mode(bool feed_paper_mode)
+    {
+        if (status.basic_status.status_data & (~0b1000))
+            return 1;
+
+        status.basic_status.status_flags.is_feeding_paper = feed_paper_mode;
+        if (feed_paper_mode)
+        {
+            Zawake();
+            Z->sleep(true);
+        }
+        else
+        {
+            Z->sleep(false);
+            Zsleep();
+        }
+
+        return 0;
+    }
     int add_hole(scheduler_hole_t h);
     int feed_paper(int gear);
-    int ui_get_menu();
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();

@@ -72,15 +72,6 @@ lv_obj_t *ui____initial_actions0;
 ///////////////////// ANIMATIONS ////////////////////
 
 ///////////////////// FUNCTIONS ////////////////////
-void ui_event_FeedButton(lv_event_t *e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t *target = lv_event_get_target(e);
-    if (event_code == LV_EVENT_CLICKED)
-    {
-        _ui_screen_change(&ui_FeedScreen, LV_SCR_LOAD_ANIM_FADE_ON, 250, 0, &ui_FeedScreen_screen_init);
-    }
-}
 void ui_event_SettingButton(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -97,17 +88,6 @@ void ui_event_FeedScreen(lv_event_t *e)
     if (event_code == LV_EVENT_SCREEN_LOAD_START)
     {
         _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED, 4);
-    }
-}
-void ui_event_FeedBackButton(lv_event_t *e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t *target = lv_event_get_target(e);
-    if (event_code == LV_EVENT_CLICKED)
-    {
-        _ui_screen_change(&ui_HomeScreen, LV_SCR_LOAD_ANIM_FADE_ON, 250, 0, &ui_HomeScreen_screen_init);
-        _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, 4);
-        lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
 void ui_event_FeedStopButton(lv_event_t *e)

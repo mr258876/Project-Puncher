@@ -3,9 +3,9 @@
 
 //---------------- Motor Controls ----------------
 #define MOTOR_STEPS     200
-#define MICROSTEPS_X    16
-#define MICROSTEPS_Y    8
-#define MICROSTEPS_Z    16
+#define MICROSTEPS_X    64
+#define MICROSTEPS_Y    64
+#define MICROSTEPS_Z    64
 
 #define DRIVER_SERIAL Serial // TMC controller Serial Port
 #define R_SENSE 0.11f         // Match to your driver <- ???
@@ -29,6 +29,8 @@
 #define X_CONTROL_CHANNEL 0
 #define Y_CONTROL_CHANNEL 1
 #define Z_CONTROL_CHANNEL 2
+
+#define Y_PUNCH_MOVEMENT_LENGTH 3.00
 
 #define LCD_LEDC_CHANNEL 7
 
