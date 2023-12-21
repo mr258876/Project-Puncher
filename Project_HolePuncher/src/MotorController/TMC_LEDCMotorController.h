@@ -59,6 +59,9 @@ public:
     motor_res_t pingDriver();
     /* Check motor existance */
     motor_res_t pingMotor();
+
+    /* Movement finish callback */
+    motor_res_t setMoveFinishCallBack(std::function<void()> cb);
 };
 
 #endif // _TMC_LEDCMOTORCONTROLLER_H_

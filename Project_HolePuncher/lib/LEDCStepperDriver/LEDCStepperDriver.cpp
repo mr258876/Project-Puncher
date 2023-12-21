@@ -131,6 +131,12 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
                     digitalWrite(driver->enable_pin, (driver->enable_active_state == HIGH) ? LOW : HIGH);
                 }
             }
+
+            /* finish callback */
+            if (driver->finish_callback)
+            {
+                driver->finish_callback();
+            }
         }
         else
         {

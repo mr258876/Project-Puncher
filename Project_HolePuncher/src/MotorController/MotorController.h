@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <functional>
 
 enum motor_status_t
 {
@@ -53,6 +54,9 @@ public:
     virtual motor_res_t pingDriver() = 0;
     /* Check motor existance */
     virtual motor_res_t pingMotor() = 0;
+
+    /* Movement finish callback */
+    virtual motor_res_t setMoveFinishCallBack(std::function<void()> cb) = 0;
 };
 
 #endif // _MOTORCONTROL_H_

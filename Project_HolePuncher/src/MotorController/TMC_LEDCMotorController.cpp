@@ -94,8 +94,6 @@ motor_res_t TMC_LEDCMotorController::setMicroSteps(uint32_t microSteps)
 {
     xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
     {
-        ESP_LOGI("PuncherScheduler", "ms: %d", driver->microsteps());
-        ESP_LOGI("PuncherScheduler", "target: %d", driver->microsteps());
         driver->mstep_reg_select(1);
         // The function in TMCStepper is not working, wtf
         switch(microSteps) {
@@ -110,7 +108,6 @@ motor_res_t TMC_LEDCMotorController::setMicroSteps(uint32_t microSteps)
             case   0: driver->mres(8); break;
             default: break;
         }
-        ESP_LOGI("PuncherScheduler", "ms new: %d", driver->microsteps());
     }
     xSemaphoreGive(*DUARTMutex);
     return MOTOR_RES_SUCCESS;
@@ -136,5 +133,11 @@ motor_res_t TMC_LEDCMotorController::pingDriver()
 motor_res_t TMC_LEDCMotorController::pingMotor()
 {
     // running_current = rms_current;
+    return MOTOR_RES_SUCCESS;
+}
+
+motor_res_t TMC_LEDCMotorController::setMoveFinishCallBack(std::function<void()> cb)
+{
+    stepper->setFinishCallBack(cb);
     return MOTOR_RES_SUCCESS;
 }

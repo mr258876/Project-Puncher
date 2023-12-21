@@ -5,6 +5,7 @@
 #include "ui/ui_setting_menu_mapping.h"
 #include "ui/lv_port.h"
 #include "ui/lv_port_indev_ctp.h"
+#include "PuncherSemaphore.h"
 
 #include <Arduino.h>
 
@@ -30,8 +31,23 @@ void evtQueueHandleLoop(void *param)
         }
 
         /* If there's still data in queue */
-        if (uxQueueMessagesWaiting(ui->event_code_queue))  xEventGroupSetBits(ui->evt_group, OnEventCode);
-        if (uxQueueMessagesWaiting(ui->setting_value_queue))  xEventGroupSetBits(ui->evt_group, OnSettingValueChange);
+        if (uxQueueMessagesWaiting(ui->event_code_queue))
+            xEventGroupSetBits(ui->evt_group, OnEventCode);
+        if (uxQueueMessagesWaiting(ui->setting_value_queue))
+            xEventGroupSetBits(ui->evt_group, OnSettingValueChange);
+    }
+}
+
+void lvglLoop(void *param)
+{
+    while (1)
+    {
+        xSemaphoreTake(LVGLMutex, portMAX_DELAY);
+        {
+            lv_timer_handler(); /* let the GUI do its work */
+        }
+        xSemaphoreGive(LVGLMutex);
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 
@@ -56,6 +72,7 @@ void LVGLPuncherUI::begin()
 
     ui_init();
     ui_menu_ptr_update();
+    xTaskCreate(lvglLoop, "lvglLoop", 8192, this, 1, NULL);
 
     LV_LOG_INFO("LVGL Booted.");
 

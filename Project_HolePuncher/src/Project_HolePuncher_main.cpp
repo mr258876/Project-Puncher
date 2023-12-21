@@ -76,11 +76,5 @@ void lvgl_init()
 
 void loop()
 {
-    scheduler->tick();
-    if (xSemaphoreTake(LVGLMutex, portMAX_DELAY) == pdTRUE)
-    {
-        lv_timer_handler(); /* let the GUI do its work */
-        xSemaphoreGive(LVGLMutex);
-    }
-    taskYIELD();
+    vTaskDelete(NULL);
 }

@@ -39,6 +39,11 @@ private:
     // friend void driver_pcnt_task(void *arg);
 
     /*
+     * Callback Function
+     */
+    std::function<void()> finish_callback = NULL;
+
+    /*
      * Motor Configuration
      */
     short motor_steps; // motor steps per revolution (usually 200)
@@ -204,6 +209,13 @@ public:
     bool isRunning()
     {
         return steps_remaining != 0;
+    }
+    /*
+     * Set finish callback
+     */
+    void setFinishCallBack(std::function<void()> cb)
+    {
+        finish_callback = cb;
     }
 };
 

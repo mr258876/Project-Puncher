@@ -16,14 +16,34 @@
 
 #include <Arduino.h>
 
+#define OnFinishX (1 << 0) // 0b1
+#define OnFinishY (1 << 1) // 0b10
+#define OnFinishZ (1 << 2) // 0b100
+
 class PuncherScheduler : PuncherSchedulerInterface
 {
 private:
+    /* Status codes*/
     puncher_status_t status;
+    bool x_finished = 1;
+    bool y_finished = 1;
+    uint8_t y_status = 0; // 0->Idle, 1->Moved down, 2->Moved up
+    bool z_finished = 1;
+    
+    /* Positions */
+    double z_pos = 0;
+    // Count from positioning pillar on the right
+    // 20.50mm base + 0.05 tape gap - 21mm cart
+    // Hence it will be 0.45mm inside the tape
+    // 5.55mm from the E3 line
+    double x_pos = -5.55;
+    
 
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
     SemaphoreHandle_t holeListHandle;
+    void handleMotorFinish();
+    int nextHole();
 
     /* Motor related */
     MotorController *X = NULL;
@@ -80,7 +100,7 @@ private:
     /* Setting Values */
     std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
     std::any x_operational_speed = std::any(static_cast<int32_t>(800)); // 8mm, last 2 digits for decimal
-    std::any x_length_type = std::any(static_cast<uint16_t>(0));
+    std::any x_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
     std::any x_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any x_operational_current = std::any(static_cast<int32_t>(1000));
     std::any x_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -92,7 +112,7 @@ private:
 
     std::any y_lead_length = std::any(static_cast<int32_t>(800));
     std::any y_operational_speed = std::any(static_cast<int32_t>(800));
-    std::any y_length_type = std::any(static_cast<uint16_t>(0));
+    std::any y_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
     std::any y_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any y_operational_current = std::any(static_cast<int32_t>(1000));
     std::any y_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -104,7 +124,7 @@ private:
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(2000));
-    std::any z_length_type = std::any(static_cast<uint16_t>(0));
+    std::any z_length_type = std::any(static_cast<uint16_t>(0));    // 0->diameter 1->perimeter
     std::any z_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any z_operational_current = std::any(static_cast<int32_t>(1000));
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
@@ -135,9 +155,10 @@ private:
     void initSettings();
     void saveValue(std::string name, puncher_setting_mapping_t item);
 
-    // /* event loop task & event queue */
+    /* event loop task & event queue */
+    EventGroupHandle_t motor_evt_group;
     // QueueHandle_t evt_queue;
-    // friend void evtQueueHandleLoop(void *param);
+    friend void evtHandleLoop(void *param);
 
 public:
     PuncherScheduler();
@@ -163,6 +184,13 @@ public:
         updateXdriver();
         updateYdriver();
         updateZdriver();
+
+        this->X->setMoveFinishCallBack([this]()
+                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishX, &xHigherPriorityTaskWoken); });
+        this->Y->setMoveFinishCallBack([this]()
+                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishY, &xHigherPriorityTaskWoken); });
+        this->Z->setMoveFinishCallBack([this]()
+                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishZ, &xHigherPriorityTaskWoken); });
     }
 
     /* Attach UI before begin() ! */
@@ -182,16 +210,18 @@ public:
         delete msg;
     }
 
-    inline void tick()
-    {
-        // if (status & PUNCHER_RUNNING)
-        // motorHandler();
-    }
-
     /* From PuncherSchedulerInterface */
     int start_workload();
     int pause_workload();
     int delete_workload();
+    inline int data_transmit_mode(int transmit_mode)
+    {
+        if (status.basic_status.status_data & (~0b100))
+            return 1;
+
+        status.basic_status.status_flags.is_transmitting_data = transmit_mode;
+        return 0;
+    }
     int add_hole(scheduler_hole_t h);
     int feed_paper(int gear);
     int ui_get_menu();

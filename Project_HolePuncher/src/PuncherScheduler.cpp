@@ -1,12 +1,25 @@
 #include "PuncherScheduler.h"
 
-// void evtQueueHandleLoop(void *param)
-// {
-//     while (1)
-//     {
-//         /* code */
-//     }
-// }
+void evtHandleLoop(void *param)
+{
+    PuncherScheduler *scheduler = (PuncherScheduler *)param;
+    while (1)
+    {
+        uint32_t evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
+
+        if (evt & OnFinishX)
+            scheduler->x_finished = 1;
+        if (evt & OnFinishY)
+            scheduler->y_finished = 1;
+        if (evt & OnFinishZ)
+            scheduler->z_finished = 1;
+
+        if (scheduler->status.basic_status.status_flags.is_running)
+        {
+            scheduler->handleMotorFinish();
+        }
+    }
+}
 
 std::string uint32ToHex(uint32_t val)
 {
@@ -120,8 +133,12 @@ void PuncherScheduler::begin()
 
     this->loadSettings();
 
+    this->motor_evt_group = xEventGroupCreate();
     // this->evt_queue = xQueueCreate(128, sizeof(puncher_event_t));
-    // xTaskCreate(evtQueueHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
+    xTaskCreate(evtHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
+
+    this->status.basic_status.status_data = 0;
+    this->status.connectivity_status.status_data = 0;
 }
 
 void PuncherScheduler::loadSettings()
@@ -282,14 +299,18 @@ int PuncherScheduler::delete_workload()
 
 int PuncherScheduler::add_hole(scheduler_hole_t h)
 {
+    /* Reject data if not in transmit mode */
+    if (!status.basic_status.status_flags.is_transmitting_data)
+        return 1;
+
     holeList.push_back(h);
     return 0;
 }
 
 int PuncherScheduler::feed_paper(int gear)
 {
-    // if (puncher_is_busy(this->status))
-    //     return this->status.basic_status.status_data;
+    if (puncher_is_busy(this->status))
+        return this->status.basic_status.status_data;
 
     if (gear)
     {
@@ -298,11 +319,10 @@ int PuncherScheduler::feed_paper(int gear)
 
         this->Z->sleep(false);
         this->Z->setSpeed(calcMotorSpeedPulse(
-            std::any_cast<int32_t>(this->z_lead_length), 
-            std::any_cast<uint16_t>(this->z_length_type), 
+            std::any_cast<int32_t>(this->z_lead_length),
+            std::any_cast<uint16_t>(this->z_length_type),
             z_speed,
-            64
-            ));
+            64));
         this->Z->rotate_infinite(gear);
         this->status.basic_status.status_flags.is_feeding_paper = 1;
     }
@@ -364,7 +384,7 @@ void PuncherScheduler::set_setting_value(puncher_event_setting_change_t *evt)
         saveValue(evt->item_name, item_mapping);
 
         /* Notify all UI after value change */
-        for (auto &ui: this->ui_list)
+        for (auto &ui : this->ui_list)
         {
             ui->onSettingValueChange(evt);
         }
@@ -386,4 +406,64 @@ void PuncherScheduler::get_setting_values(void *p_ui)
         ui->onSettingValueChange(&evt);
     }
     ESP_LOGD("PuncherScheduler", "Setting values pushed to ui");
+}
+
+void PuncherScheduler::handleMotorFinish()
+{
+    if ((x_finished && z_finished))
+    {
+        if (y_finished == 0)
+        {
+            // Move down Y
+            /* TODO */
+            y_status = 1;
+            y_finished = 0;
+        }
+        else
+        {
+            if (y_status == 1)
+            {
+                // Y movoed down, now move back
+                /* TODO */
+                y_status = 2;
+                y_finished = 0;
+            }
+            else
+            {
+                // Y movements finished, load next hole
+                y_status = 0;
+
+                nextHole();
+            }
+        }
+    }
+}
+
+int PuncherScheduler::nextHole()
+{
+    if (!status.basic_status.status_flags.is_running) return 1;
+    
+    if (holeList.size() < 1)
+    {
+        status.basic_status.status_flags.is_running = 0;
+        return 0;
+    }
+    
+    scheduler_hole_t hole = holeList.front();
+
+    x_finished = 0;
+    y_finished = 0;
+    z_finished = 0;
+
+    if (hole.x > 0)
+    {
+        // X->move();
+    }
+    double z_steps = (hole.z - z_pos) / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 200 * 64;
+    z_steps += 0.5;
+    Z->move((int32_t)z_steps);
+
+    holeList.erase(holeList.begin());
+
+    return 0;
 }

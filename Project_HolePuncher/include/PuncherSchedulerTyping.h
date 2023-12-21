@@ -12,11 +12,11 @@ struct __packed scheduler_hole_t
 
 struct __packed puncher_basic_status_t
 {
-    uint8_t has_mission : 1;
-    uint8_t is_running : 1;
-    uint8_t is_feeding_paper : 1;
-    uint8_t is_transmitting : 1;
     uint8_t has_error : 1;
+    uint8_t has_mission : 1;
+    uint8_t is_transmitting_data : 1;
+    uint8_t is_feeding_paper : 1;
+    uint8_t is_running : 1;
 };
 
 
