@@ -1,0 +1,3 @@
+[submodule "Project_HolePuncher/components/esp_freetype"]
+	path = Project_HolePuncher/components/esp_freetype
+	url = https://github.com/100askTeam/esp_freetype
