@@ -77,6 +77,7 @@
         "variant": "cpp",
         "any": "cpp",
         "bitset": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "esp32-hal-tinyusb.h": "c"
     }
 }

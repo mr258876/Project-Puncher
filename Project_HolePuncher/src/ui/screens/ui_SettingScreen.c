@@ -301,7 +301,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_XAutoZreoing);
     ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_XZeroingTorchThres);
     ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_XZeroingCurrent);
-    ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, ui_event_XZeroingSpeed);
+    ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_XZeroingSpeed);
 
 
     /*Create y axis page*/
@@ -327,7 +327,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_YAutoZreoing);
     ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_YZeroingTorchThres);
     ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_YZeroingCurrent);
-    ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm)"), 1, 9999, 2000, 4, 2, ui_event_YZeroingSpeed);
+    ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YZeroingSpeed);
     
     /*Create z aixs page*/
     ui_setting_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));

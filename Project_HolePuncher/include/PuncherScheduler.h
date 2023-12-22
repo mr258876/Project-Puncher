@@ -36,12 +36,12 @@ private:
     // by measurements, 14mm from base at top
     // 6.5mm from base at ready state
     // 3.5mm ftom base at full down
-    double y_pos = -7.5;
+    double y_pos = Y_ZEROING_POSITION;
     // Count from positioning pillar on the right
     // 20.50mm base + 0.05 tape gap - 21mm cart
     // Hence it will be 0.45mm inside the tape
     // 5.55mm from the E3 line
-    double x_pos = -5.55;
+    double x_pos = X_ZEROING_POSITION;
 
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
@@ -307,7 +307,7 @@ public:
     int delete_workload();
     inline int data_transmit_mode(bool transmit_mode)
     {
-        if (status.basic_status.status_data & (~0b100))
+        if (status.basic_status.status_data & (~PUNCHER_STATUS_IS_TRANSMITTING_DATA))
             return 1;
 
         status.basic_status.status_flags.is_transmitting_data = transmit_mode;
@@ -315,7 +315,7 @@ public:
     }
     int feed_paper_mode(bool feed_paper_mode)
     {
-        if (status.basic_status.status_data & (~0b1000))
+        if (status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER))
             return 1;
 
         status.basic_status.status_flags.is_feeding_paper = feed_paper_mode;

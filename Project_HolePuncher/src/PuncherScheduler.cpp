@@ -319,7 +319,7 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
 
 int PuncherScheduler::feed_paper(int gear)
 {
-    if (this->status.basic_status.status_data & (~0b1000))
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER))
         return 1;
 
     if (gear)
