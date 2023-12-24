@@ -6,12 +6,13 @@
 class SerialInterface: public PuncherUI
 {
 private:
-    /* data */
+    PuncherSchedulerInterface *scheduler;
 public:
     SerialInterface(/* args */);
     ~SerialInterface();
 
     void begin();
+    void enableLog();
 
     /* From PuncherUI */
     void onStatusCode(puncher_event_code_t *data);
@@ -19,5 +20,6 @@ public:
     void attachScheduler(PuncherSchedulerInterface *p_scheduler);
 };
 
+extern SerialInterface *usbInterface;
 
 #endif  // _SERIALINTERFACE_H_

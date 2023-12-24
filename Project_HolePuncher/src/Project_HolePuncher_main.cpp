@@ -6,10 +6,10 @@
 
 #include "PuncherScheduler.h"
 #include "PuncherMotors.h"
-// #include "SerialCommand.h"
 
 #include "MotorController/TMC_LEDCMotorController.h"
 #include "ui/LVGL_PuncherUI.h"
+#include "SerialInterface/SerialInterface.h"
 
 static PuncherScheduler *scheduler;
 
@@ -18,6 +18,7 @@ static PuncherScheduler *scheduler;
 // ---------- Function declarations
 void motor_init();
 void lvgl_init();
+void serial_init();
 
 void setup()
 {
@@ -31,6 +32,8 @@ void setup()
     motor_init();
 
     lvgl_init();
+
+    serial_init();
 
     ESP_LOGI("Puncher_Main", "System booted.");
 }
@@ -72,6 +75,16 @@ void lvgl_init()
     scheduler->attachUI(lvgl_ui);
 
     ESP_LOGI("Puncher_Main", "LVGL UI ready!");
+}
+
+void serial_init()
+{
+    ESP_LOGI("Puncher_Main", "Starting USB Serial Interface...");
+
+    usbInterface->begin();
+    // usbInterface->enableLog();
+
+    ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
 }
 
 void loop()
