@@ -34,13 +34,13 @@ motor_res_t TMC_LEDCMotorController::begin()
 
 motor_res_t TMC_LEDCMotorController::move(long steps)
 {
-    stepper->move(steps);
+    stepper->move(reverse ? -steps : steps);
     return MOTOR_RES_SUCCESS;
 }
 
 motor_res_t TMC_LEDCMotorController::rotate_infinite(int dir)
 {
-    stepper->rotate_infinite(dir);
+    stepper->rotate_infinite(reverse ? -dir : dir);
     return MOTOR_RES_SUCCESS;
 }
 
@@ -62,6 +62,12 @@ motor_status_t TMC_LEDCMotorController::getStatus()
 motor_res_t TMC_LEDCMotorController::setActiveState(uint8_t activeState)
 {
     stepper->setEnableActiveState(activeState);
+    return MOTOR_RES_SUCCESS;
+}
+
+motor_res_t TMC_LEDCMotorController::setReverse(bool reverse)
+{
+    this->reverse = reverse;
     return MOTOR_RES_SUCCESS;
 }
 
@@ -96,17 +102,37 @@ motor_res_t TMC_LEDCMotorController::setMicroSteps(uint32_t microSteps)
     {
         driver->mstep_reg_select(1);
         // The function in TMCStepper is not working, wtf
-        switch(microSteps) {
-            case 256: driver->mres(0); break;
-            case 128: driver->mres(1); break;
-            case  64: driver->mres(2); break;
-            case  32: driver->mres(3); break;
-            case  16: driver->mres(4); break;
-            case   8: driver->mres(5); break;
-            case   4: driver->mres(6); break;
-            case   2: driver->mres(7); break;
-            case   0: driver->mres(8); break;
-            default: break;
+        switch (microSteps)
+        {
+        case 256:
+            driver->mres(0);
+            break;
+        case 128:
+            driver->mres(1);
+            break;
+        case 64:
+            driver->mres(2);
+            break;
+        case 32:
+            driver->mres(3);
+            break;
+        case 16:
+            driver->mres(4);
+            break;
+        case 8:
+            driver->mres(5);
+            break;
+        case 4:
+            driver->mres(6);
+            break;
+        case 2:
+            driver->mres(7);
+            break;
+        case 0:
+            driver->mres(8);
+            break;
+        default:
+            break;
         }
     }
     xSemaphoreGive(*DUARTMutex);

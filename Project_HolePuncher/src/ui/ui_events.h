@@ -9,6 +9,8 @@ extern "C" {
 
 void ui_event_FeedRoller(lv_event_t *e);
 
+void ui_event_mcodeTickRate(lv_event_t *e);
+
 void ui_event_XLeadLength(lv_event_t *e);
 void ui_event_XOperationalSpeed(lv_event_t *e);
 void ui_event_XLengthType(lv_event_t *e);
@@ -40,6 +42,9 @@ void ui_event_ZReverseAxis(lv_event_t *e);
 void ui_event_ZOperationalCurrent(lv_event_t *e);
 void ui_event_ZIdleBehavior(lv_event_t *e);
 void ui_event_ZSleepCurrent(lv_event_t *e);
+void ui_event_ZCaliTarget(lv_event_t *e);
+void ui_event_ZCaliMeasure(lv_event_t *e);
+void ui_event_ZCaliResidual(lv_event_t *e);
 
 void ui_event_VoltageDropDown(lv_event_t * e);
 

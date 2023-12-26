@@ -43,6 +43,8 @@ private:
     // 5.55mm from the E3 line
     double x_pos = X_ZEROING_POSITION;
 
+    double x_target_pos = 0;
+
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
     SemaphoreHandle_t holeListHandle;
@@ -77,6 +79,7 @@ private:
     {
         if (this->X)
         {
+            this->X->setReverse(std::any_cast<uint8_t>(this->x_reverse_axis));
             this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
         }
     }
@@ -84,6 +87,7 @@ private:
     {
         if (this->Y)
         {
+            this->Y->setReverse(std::any_cast<uint8_t>(this->y_reverse_axis));
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
         }
     }
@@ -91,6 +95,7 @@ private:
     {
         if (this->Z)
         {
+            this->Z->setReverse(std::any_cast<uint8_t>(this->z_reverse_axis));
             this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
         }
     }
@@ -100,10 +105,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(x_idle_behavior))
         {
-        case 0: break;
-        case 1: this->X->setCurrent(std::any_cast<int32_t>(this->x_sleep_current)); break;
-        case 2: this->X->sleep(true); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_sleep_current));
+            break;
+        case 2:
+            this->X->sleep(true);
+            break;
+        default:
+            break;
         }
     }
     // Leave idle mode
@@ -111,10 +122,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(x_idle_behavior))
         {
-        case 0: break;
-        case 1: this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current)); break;
-        case 2: this->X->sleep(false); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
+            break;
+        case 2:
+            this->X->sleep(false);
+            break;
+        default:
+            break;
         }
     }
     // Enter idle mode
@@ -122,10 +139,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(y_idle_behavior))
         {
-        case 0: break;
-        case 1: this->Y->setCurrent(std::any_cast<int32_t>(this->y_sleep_current)); break;
-        case 2: this->Y->sleep(true); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_sleep_current));
+            break;
+        case 2:
+            this->Y->sleep(true);
+            break;
+        default:
+            break;
         }
     }
     // Leave idle mode
@@ -133,10 +156,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(y_idle_behavior))
         {
-        case 0: break;
-        case 1: this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current)); break;
-        case 2: this->Y->sleep(false); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
+            break;
+        case 2:
+            this->Y->sleep(false);
+            break;
+        default:
+            break;
         }
     }
     // Enter idle mode
@@ -144,10 +173,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(z_idle_behavior))
         {
-        case 0: break;
-        case 1: this->Z->setCurrent(std::any_cast<int32_t>(this->z_sleep_current)); break;
-        case 2: this->Z->sleep(true); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->Z->setCurrent(std::any_cast<int32_t>(this->z_sleep_current));
+            break;
+        case 2:
+            this->Z->sleep(true);
+            break;
+        default:
+            break;
         }
     }
     // Leave idle mode
@@ -155,10 +190,16 @@ private:
     {
         switch (std::any_cast<uint16_t>(z_idle_behavior))
         {
-        case 0: break;
-        case 1: this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current)); break;
-        case 2: this->Z->sleep(false); break;
-        default: break;
+        case 0:
+            break;
+        case 1:
+            this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
+            break;
+        case 2:
+            this->Z->sleep(false);
+            break;
+        default:
+            break;
         }
     }
 
@@ -177,6 +218,7 @@ private:
     inline int32_t calc_Z_steps(double mm)
     {
         double steps = mm / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_Z;
+        steps = steps * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
         steps += 0.5;
         return (int32_t)steps;
     }
@@ -210,17 +252,22 @@ private:
     std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
-    std::any z_operational_speed = std::any(static_cast<int32_t>(2000));
+    std::any z_operational_speed = std::any(static_cast<int32_t>(1000));
     std::any z_length_type = std::any(static_cast<uint16_t>(0)); // 0->diameter 1->perimeter
     std::any z_reverse_axis = std::any(static_cast<uint8_t>(0));
     std::any z_operational_current = std::any(static_cast<int32_t>(1000));
     std::any z_idle_behavior = std::any(static_cast<uint16_t>(0));
     std::any z_sleep_current = std::any(static_cast<int32_t>(500));
+    std::any z_cali_target_bar = std::any(static_cast<int32_t>(50));
+    std::any z_cali_measure_bar = std::any(static_cast<int32_t>(50));
+    std::any z_cali_residual = std::any(static_cast<int32_t>(0));
 
     std::any power_voltage = std::any(static_cast<uint16_t>(0)); // 0->5V 1->9V 2->12V 3->15V 4->20V
 
     std::any display_brightness = std::any(static_cast<int32_t>(128));
     std::any display_language = std::any(static_cast<uint16_t>(0));
+
+    std::any mcode_default_tick_rate = std::any(static_cast<int32_t>(96));
 
     struct puncher_setting_mapping_t
     {
@@ -291,14 +338,13 @@ public:
         ui->attachScheduler(this);
     }
 
-    /* Notify all UI */
-    inline void notifyUI(puncher_event_code_t *msg)
+    /* update status to UI */
+    inline void updateUIstatus()
     {
         for (PuncherUI *p_ui : this->ui_list)
         {
-            p_ui->onStatusCode(msg);
+            p_ui->onStatusCode(&status);
         }
-        delete msg;
     }
 
     /* From PuncherSchedulerInterface */
@@ -311,6 +357,16 @@ public:
             return 1;
 
         status.basic_status.status_flags.is_transmitting_data = transmit_mode;
+
+        if (!transmit_mode)
+        {
+            status.task_length = holeList.size();
+            status.finished_length = 0;
+            if (status.task_length > 0)
+                status.basic_status.status_flags.has_mission = 1;
+        }
+
+        updateUIstatus();
         return 0;
     }
     int feed_paper_mode(bool feed_paper_mode)
@@ -332,13 +388,19 @@ public:
 
         return 0;
     }
-    int add_hole(scheduler_hole_t h);
+    int add_hole(scheduler_hole_t &h);
+    int add_hold_mcode(int x, int y, int z);
     int feed_paper(int gear);
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();
     void set_setting_value(puncher_event_setting_change_t *evt);
     void get_setting_values(void *ui);
+    inline void get_status(void *p_ui)
+    {
+        PuncherUI *ui = (PuncherUI *)p_ui;
+        ui->onStatusCode(&status);
+    }
 
     /* setters */
     bool setXLeadLength(std::any val);
@@ -372,11 +434,16 @@ public:
     bool setZOperationalCurrent(std::any val);
     bool setZIdleBehavior(std::any val);
     bool setZSleepCurrent(std::any val);
+    bool setZCaliTargetBar(std::any val);
+    bool setZCaliMeasureBar(std::any val);
+    bool setZCaliResidual(std::any val);
 
     bool setPowerVoltage(std::any option);
 
     bool setDisplayBrightness(std::any option);
     bool setDisplayLanguage(std::any option);
+
+    bool setMcodeDefaultTickRate(std::any val);
 
     inline uint16_t getDisplayLanguage() { return std::any_cast<uint16_t>(display_language); }
 };

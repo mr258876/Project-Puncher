@@ -4,6 +4,34 @@
 #include "PuncherEvents.h"
 #include "esp_log.h"
 
+void ui_event_StartButton(lv_event_t *e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t *target = lv_event_get_target(e);
+    if (event_code == LV_EVENT_CLICKED)
+    {
+        lvgl_ui->getScheduler()->start_workload();
+    }
+}
+void ui_event_PauseButton(lv_event_t *e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t *target = lv_event_get_target(e);
+    if (event_code == LV_EVENT_CLICKED)
+    {
+        /* TODO */
+    }
+}
+void ui_event_StopButton(lv_event_t *e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t *target = lv_event_get_target(e);
+    if (event_code == LV_EVENT_CLICKED)
+    {
+        /* TODO */
+    }
+}
+
 void ui_event_FeedButton(lv_event_t *e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -27,6 +55,16 @@ void ui_event_FeedBackButton(lv_event_t *e)
     }
 }
 
+void ui_event_mcodeTickRate(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"mcode_default_tick_rate", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 
 void ui_event_XLeadLength(lv_event_t *e)
 {
@@ -320,6 +358,36 @@ void ui_event_ZSleepCurrent(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_ZCaliTarget(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"z_cali_target_bar", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_ZCaliMeasure(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"z_cali_measure_bar", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_ZCaliResidual(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"z_cali_residual", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 
 void ui_event_VoltageDropDown(lv_event_t *e)
 {
@@ -356,7 +424,7 @@ void ui_event_LanguageDropDown(lv_event_t *e)
 void ui_event_FeedRoller(lv_event_t *e)
 {
     lv_obj_t *roller = e->target;
-    
+
     if (e->code == LV_EVENT_VALUE_CHANGED)
     {
         lvgl_ui->getScheduler()->feed_paper(4 - lv_roller_get_selected(roller));

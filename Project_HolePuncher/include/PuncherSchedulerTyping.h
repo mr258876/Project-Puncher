@@ -26,6 +26,7 @@ struct __packed puncher_basic_status_t
 #define PUNCHER_STATUS_IS_FEEDING_PAPER     (1 << 3)
 #define PUNCHER_STATUS_IS_RUNNING           (1 << 4)
 #define PUNCHER_STATUS_IS_ZEROING           (1 << 5)
+#define PUNCHER_STATUS_BUSY_MASK            (~0b11)
 
 
 struct __packed puncher_connectivity_status_t
@@ -52,6 +53,10 @@ struct __packed puncher_status_t
         uint32_t status_data;
     };
     puncher_connectivity_status_u connectivity_status;
+
+    // data
+    uint32_t task_length;
+    uint32_t finished_length;
 };
 
 inline int puncher_is_busy(puncher_status_t &status)

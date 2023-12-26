@@ -22,6 +22,7 @@ private:
     friend void evtQueueHandleLoop(void *param);
     uint16_t lang_id = 0;
 
+    void handleEventCodeChange(puncher_status_t *msg);
     void handleSettingValueChange(puncher_event_setting_change_t *msg);
 
 public:
@@ -29,7 +30,7 @@ public:
     ~LVGLPuncherUI();
 
     void begin();
-    void onStatusCode(puncher_event_code_t *data);
+    void onStatusCode(puncher_status_t *data);
     void onSettingValueChange(puncher_event_setting_change_t *msg);
     void attachScheduler(PuncherSchedulerInterface *p_scheduler);
     inline PuncherSchedulerInterface *getScheduler() { return scheduler; }

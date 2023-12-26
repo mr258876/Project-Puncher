@@ -70,11 +70,16 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("z_operational_current", ui_setting_menu_mapping_t(ui_setting_z_operational_current, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("z_idle_behavior", ui_setting_menu_mapping_t(ui_setting_z_idle_behavior, _ui_menu_dropdown_set_value));
     ui_setting_mapping.emplace("z_sleep_current", ui_setting_menu_mapping_t(ui_setting_z_sleep_current, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("z_cali_target_bar", ui_setting_menu_mapping_t(ui_setting_z_cali_target, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("z_cali_measure_bar", ui_setting_menu_mapping_t(ui_setting_z_cali_measure, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("z_cali_residual", ui_setting_menu_mapping_t(ui_setting_z_cali_residual, _ui_menu_spinbox_set_value));
 
     ui_setting_mapping.emplace("power_voltage", ui_setting_menu_mapping_t(ui_setting_power_voltage, _ui_menu_dropdown_set_value));
 
     ui_setting_mapping.emplace("display_brightness", ui_setting_menu_mapping_t(ui_setting_display_brightness, _ui_menu_set_brightness));
     ui_setting_mapping.emplace("display_language", ui_setting_menu_mapping_t(ui_setting_display_language, _ui_menu_set_language));
+
+    ui_setting_mapping.emplace("mcode_default_tick_rate", ui_setting_menu_mapping_t(ui_setting_usb_mcode_tick_rate, _ui_menu_spinbox_set_value));
 }
 
 #endif

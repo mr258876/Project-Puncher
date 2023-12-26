@@ -21,6 +21,8 @@ private:
     int micro_steps;
     HardwareSerial *driver_serial;
 
+    uint8_t reverse = 0;
+
     /* feature settings */
     uint8_t use_auto_sleep : 1;
 
@@ -47,6 +49,8 @@ public:
     motor_res_t sleep(bool sleep);
     /* Set motor sleep io active behavior */
     motor_res_t setActiveState(uint8_t activeState);
+    /* Set motor to run in opposite direction */
+    motor_res_t setReverse(bool reverse);
 
     /* Set motor speed */
     motor_res_t setSpeed(uint32_t s);

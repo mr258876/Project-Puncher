@@ -9,7 +9,7 @@ class PuncherUI
 public:
     virtual void begin() = 0;
     /* For PuncherScheduler, call this to update values in UI, open a dialog, etc. */
-    virtual void onStatusCode(puncher_event_code_t *data) = 0;
+    virtual void onStatusCode(puncher_status_t *data) = 0;
     virtual void onSettingValueChange(puncher_event_setting_change_t *data) = 0;
     /* For PuncherScheduler */
     virtual void attachScheduler(PuncherSchedulerInterface *p_scheduler) = 0;

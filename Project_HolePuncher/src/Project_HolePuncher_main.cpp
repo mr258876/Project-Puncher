@@ -81,13 +81,21 @@ void serial_init()
 {
     ESP_LOGI("Puncher_Main", "Starting USB Serial Interface...");
 
-    usbInterface->begin();
+    // usbInterface->begin();
     // usbInterface->enableLog();
+
+    // scheduler->attachUI(usbInterface);
 
     ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
 }
 
 void loop()
 {
+    scheduler->add_hold_mcode(80, 96, 0);
+    scheduler->add_hold_mcode(10, 96, 1);
+    scheduler->add_hold_mcode(15, 96, 1);
+    scheduler->add_hold_mcode(20, 96, 1);
+    scheduler->add_hold_mcode(25, 96, 1);
+    scheduler->add_hold_mcode(90, 96, 0);
     vTaskDelete(NULL);
 }

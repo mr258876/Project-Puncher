@@ -1,6 +1,8 @@
 #include "PuncherScheduler.h"
 #include "PuncherConf.h"
 
+static const char *TAG = "PuncherScheduler";
+
 void evtHandleLoop(void *param)
 {
     PuncherScheduler *scheduler = (PuncherScheduler *)param;
@@ -12,6 +14,7 @@ void evtHandleLoop(void *param)
         {
             scheduler->Xsleep();
             scheduler->x_finished = 1;
+            scheduler->x_pos = scheduler->x_target_pos;
         }
         if (evt & OnFinishY)
         {
@@ -115,6 +118,12 @@ PuncherScheduler::PuncherScheduler()
                                                                          { return this->setZIdleBehavior(val); }));
     setting_mapping.emplace("z_sleep_current", puncher_setting_mapping_t(z_sleep_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setZSleepCurrent(val); }));
+    setting_mapping.emplace("z_cali_target_bar", puncher_setting_mapping_t(z_cali_target_bar, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                           { return this->setZCaliTargetBar(val); }));
+    setting_mapping.emplace("z_cali_measure_bar", puncher_setting_mapping_t(z_cali_measure_bar, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                            { return this->setZCaliMeasureBar(val); }));
+    setting_mapping.emplace("z_cali_residual", puncher_setting_mapping_t(z_cali_residual, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                         { return this->setZCaliResidual(val); }));
 
     setting_mapping.emplace("power_voltage", puncher_setting_mapping_t(power_voltage, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
                                                                        { return this->setPowerVoltage(val); }));
@@ -125,7 +134,10 @@ PuncherScheduler::PuncherScheduler()
     setting_mapping.emplace("display_language", puncher_setting_mapping_t(display_language, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
                                                                           { return this->setDisplayLanguage(val); }));
 
-    ESP_LOGI("PuncherScheduler", "Values len: %d", setting_mapping.size());
+    setting_mapping.emplace("mcode_default_tick_rate", puncher_setting_mapping_t(mcode_default_tick_rate, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                                 { return this->setMcodeDefaultTickRate(val); }));
+
+    ESP_LOGI(TAG, "Values len: %d", setting_mapping.size());
 }
 
 PuncherScheduler::~PuncherScheduler()
@@ -227,7 +239,7 @@ void PuncherScheduler::saveValue(std::string name, puncher_setting_mapping_t ite
     size_t hashVal = hashStr(name);
 
     const char *hexString = uint32ToHex(hashVal).c_str();
-    ESP_LOGD("PuncherScheduler", "Save hash: %s", hexString);
+    ESP_LOGD(TAG, "Save hash: %s", hexString);
 
     switch (item.type)
     {
@@ -274,18 +286,25 @@ void PuncherScheduler::saveValue(std::string name, puncher_setting_mapping_t ite
 
 int PuncherScheduler::start_workload()
 {
-    if (puncher_is_busy(status))
-        return status.basic_status.status_data;
+    if (status.basic_status.status_data & (~PUNCHER_STATUS_HAS_MISSION))
+    {
+        ESP_LOGI(TAG, "Start workload fail! Status: %u", status.basic_status.status_data);
+        return 1;
+    }
 
     if (status.basic_status.status_flags.has_mission)
     {
-        reverse(holeList.begin(), holeList.end()); // Reverse the vector so it will be O(1) each time poping a hole
-
-        // TODO
-
         status.basic_status.status_flags.is_running = 1;
+
+        ESP_LOGI(TAG, "Workload started!");
+        updateUIstatus();
+
+        z_pos = 0;
+        nextHole();
+
         return 0;
     }
+    ESP_LOGI(TAG, "No mission avaliable!");
     return 1;
 }
 
@@ -298,16 +317,20 @@ int PuncherScheduler::pause_workload()
 
 int PuncherScheduler::delete_workload()
 {
-    if (puncher_is_busy(this->status))
+    if (status.basic_status.status_data & PUNCHER_STATUS_BUSY_MASK)
     {
         return this->status.basic_status.status_data;
     }
 
-    this->holeList.clear();
+    holeList.clear();
+    status.task_length = 0;
+    status.finished_length = 0;
+    status.basic_status.status_flags.has_mission = 0;
+
     return 0;
 }
 
-int PuncherScheduler::add_hole(scheduler_hole_t h)
+int PuncherScheduler::add_hole(scheduler_hole_t &h)
 {
     /* Reject data if not in transmit mode */
     if (!status.basic_status.status_flags.is_transmitting_data)
@@ -317,9 +340,40 @@ int PuncherScheduler::add_hole(scheduler_hole_t h)
     return 0;
 }
 
+int PuncherScheduler::add_hold_mcode(int x, int y, int z)
+{
+    if (x == 80)
+        data_transmit_mode(1);
+
+    /* Reject data if not in transmit mode */
+    if (!status.basic_status.status_flags.is_transmitting_data)
+        return 1;
+
+    scheduler_hole_t hole;
+    if (z < 1 || x == 80 || x == 90)
+    {
+        hole.x = 0;
+    }
+    else
+    {
+        hole.x = x;
+    }
+
+    hole.z = y * 1.0 * 8 / std::any_cast<int32_t>(mcode_default_tick_rate);
+
+    int res = add_hole(hole);
+
+    if (x == 90)
+    {
+        data_transmit_mode(0);
+    }
+
+    return res;
+}
+
 int PuncherScheduler::feed_paper(int gear)
 {
-    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER))
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
 
     if (gear)
@@ -397,16 +451,16 @@ void PuncherScheduler::get_setting_values(void *p_ui)
 {
     PuncherUI *ui = (PuncherUI *)p_ui;
 
-    ESP_LOGD("PuncherScheduler", "Values len: %d", setting_mapping.size());
+    ESP_LOGD(TAG, "Values len: %d", setting_mapping.size());
     for (auto &pair : setting_mapping)
     {
-        ESP_LOGD("PuncherScheduler", "Pushing value %s", pair.first.c_str());
+        ESP_LOGD(TAG, "Pushing value %s", pair.first.c_str());
 
         puncher_event_setting_change_t evt = puncher_event_setting_change_t(pair.first.c_str(), pair.second.obj);
 
         ui->onSettingValueChange(&evt);
     }
-    ESP_LOGD("PuncherScheduler", "Setting values pushed to ui");
+    ESP_LOGD(TAG, "Setting values pushed to ui");
 }
 
 void PuncherScheduler::handleMotorFinish()
@@ -417,10 +471,10 @@ void PuncherScheduler::handleMotorFinish()
         {
             // Move down Y
             Yawake();
-            Y->move(calc_Y_steps(Y_PUNCH_MOVEMENT_LENGTH));
+            Y->move(calc_Y_steps(Y_PUNCH_MOVEMENT_LENGTH - y_pos));
+            y_pos = Y_PUNCH_MOVEMENT_LENGTH;
 
             y_status = 1;
-            y_finished = 0;
         }
         else
         {
@@ -429,9 +483,9 @@ void PuncherScheduler::handleMotorFinish()
                 // Y movoed down, now move back
                 Yawake();
                 Y->move(calc_Y_steps(-Y_PUNCH_MOVEMENT_LENGTH));
+                y_pos -= Y_PUNCH_MOVEMENT_LENGTH;
 
                 y_status = 2;
-                y_finished = 0;
             }
             else
             {
@@ -452,6 +506,10 @@ int PuncherScheduler::nextHole()
     if (holeList.size() < 1)
     {
         status.basic_status.status_flags.is_running = 0;
+        status.basic_status.status_flags.has_mission = 0;
+        status.task_length = 0;
+        status.finished_length = 0;
+        updateUIstatus();
         return 0;
     }
 
@@ -461,16 +519,47 @@ int PuncherScheduler::nextHole()
     y_finished = 0;
     z_finished = 0;
 
+    y_status = 0;
+
     if (hole.x > 0)
     {
-        Xawake();
-        X->move(calc_X_steps((30 - hole.x) * 1.0 * 2 - x_pos));
+        int32_t x_steps = calc_X_steps((30 - hole.x) * 1.0 * 2 - x_pos);
+        if (x_steps)
+        {
+            Xawake();
+            X->move(x_steps);
+            x_target_pos = (30 - hole.x) * 1.0 * 2;
+        }
+        else
+        {
+            x_finished = 1;
+            xEventGroupSetBits(motor_evt_group, OnFinishX);
+        }
+    }
+    else
+    {
+        x_finished = 1;
+        y_finished = 1;
+        y_status = 2;
+        xEventGroupSetBits(motor_evt_group, OnFinishX);
+        xEventGroupSetBits(motor_evt_group, OnFinishY);
     }
 
-    Zawake();
-    Z->move(calc_Z_steps(hole.z - z_pos));
+    if (hole.z > 0)
+    {
+        Zawake();
+        Z->move(calc_Z_steps(hole.z));
+    }
+    else
+    {
+        z_finished = 1;
+        xEventGroupSetBits(motor_evt_group, OnFinishZ);
+    }
 
     holeList.erase(holeList.begin());
+
+    status.finished_length += 1;
+    updateUIstatus();
 
     return 0;
 }

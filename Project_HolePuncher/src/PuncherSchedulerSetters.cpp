@@ -33,6 +33,7 @@ bool PuncherScheduler::setXReverseAxis(std::any val)
         return false;
 
     this->x_reverse_axis = val;
+    updateXdriver();
     return true;
 }
 bool PuncherScheduler::setXOperationalCurrent(std::any val)
@@ -126,6 +127,7 @@ bool PuncherScheduler::setYReverseAxis(std::any val)
         return false;
 
     this->y_reverse_axis = val;
+    updateYdriver();
     return true;
 }
 bool PuncherScheduler::setYOperationalCurrent(std::any val)
@@ -219,6 +221,7 @@ bool PuncherScheduler::setZReverseAxis(std::any val)
         return false;
 
     this->z_reverse_axis = val;
+    updateZdriver();
     return true;
 }
 bool PuncherScheduler::setZOperationalCurrent(std::any val)
@@ -244,6 +247,30 @@ bool PuncherScheduler::setZSleepCurrent(std::any val)
         return false;
 
     this->z_sleep_current = val;
+    return true;
+}
+bool PuncherScheduler::setZCaliTargetBar(std::any val)
+{
+    if (std::any_cast<int32_t>(this->z_cali_target_bar) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->z_cali_target_bar = val;
+    return true;
+}
+bool PuncherScheduler::setZCaliMeasureBar(std::any val)
+{
+    if (std::any_cast<int32_t>(this->z_cali_measure_bar) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->z_cali_measure_bar = val;
+    return true;
+}
+bool PuncherScheduler::setZCaliResidual(std::any val)
+{
+    if (std::any_cast<int32_t>(this->z_cali_residual) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->z_cali_residual = val;
     return true;
 }
 
@@ -272,5 +299,14 @@ bool PuncherScheduler::setDisplayLanguage(std::any option)
         return false;
 
     this->display_language = option;
+    return true;
+}
+
+bool PuncherScheduler::setMcodeDefaultTickRate(std::any val)
+{
+    if (std::any_cast<int32_t>(this->mcode_default_tick_rate) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->mcode_default_tick_rate = val;
     return true;
 }

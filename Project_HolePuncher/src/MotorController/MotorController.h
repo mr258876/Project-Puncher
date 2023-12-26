@@ -42,6 +42,8 @@ public:
     virtual motor_res_t sleep(bool sleep) = 0;
     /* Set motor sleep io active behavior */
     virtual motor_res_t setActiveState(uint8_t activeState) = 0;
+    /* Set motor to run in opposite direction */
+    virtual motor_res_t setReverse(bool reverse) = 0;
 
     /* Set motor speed */
     virtual motor_res_t setSpeed(uint32_t s) = 0;

@@ -15,9 +15,11 @@ public:
     void enableLog();
 
     /* From PuncherUI */
-    void onStatusCode(puncher_event_code_t *data);
+    void onStatusCode(puncher_status_t *data);
     void onSettingValueChange(puncher_event_setting_change_t *data);
     void attachScheduler(PuncherSchedulerInterface *p_scheduler);
+
+    inline PuncherSchedulerInterface *getScheduler() { return scheduler; }
 };
 
 extern SerialInterface *usbInterface;

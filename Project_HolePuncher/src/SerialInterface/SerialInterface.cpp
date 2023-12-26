@@ -46,7 +46,7 @@ void SerialInterface::enableLog()
     ESP_ERROR_CHECK(esp_tusb_init_console(TINYUSB_CDC_ACM_0));
 }
 
-void SerialInterface::onStatusCode(puncher_event_code_t *data) {}
+void SerialInterface::onStatusCode(puncher_status_t *data) {}
 void SerialInterface::onSettingValueChange(puncher_event_setting_change_t *data) {}
 void SerialInterface::attachScheduler(PuncherSchedulerInterface *p_scheduler)
 {
@@ -66,7 +66,18 @@ static void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
     if (ret == ESP_OK)
     {
         buf[rx_size] = '\0';
-        ESP_LOGD(TAG, "Got data (%d bytes): %s", rx_size, buf);
+        ESP_LOGI(TAG, "Got data (%d bytes): %s", rx_size, buf);
+
+        int x, y, z;
+        int scan_res = sscanf((const char *)buf, "M%d Y%d P%d", &x, &y, &z);
+        ESP_LOGI(TAG, "Mcode sscanf Result: %d", scan_res);
+        int add_res = 0;
+        if (scan_res == 3)
+        {
+            add_res = usbInterface->getScheduler()->add_hold_mcode(x, y, z);
+            memset(buf, 0, rx_size);
+            rx_size = sprintf((char *)buf, "S%d\n", add_res);
+        }
     }
     else
     {

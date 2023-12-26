@@ -179,5 +179,8 @@ void ui_HomeScreen_screen_init(void)
     lv_label_set_text(ui_SettingButtonLabel, LV_SYMBOL_SETTINGS);
 
     lv_obj_add_event_cb(ui_FeedButton, ui_event_FeedButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_StartButton, ui_event_StartButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_PauseButton, ui_event_PauseButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_StopButton, ui_event_StopButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SettingButton, ui_event_SettingButton, LV_EVENT_ALL, NULL);
 }

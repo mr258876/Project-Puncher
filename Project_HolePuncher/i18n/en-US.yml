@@ -46,3 +46,8 @@ en-US:
   System: ~
   Language: ~
   _language_options: "English\n简体中文"
+  Mcode Tickrate: ~
+  Calibration: ~
+  Target Bar: ~
+  Measured Bar: ~
+  Measured Residual (mm): "Measured\nResidual (mm)"

@@ -16,6 +16,8 @@ lv_obj_t * ui_setting_about_page;
 
 lv_obj_t * ui_setting_wifi_switch;
 
+lv_obj_t * ui_setting_usb_mcode_tick_rate;
+
 lv_obj_t * ui_setting_x_lead_length;
 lv_obj_t * ui_setting_x_operational_speed;
 lv_obj_t * ui_setting_x_length_type;
@@ -47,6 +49,9 @@ lv_obj_t * ui_setting_z_reverse_axis;
 lv_obj_t * ui_setting_z_operational_current;
 lv_obj_t * ui_setting_z_idle_behavior;
 lv_obj_t * ui_setting_z_sleep_current;
+lv_obj_t * ui_setting_z_cali_target;
+lv_obj_t * ui_setting_z_cali_measure;
+lv_obj_t * ui_setting_z_cali_residual;
 
 lv_obj_t * ui_setting_power_voltage;
 
@@ -277,6 +282,7 @@ void ui_SettingScreen_screen_init(void)
     lv_obj_set_style_pad_hor(ui_setting_usb_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
     lv_menu_separator_create(ui_setting_usb_page);
     section = lv_menu_section_create(ui_setting_usb_page);
+    ui_setting_usb_mcode_tick_rate = create_spinbox(section, NULL, _("Mcode Tickrate"), 1, 256, 96, 3, 0, ui_event_mcodeTickRate);
 
     /*Create x axis page*/
     ui_setting_x_axis_page = lv_menu_page_create(menu, _("X Axis"));
@@ -347,6 +353,12 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_z_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_ZIdleBehavior);
     ui_setting_z_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, ui_event_ZSleepCurrent);
 
+    create_text(ui_setting_z_axis_page, NULL, _("Calibration"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_z_axis_page);
+    ui_setting_z_cali_target = create_spinbox(section, NULL, _("Target Bar"), 1, 500, 50, 3, 0, ui_event_ZCaliTarget);
+    ui_setting_z_cali_measure = create_spinbox(section, NULL, _("Measured Bar"), 1, 500, 50, 3, 0, ui_event_ZCaliMeasure);
+    ui_setting_z_cali_residual = create_spinbox(section, NULL, _("Measured Residual (mm)"), -8000, 8000, 0, 4, 1, ui_event_ZCaliResidual);
+
 
     /*Create power page*/
     ui_setting_power_page = lv_menu_page_create(menu, _("Power"));
@@ -374,7 +386,8 @@ void ui_SettingScreen_screen_init(void)
     lv_menu_separator_create(ui_setting_about_page);
     section = lv_menu_section_create(ui_setting_about_page);
     cont = create_text(section, NULL, "Project Puncher\nNext Gen", LV_MENU_ITEM_BUILDER_VARIANT_1);
-    cont = create_text(section, NULL, "Version 0.0", LV_MENU_ITEM_BUILDER_VARIANT_1);
+    cont = create_text(section, NULL, "Version", LV_MENU_ITEM_BUILDER_VARIANT_1);
+    cont = create_text(section, NULL, PROJECT_VER, LV_MENU_ITEM_BUILDER_VARIANT_1);
 
     /*Create a root page*/
     ui_setting_root_page = lv_menu_page_create(menu, _("Setting"));

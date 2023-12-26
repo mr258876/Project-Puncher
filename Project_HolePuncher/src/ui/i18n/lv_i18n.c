@@ -26,6 +26,7 @@ static lv_i18n_phrase_t en_us_singulars[] = {
     {"Zeroing Speed (mm/s)", "Zeroing\nSpeed (mm/s)"},
     {"_motor_voltage_options", "5V\n9V\n12V\n15V\n20V"},
     {"_language_options", "English\n简体中文"},
+    {"Measured Residual (mm)", "Measured\nResidual (mm)"},
     {NULL, NULL} // End mark
 };
 
@@ -91,6 +92,11 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"System", "系统"},
     {"Language", "语言"},
     {"_language_options", "English\n简体中文"},
+    {"Mcode Tickrate", "Mcode 每小节tick数"},
+    {"Calibration", "校准"},
+    {"Target Bar", "目标小节数"},
+    {"Measured Bar", "测量小节数"},
+    {"Measured Residual (mm)", "测量残差(mm)"},
     {NULL, NULL} // End mark
 };
 

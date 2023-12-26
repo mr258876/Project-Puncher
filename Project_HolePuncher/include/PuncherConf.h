@@ -31,7 +31,7 @@
 #define Z_CONTROL_CHANNEL 2
 
 #define X_ZEROING_POSITION      -5.55
-#define Y_ZEROING_POSITION      -7.50
+#define Y_ZEROING_POSITION      -6.50
 #define Y_PUNCH_MOVEMENT_LENGTH 3.00
 
 #define LCD_LEDC_CHANNEL 7
