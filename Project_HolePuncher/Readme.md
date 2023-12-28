@@ -17,3 +17,19 @@
 ### Modified & Distributed under MIT license:
 - [owennewo/as5600_i2c_arduino](https://github.com/owennewo/as5600_i2c_arduino)
 - [strange-v/FT6X36](https://github.com/strange-v/FT6X36)
+
+## Compilation Note
+
+### Arduino TinyUSB Header BUG
+In `.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp`
+
+Change Line 14-15 From
+```c
+#include "USB.h"
+#if CONFIG_TINYUSB_CDC_ENABLED
+```
+To
+```c
+#include "USB.h"
+#if CONFIG_TINYUSB_CDC_ENABLED && CONFIG_TINYUSB_ENABLED
+```
