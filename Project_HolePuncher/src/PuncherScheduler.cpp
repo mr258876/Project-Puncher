@@ -533,12 +533,14 @@ int PuncherScheduler::nextHole()
         else
         {
             x_finished = 1;
+            x_target_pos = x_pos;
             xEventGroupSetBits(motor_evt_group, OnFinishX);
         }
     }
     else
     {
         x_finished = 1;
+        x_target_pos = x_pos;
         y_finished = 1;
         y_status = 2;
         xEventGroupSetBits(motor_evt_group, OnFinishX);

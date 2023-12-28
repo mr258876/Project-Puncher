@@ -34,7 +34,7 @@ motor_res_t TMC_LEDCMotorController::begin()
 
 motor_res_t TMC_LEDCMotorController::move(long steps)
 {
-    stepper->move(reverse ? -steps : steps);
+    stepper->startMove(reverse ? -steps : steps);
     return MOTOR_RES_SUCCESS;
 }
 
