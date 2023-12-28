@@ -1,0 +1,53 @@
+zh-CN:
+  Project Puncher: ~
+  Next Gen: ~
+  Status: 状态
+  ETA: 预计剩余时间
+  Feed: 进纸
+  Setting: 设置
+  Info: 信息
+  Warning: 警告
+  Error: 错误
+  Back: 返回
+  OK: ~
+  About: 关于
+  STOP: 停止
+  Connectivity: 连接
+  Motors: 电机
+  Display: 显示
+  Disp.: 显示
+  Others: 其他
+  Brightness: 亮度
+  Wi-Fi: ~
+  BLE: 蓝牙
+  X Axis: X轴
+  Y Axis: Y轴
+  Z Axis: Z轴
+  Mechanical: 机械
+  Lead Length (mm): 导程长度(mm)
+  Operational Speed (mm/s): "运行速度(mm/s)"
+  Length Type: 长度类型
+  _length_type_options: "直径\n周长"
+  Reverse Axis: 反转方向
+  Electrical: 电气
+  Operational Current (mA): 运行电流(mA)
+  Idle Behavior: 空闲行为
+  _idle_behavior_options: "保持电流\n减小电流\n切断电源"
+  Zeroing: 归位
+  Auto Zeroing: 自动归位
+  Zeroing Torch Threshold: 归位力矩阈值
+  Zeroing Current (mA): 归位电流(mA)
+  Zeroing Speed (mm/s): 归位速度(mm/s)
+  Power: 供电
+  Voltage: 电压
+  Motor_Voltage: 电机电压
+  _motor_voltage_options: ~
+  Screen: 屏幕
+  System: 系统
+  Language: 语言
+  _language_options: "English\n简体中文"
+  Mcode Tickrate: Mcode 每小节tick数
+  Calibration: 校准
+  Target Bar: 目标小节数
+  Measured Bar: 测量小节数
+  Measured Residual (mm): 测量残差(mm)

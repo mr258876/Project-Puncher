@@ -35,17 +35,29 @@ static void IRAM_ATTR __pcnt_clear_intr(uint8_t unit)
 
 static int16_t IRAM_ATTR __pcnt_get_count(uint8_t unit)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     return PCNT.cnt_unit[unit].cnt_val;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    return PCNT.cnt_unit[unit].pulse_cnt_un;
+    #endif
 }
 
 static void IRAM_ATTR __pcnt_set_threshold(uint8_t unit, int16_t value)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf1.cnt_thres0 = value;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    PCNT.conf_unit[unit].conf1.cnt_thres0_un = value;
+    #endif
 }
 
 static void IRAM_ATTR __pcnt_set_threshold_enable(uint8_t unit, uint8_t enable)
 {
+    #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf0.thr_thres0_en = enable;
+    #elif CONFIG_IDF_TARGET_ESP32S3
+    PCNT.conf_unit[unit].conf0.thr_thres0_en_un = enable;
+    #endif
 }
 
 static void IRAM_ATTR __ledc_timer_pause(uint8_t mode, uint8_t timer)
@@ -103,7 +115,7 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
         __pcnt_clear_intr(driver->pcnt_unit);
         int16_t count = __pcnt_get_count(driver->pcnt_unit);
         driver->steps_remaining -= count;
-        driver->step_count += count;
+        driver->motor_pos += (driver->dir_state ? count : -count);
 
         if (driver->steps_remaining == 0)
         {
@@ -118,6 +130,12 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
                 {
                     digitalWrite(driver->enable_pin, (driver->enable_active_state == HIGH) ? LOW : HIGH);
                 }
+            }
+
+            /* finish callback */
+            if (driver->finish_callback)
+            {
+                driver->finish_callback();
             }
         }
         else
@@ -154,7 +172,11 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
         driver_id = 0;
     }
 
+    #if SOC_LEDC_SUPPORT_HS_MODE
     ledc_mode_t ledc_mode = (driver_id > 3 ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE);
+    #else
+    ledc_mode_t ledc_mode = LEDC_LOW_SPEED_MODE;
+    #endif
     ledc_timer_t ledc_timer = (driver_id > 3 ? static_cast<ledc_timer_t>(driver_id - 4) : static_cast<ledc_timer_t>(driver_id));
     ledc_channel_t ledc_channel = static_cast<ledc_channel_t>(driver_id);
     pcnt_unit_t pcnt_unit = static_cast<pcnt_unit_t>(driver_id);
@@ -228,8 +250,8 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     config_ledc_timer.speed_mode = ledc_mode;
     config_ledc_timer.timer_num = ledc_timer;
     config_ledc_timer.duty_resolution = LEDC_TIMER_4_BIT;
-    config_ledc_timer.freq_hz = 200;
-    config_ledc_timer.clk_cfg = LEDC_AUTO_CLK;
+    config_ledc_timer.freq_hz = 256000;
+    config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
 
     ledc_channel_config_t config_ledc_channel;
@@ -282,11 +304,16 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     ESP_ERROR_CHECK(pcnt_intr_enable(pcnt_unit));
 
     pcnt_running = false;
+    infinite_run = 0;
 
     /* To use LEDC and PCNT on the same pin
        See https://esp32.com/viewtopic.php?t=18115 */
     gpio_set_direction(static_cast<gpio_num_t>(step_pin), GPIO_MODE_INPUT_OUTPUT);
+    #if SOC_LEDC_SUPPORT_HS_MODE
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (ledc_mode == LEDC_HIGH_SPEED_MODE ? (LEDC_HS_SIG_OUT0_IDX + ledc_channel) : (LEDC_LS_SIG_OUT0_IDX + ledc_channel)), 0, 0);
+    #else
+    gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (LEDC_LS_SIG_OUT0_IDX + ledc_channel), 0, 0);
+    #endif
 
     setRPM(rpm);
     setMicrostep(microsteps);
@@ -321,7 +348,7 @@ void LEDCStepperDriver::setPulseFreq(long freq)
 {
     this->pulse_freq = freq;
     this->rpm = freq * 60.0 / motor_steps / microsteps;
-
+    
     if (pwm_running)
         driver_pwm_start();
 }
@@ -352,6 +379,15 @@ void LEDCStepperDriver::rotate(long deg)
 void LEDCStepperDriver::rotate(double deg)
 {
     move(calcStepsForRotation(deg));
+}
+/*
+ * Rotate infinitely. Use stop() or move(0) to stop.
+ */
+void LEDCStepperDriver::rotate_infinite(int dir)
+{
+    infinite_run = 1;
+    startMove(((dir > 0) ? 1 : -1) * PCNT_THRES_VAL);
+    __pcnt_pause(pcnt_unit);
 }
 void LEDCStepperDriver::startMove(long steps)
 {
@@ -421,10 +457,12 @@ void LEDCStepperDriver::disable(void)
 long LEDCStepperDriver::stop()
 {
     driver_pwm_stop();
+    infinite_run = 0;
 
     int16_t counter_value;
     pcnt_get_counter_value(pcnt_unit, &counter_value);
     steps_remaining -= counter_value;
+    motor_pos += (dir_state ? counter_value : -counter_value);
     pcnt_counter_pause(pcnt_unit);
     pcnt_counter_clear(pcnt_unit);
 

@@ -9,7 +9,7 @@
 #include "soc/pcnt_struct.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "soc/rtc_wdt.h"
+#include "hal/wdt_hal.h"
 
 #define PIN_UNCONNECTED -1
 #define IS_CONNECTED(pin) (pin != PIN_UNCONNECTED)
@@ -39,6 +39,11 @@ private:
     // friend void driver_pcnt_task(void *arg);
 
     /*
+     * Callback Function
+     */
+    std::function<void()> finish_callback = NULL;
+
+    /*
      * Motor Configuration
      */
     short motor_steps; // motor steps per revolution (usually 200)
@@ -57,9 +62,10 @@ private:
     /*
      * Movement state
      */
-    long step_count;      // step count
+    long motor_pos;       // position count
     long steps_remaining; // to complete the current move (absolute value)
     long pulse_freq;      // step pulse frequency (hz)
+    uint8_t infinite_run;
 
     // microstep range (1, 16, 32 etc)
     static const short MAX_MICROSTEP = 128;
@@ -120,8 +126,11 @@ public:
      */
     void rotate(double deg);
     /*
-     * Methods for non-blocking mode.
-     * Uses LEDC and PCNT.
+     * Rotate infinitely. Use stop() or move(0) to stop.
+     */
+    void rotate_infinite(int dir);
+    /*
+     * For compatibility.
      */
     void startMove(long steps);
     inline void startRotate(int deg)
@@ -160,12 +169,12 @@ public:
      */
     long stop();
     /*
-     * Get the number of completed steps so far.
-     * This is always a positive number
+     * Get motor position.
+     * Not accurate when motor running.
      */
-    long getStepsCompleted(void)
+    long getPosition(void)
     {
-        return step_count;
+        return motor_pos;
     }
     /*
      * Get the number of steps remaining to complete the move
@@ -200,6 +209,13 @@ public:
     bool isRunning()
     {
         return steps_remaining != 0;
+    }
+    /*
+     * Set finish callback
+     */
+    void setFinishCallBack(std::function<void()> cb)
+    {
+        finish_callback = cb;
     }
 };
 
