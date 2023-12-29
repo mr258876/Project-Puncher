@@ -1,5 +1,7 @@
 #include "LEDCStepperDriver.h"
 
+#if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3
+
 static portMUX_TYPE driver_spinlock = portMUX_INITIALIZER_UNLOCKED;
 
 /*
@@ -471,3 +473,7 @@ long LEDCStepperDriver::stop()
 
     return steps_remaining;
 }
+
+#else   // IDF_TARGET
+#error LEDCStepperDriver works only on ESP32 series!
+#endif  // IDF_TARGET

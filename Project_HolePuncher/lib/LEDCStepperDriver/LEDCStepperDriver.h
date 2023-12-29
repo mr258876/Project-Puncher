@@ -2,6 +2,8 @@
 #ifndef _LEDCSTEPPERDRIVER_H_
 #define _LEDCSTEPPERDRIVER_H_
 
+#if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3
+
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "soc/ledc_struct.h"
@@ -219,4 +221,8 @@ public:
     }
 };
 
-#endif
+#else   // IDF_TARGET
+#error LEDCStepperDriver works only on ESP32 series!
+#endif  // IDF_TARGET
+
+#endif  // _LEDCSTEPPERDRIVER_H_
