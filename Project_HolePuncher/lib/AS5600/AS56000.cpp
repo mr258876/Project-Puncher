@@ -1,13 +1,15 @@
 #include "AS5600.h"
- 
-AS5600::AS5600()
-{
-  i2cAddress = AS5600_I2C_ADDR;
-}
 
 AS5600::AS5600(uint8_t address)
 {
   i2cAddress = address;
+  i2c_wire = &Wire;
+}
+
+AS5600::AS5600(TwoWire *i2c_port, uint8_t address)
+{
+  i2cAddress = address;
+  i2c_wire = i2c_port;
 }
 
 uint8_t AS5600::getBurnCount()
@@ -134,35 +136,35 @@ void AS5600::burnSettings()
 uint8_t AS5600::readByte(uint8_t addr)
 {
 
-  Wire.beginTransmission(i2cAddress);
-  Wire.write(addr);
-  Wire.endTransmission();
-  Wire.requestFrom(i2cAddress, uint8_t(2));
-  while(Wire.available() < 1);
-  return Wire.read();
+  i2c_wire->beginTransmission(i2cAddress);
+  i2c_wire->write(addr);
+  i2c_wire->endTransmission();
+  i2c_wire->requestFrom(i2cAddress, uint8_t(2));
+  while(i2c_wire->available() < 1);
+  return i2c_wire->read();
 }
 
 uint16_t AS5600::readTwoBytes(uint8_t addr)
 {
   uint16_t retVal;
 
-  Wire.beginTransmission(i2cAddress);
-  Wire.write(addr);
-  Wire.endTransmission();
-  Wire.requestFrom(i2cAddress, uint8_t(2));
+  i2c_wire->beginTransmission(i2cAddress);
+  i2c_wire->write(addr);
+  i2c_wire->endTransmission();
+  i2c_wire->requestFrom(i2cAddress, uint8_t(2));
   
-  while(Wire.available() < 2);
-  retVal = (uint16_t) Wire.read() << 8;
-  retVal = retVal | (uint16_t) Wire.read();
+  while(i2c_wire->available() < 2);
+  retVal = (uint16_t) i2c_wire->read() << 8;
+  retVal = retVal | (uint16_t) i2c_wire->read();
   return retVal;
 }
 
 void AS5600::writeByte(uint8_t addr, uint8_t value)
 {
-  Wire.beginTransmission(i2cAddress);
-  Wire.write(addr);
-  Wire.write(value);
-  Wire.endTransmission(); 
+  i2c_wire->beginTransmission(i2cAddress);
+  i2c_wire->write(addr);
+  i2c_wire->write(value);
+  i2c_wire->endTransmission(); 
 }
 
 void AS5600::writeTwoBytes(uint8_t addr, uint16_t value)
@@ -171,10 +173,10 @@ void AS5600::writeTwoBytes(uint8_t addr, uint16_t value)
   uint8_t high = value >> 8;
   uint8_t low = (uint8_t) value & 0x00FF;
 
-  Wire.beginTransmission(i2cAddress);
-  Wire.write(addr);
-  Wire.write(high);
-  Wire.write(low);
-  Wire.endTransmission();
+  i2c_wire->beginTransmission(i2cAddress);
+  i2c_wire->write(addr);
+  i2c_wire->write(high);
+  i2c_wire->write(low);
+  i2c_wire->endTransmission();
   
 }

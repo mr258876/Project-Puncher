@@ -40,8 +40,8 @@ struct AS5600_Config {
 
 class AS5600 {
     public:
-        AS5600();
-        AS5600(uint8_t i2cAddress);
+        AS5600(uint8_t i2cAddress = AS5600_I2C_ADDR);
+        AS5600(TwoWire *i2c_port, uint8_t address = AS5600_I2C_ADDR);
 
         // if you need to change config you can either write to registers every time arduino starts up or burn the values.  
         // Burning the values can only be done 3 times.  This method give how many times config has been burnt 
@@ -75,6 +75,8 @@ class AS5600 {
         void burnSettings();
         
     private:
+        TwoWire *i2c_wire;
+
         uint8_t i2cAddress;
         uint16_t readTwoBytes(uint8_t addr);
         uint8_t readByte(uint8_t addr);
