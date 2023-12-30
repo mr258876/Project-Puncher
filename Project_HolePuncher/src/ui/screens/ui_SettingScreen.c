@@ -390,7 +390,7 @@ void ui_SettingScreen_screen_init(void)
     cont = create_text(section, NULL, PROJECT_VER, LV_MENU_ITEM_BUILDER_VARIANT_1);
 
     /*Create a root page*/
-    ui_setting_root_page = lv_menu_page_create(menu, _("Setting"));
+    ui_setting_root_page = lv_menu_page_create(menu, NULL);
     lv_obj_set_style_pad_hor(ui_setting_root_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
 
     create_text(ui_setting_root_page, NULL, _("Connectivity"), LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -427,9 +427,15 @@ void ui_SettingScreen_screen_init(void)
 
     // increase header height
     lv_obj_t *sidebar_header = lv_menu_get_sidebar_header(menu);
-    lv_obj_set_height(sidebar_header, lv_pct(16));
+    lv_obj_set_height(sidebar_header, lv_pct(14));
     // change sidebar width
     lv_obj_set_width(lv_obj_get_parent(ui_setting_root_page), lv_pct(34));
 
+    // increase back button size
+    lv_obj_t *back_btn = lv_menu_get_sidebar_header_back_btn(menu);
+    lv_obj_t *back_btn_label = lv_label_create(back_btn);
+    lv_label_set_text(back_btn_label, _("Back"));
+    lv_obj_set_flex_grow(back_btn, 1);
+    
     lv_event_send(lv_obj_get_child(lv_obj_get_child(lv_menu_get_cur_sidebar_page(menu), 1), 0), LV_EVENT_CLICKED, NULL);
 }
