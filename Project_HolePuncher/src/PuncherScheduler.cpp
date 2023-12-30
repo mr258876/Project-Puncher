@@ -6,25 +6,23 @@ static const char *TAG = "PuncherScheduler";
 void evtHandleLoop(void *param)
 {
     PuncherScheduler *scheduler = (PuncherScheduler *)param;
+    uint32_t evt;
+
     while (1)
     {
-        uint32_t evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
+        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
 
         if (evt & OnFinishX)
         {
-            scheduler->Xsleep();
-            scheduler->x_finished = 1;
-            scheduler->x_pos = scheduler->x_target_pos;
+            scheduler->onFinishX();
         }
         if (evt & OnFinishY)
         {
-            scheduler->Ysleep();
-            scheduler->y_finished = 1;
+            scheduler->onFinishY();
         }
         if (evt & OnFinishZ)
         {
-            scheduler->Zsleep();
-            scheduler->z_finished = 1;
+            scheduler->onFinishZ();
         }
 
         if (scheduler->status.basic_status.status_flags.is_running)
@@ -32,6 +30,8 @@ void evtHandleLoop(void *param)
             scheduler->handleMotorFinish();
         }
     }
+
+    vTaskDelete(NULL);
 }
 
 std::string uint32ToHex(uint32_t val)
@@ -300,6 +300,11 @@ int PuncherScheduler::start_workload()
         updateUIstatus();
 
         z_pos = 0;
+        if (sensor_Z_avaliable)
+        {
+            sensor_Z->clearRelativePosition();
+        }
+
         nextHole();
 
         return 0;
@@ -472,7 +477,7 @@ void PuncherScheduler::handleMotorFinish()
             // Move down Y
             Yawake();
             Y->move(calc_Y_steps(Y_PUNCH_MOVEMENT_LENGTH - y_pos));
-            y_pos = Y_PUNCH_MOVEMENT_LENGTH;
+            y_target_pos = Y_PUNCH_MOVEMENT_LENGTH;
 
             y_status = 1;
         }
@@ -483,7 +488,7 @@ void PuncherScheduler::handleMotorFinish()
                 // Y movoed down, now move back
                 Yawake();
                 Y->move(calc_Y_steps(-Y_PUNCH_MOVEMENT_LENGTH));
-                y_pos -= Y_PUNCH_MOVEMENT_LENGTH;
+                y_target_pos = 0;
 
                 y_status = 2;
             }
@@ -542,6 +547,7 @@ int PuncherScheduler::nextHole()
         x_finished = 1;
         x_target_pos = x_pos;
         y_finished = 1;
+        y_target_pos = y_pos;
         y_status = 2;
         xEventGroupSetBits(motor_evt_group, OnFinishX);
         xEventGroupSetBits(motor_evt_group, OnFinishY);
@@ -549,12 +555,14 @@ int PuncherScheduler::nextHole()
 
     if (hole.z > 0)
     {
+        z_target_pos += hole.z;
         Zawake();
         Z->move(calc_Z_steps(hole.z));
     }
     else
     {
         z_finished = 1;
+        z_target_pos = z_pos;
         xEventGroupSetBits(motor_evt_group, OnFinishZ);
     }
 
@@ -564,4 +572,142 @@ int PuncherScheduler::nextHole()
     updateUIstatus();
 
     return 0;
+}
+
+void PuncherScheduler::onFinishX()
+{
+    Xsleep();
+    x_finished = 1;
+    x_pos = x_target_pos;
+}
+
+void PuncherScheduler::onFinishY()
+{
+    Ysleep();
+    y_finished = 1;
+    y_pos = y_target_pos;
+}
+
+void PuncherScheduler::onFinishZ()
+{
+    if (sensor_Z_avaliable)
+    {
+        double pos = sensor_Z->getRelativePosition();
+        double pos_target = z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;
+        pos_target = pos_target * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
+        long diff_steps = (pos_target - pos) / 2 / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS_Z;
+
+        if (diff_steps > 2 || diff_steps < -2)
+        {
+            // move the extra steps
+            Z->move(diff_steps);
+            return;
+        }
+    }
+
+    Zsleep();
+    z_finished = 1;
+    z_pos = z_target_pos;
+}
+
+void PuncherScheduler::Xsleep()
+{
+    switch (std::any_cast<uint16_t>(x_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->X->setCurrent(std::any_cast<int32_t>(this->x_sleep_current));
+        break;
+    case 2:
+        this->X->sleep(true);
+        break;
+    default:
+        break;
+    }
+}
+// Leave idle mode
+void PuncherScheduler::Xawake()
+{
+    switch (std::any_cast<uint16_t>(x_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
+        break;
+    case 2:
+        this->X->sleep(false);
+        break;
+    default:
+        break;
+    }
+}
+// Enter idle mode
+void PuncherScheduler::Ysleep()
+{
+    switch (std::any_cast<uint16_t>(y_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->Y->setCurrent(std::any_cast<int32_t>(this->y_sleep_current));
+        break;
+    case 2:
+        this->Y->sleep(true);
+        break;
+    default:
+        break;
+    }
+}
+// Leave idle mode
+void PuncherScheduler::Yawake()
+{
+    switch (std::any_cast<uint16_t>(y_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
+        break;
+    case 2:
+        this->Y->sleep(false);
+        break;
+    default:
+        break;
+    }
+}
+// Enter idle mode
+void PuncherScheduler::Zsleep()
+{
+    switch (std::any_cast<uint16_t>(z_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->Z->setCurrent(std::any_cast<int32_t>(this->z_sleep_current));
+        break;
+    case 2:
+        this->Z->sleep(true);
+        break;
+    default:
+        break;
+    }
+}
+// Leave idle mode
+void PuncherScheduler::Zawake()
+{
+    switch (std::any_cast<uint16_t>(z_idle_behavior))
+    {
+    case 0:
+        break;
+    case 1:
+        this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
+        break;
+    case 2:
+        this->Z->sleep(false);
+        break;
+    default:
+        break;
+    }
 }

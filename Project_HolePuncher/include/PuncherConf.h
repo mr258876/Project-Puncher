@@ -36,4 +36,7 @@
 
 #define LCD_LEDC_CHANNEL 7
 
+#define I2C0_SDA    38
+#define I2C0_SCL    21
+
 #endif

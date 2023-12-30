@@ -10,6 +10,7 @@
 
 #include "PuncherSchedulerAbst.h"
 #include "MotorController/MotorController.h"
+#include "PositionSensor/PositionSensor.h"
 #include "StoreManager/StorageManager.h"
 #include "PuncherUI.h"
 #include "PowerManager/PowerManager.h"
@@ -17,6 +18,7 @@
 
 #include <Arduino.h>
 
+// event group definitions
 #define OnFinishX (1 << 0) // 0b1
 #define OnFinishY (1 << 1) // 0b10
 #define OnFinishZ (1 << 2) // 0b100
@@ -44,6 +46,8 @@ private:
     double x_pos = X_ZEROING_POSITION;
 
     double x_target_pos = 0;
+    double y_target_pos = 0;
+    double z_target_pos = 0;
 
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
@@ -56,8 +60,20 @@ private:
     MotorController *Y = NULL;
     MotorController *Z = NULL;
 
+    PositionSensor *sensor_X = NULL;
+    PositionSensor *sensor_Y = NULL;
+    PositionSensor *sensor_Z = NULL;
+
+    bool sensor_X_avaliable = false;
+    bool sensor_Y_avaliable = false;
+    bool sensor_Z_avaliable = false;
+
     uint32_t calcMotorSpeedPulse(int32_t length10UM, uint16_t length_type, int32_t speed10UMpS, int32_t microSteps);
     uint32_t calcMotorSpeedPulse(std::any length10UM, std::any length_type, std::any speed10UMpS, std::any microSteps);
+
+    void onFinishX();
+    void onFinishY();
+    void onFinishZ();
 
     inline void updateXspeed()
     {
@@ -100,108 +116,13 @@ private:
         }
     }
 
-    // Enter idle mode
-    inline void Xsleep()
-    {
-        switch (std::any_cast<uint16_t>(x_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->X->setCurrent(std::any_cast<int32_t>(this->x_sleep_current));
-            break;
-        case 2:
-            this->X->sleep(true);
-            break;
-        default:
-            break;
-        }
-    }
-    // Leave idle mode
-    inline void Xawake()
-    {
-        switch (std::any_cast<uint16_t>(x_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
-            break;
-        case 2:
-            this->X->sleep(false);
-            break;
-        default:
-            break;
-        }
-    }
-    // Enter idle mode
-    inline void Ysleep()
-    {
-        switch (std::any_cast<uint16_t>(y_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->Y->setCurrent(std::any_cast<int32_t>(this->y_sleep_current));
-            break;
-        case 2:
-            this->Y->sleep(true);
-            break;
-        default:
-            break;
-        }
-    }
-    // Leave idle mode
-    inline void Yawake()
-    {
-        switch (std::any_cast<uint16_t>(y_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
-            break;
-        case 2:
-            this->Y->sleep(false);
-            break;
-        default:
-            break;
-        }
-    }
-    // Enter idle mode
-    inline void Zsleep()
-    {
-        switch (std::any_cast<uint16_t>(z_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->Z->setCurrent(std::any_cast<int32_t>(this->z_sleep_current));
-            break;
-        case 2:
-            this->Z->sleep(true);
-            break;
-        default:
-            break;
-        }
-    }
-    // Leave idle mode
-    inline void Zawake()
-    {
-        switch (std::any_cast<uint16_t>(z_idle_behavior))
-        {
-        case 0:
-            break;
-        case 1:
-            this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
-            break;
-        case 2:
-            this->Z->sleep(false);
-            break;
-        default:
-            break;
-        }
-    }
+    // Enter / Leave idle mode
+    void Xsleep();
+    void Xawake();
+    void Ysleep();
+    void Yawake();
+    void Zsleep();
+    void Zawake();
 
     inline int32_t calc_X_steps(double mm)
     {
@@ -331,6 +252,18 @@ public:
         Zsleep();
     }
 
+    inline void attachPositionSensors(PositionSensor *sensor_X, PositionSensor *sensor_Y, PositionSensor *sensor_Z)
+    {
+        this->sensor_X = sensor_X;
+        this->sensor_Y = sensor_Y;
+        this->sensor_Z = sensor_Z;
+
+        if (sensor_Z)
+        {
+            sensor_Z_avaliable = (sensor_Z->ping() == 0);
+        }
+    }
+
     /* Attach UI before begin() ! */
     inline void attachUI(PuncherUI *ui)
     {
@@ -353,12 +286,16 @@ public:
     int delete_workload();
     inline int data_transmit_mode(bool transmit_mode)
     {
-        if (status.basic_status.status_data & (~PUNCHER_STATUS_IS_TRANSMITTING_DATA))
+        if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_TRANSMITTING_DATA | PUNCHER_STATUS_IS_FEEDING_PAPER)))
             return 1;
 
         status.basic_status.status_flags.is_transmitting_data = transmit_mode;
 
-        if (!transmit_mode)
+        if (transmit_mode)
+        {
+            holeList.clear();
+        }
+        else
         {
             status.task_length = holeList.size();
             status.finished_length = 0;
@@ -371,7 +308,7 @@ public:
     }
     int feed_paper_mode(bool feed_paper_mode)
     {
-        if (status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER))
+        if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_FEEDING_PAPER | PUNCHER_STATUS_IS_TRANSMITTING_DATA)))
             return 1;
 
         status.basic_status.status_flags.is_feeding_paper = feed_paper_mode;
@@ -384,6 +321,7 @@ public:
         {
             Z->sleep(false);
             Zsleep();
+            if (sensor_Z) sensor_Z->clearRelativePosition();
         }
 
         return 0;

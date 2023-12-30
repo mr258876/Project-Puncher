@@ -8,6 +8,7 @@
 #include "PuncherMotors.h"
 
 #include "MotorController/TMC_LEDCMotorController.h"
+#include "PositionSensor/AS5600PositionSensor.h"
 #include "ui/LVGL_PuncherUI.h"
 #include "SerialInterface/SerialInterface.h"
 
@@ -17,6 +18,7 @@ static PuncherScheduler *scheduler;
 
 // ---------- Function declarations
 void motor_init();
+void encoder_init();
 void lvgl_init();
 void serial_init();
 
@@ -30,6 +32,8 @@ void setup()
     scheduler->begin();
 
     motor_init();
+
+    encoder_init();
 
     lvgl_init();
 
@@ -87,6 +91,20 @@ void serial_init()
     scheduler->attachUI(usbInterface);
 
     ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
+}
+
+void encoder_init()
+{
+    ESP_LOGI("Puncher_Main", "Encoder initializing...");
+
+    Wire.begin(I2C0_SDA, I2C0_SCL, 400000U);
+
+    sensor_Z = new AS5600PositionSensor(&Wire, &I2C0Mutex);
+    sensor_Z->begin();
+
+    scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
+
+    ESP_LOGI("Puncher_Main", "Encoder initialized!");
 }
 
 void loop()
