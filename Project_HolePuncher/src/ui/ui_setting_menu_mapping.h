@@ -50,6 +50,7 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("x_zeroing_torch_thres", ui_setting_menu_mapping_t(ui_setting_x_zeroing_torch_thres, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("x_zeroing_current", ui_setting_menu_mapping_t(ui_setting_x_zeroing_current, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("x_zeroing_speed", ui_setting_menu_mapping_t(ui_setting_x_zeroing_speed, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("x_zeroing_position", ui_setting_menu_mapping_t(ui_setting_x_zeroing_position, _ui_menu_spinbox_set_value));
 
     ui_setting_mapping.emplace("y_lead_length", ui_setting_menu_mapping_t(ui_setting_y_lead_length, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("y_operational_speed", ui_setting_menu_mapping_t(ui_setting_y_operational_speed, _ui_menu_spinbox_set_value));
@@ -62,6 +63,7 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("y_zeroing_torch_thres", ui_setting_menu_mapping_t(ui_setting_y_zeroing_torch_thres, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("y_zeroing_current", ui_setting_menu_mapping_t(ui_setting_y_zeroing_current, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("y_zeroing_speed", ui_setting_menu_mapping_t(ui_setting_y_zeroing_speed, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("y_zeroing_position", ui_setting_menu_mapping_t(ui_setting_y_zeroing_position, _ui_menu_spinbox_set_value));
 
     ui_setting_mapping.emplace("z_lead_length", ui_setting_menu_mapping_t(ui_setting_z_lead_length, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("z_operational_speed", ui_setting_menu_mapping_t(ui_setting_z_operational_speed, _ui_menu_spinbox_set_value));

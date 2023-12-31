@@ -176,6 +176,16 @@ void ui_event_XZeroingSpeed(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_XZeroingPosition(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"x_zeroing_position", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 
 void ui_event_YLeadLength(lv_event_t *e)
 {
@@ -284,6 +294,16 @@ void ui_event_YZeroingSpeed(lv_event_t *e)
     if (e->code == LV_EVENT_VALUE_CHANGED)
     {
         puncher_event_setting_change_t evt = {"y_zeroing_speed", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_YZeroingPosition(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"y_zeroing_position", lv_spinbox_get_value(obj)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }

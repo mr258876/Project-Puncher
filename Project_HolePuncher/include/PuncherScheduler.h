@@ -159,6 +159,7 @@ private:
     std::any x_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any x_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any x_zeroing_speed = std::any(static_cast<int32_t>(1000));
+    std::any x_zeroing_position = std::any(static_cast<int32_t>(X_ZEROING_POSITION*100));
 
     std::any y_lead_length = std::any(static_cast<int32_t>(800));
     std::any y_operational_speed = std::any(static_cast<int32_t>(800));
@@ -171,6 +172,7 @@ private:
     std::any y_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any y_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
+    std::any y_zeroing_position = std::any(static_cast<int32_t>(Y_ZEROING_POSITION*100));
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(1000));
@@ -352,6 +354,7 @@ public:
     bool setXZeroingTorchThres(std::any val);
     bool setXZeroingCurrent(std::any val);
     bool setXZeroingSpeed(std::any val);
+    bool setXZeroingPosition(std::any val);
 
     bool setYLeadLength(std::any val);
     bool setYOperationalSpeed(std::any val);
@@ -364,6 +367,7 @@ public:
     bool setYZeroingTorchThres(std::any val);
     bool setYZeroingCurrent(std::any val);
     bool setYZeroingSpeed(std::any val);
+    bool setYZeroingPosition(std::any val);
 
     bool setZLeadLength(std::any val);
     bool setZOperationalSpeed(std::any val);

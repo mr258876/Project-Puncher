@@ -80,6 +80,8 @@ PuncherScheduler::PuncherScheduler()
                                                                            { return this->setXZeroingCurrent(val); }));
     setting_mapping.emplace("x_zeroing_speed", puncher_setting_mapping_t(x_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setXZeroingSpeed(val); }));
+    setting_mapping.emplace("x_zeroing_position", puncher_setting_mapping_t(x_zeroing_position, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                         { return this->setXZeroingPosition(val); }));
 
     setting_mapping.emplace("y_lead_length", puncher_setting_mapping_t(y_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                        { return this->setYLeadLength(val); }));
@@ -103,6 +105,8 @@ PuncherScheduler::PuncherScheduler()
                                                                            { return this->setYZeroingCurrent(val); }));
     setting_mapping.emplace("y_zeroing_speed", puncher_setting_mapping_t(y_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setYZeroingSpeed(val); }));
+    setting_mapping.emplace("y_zeroing_position", puncher_setting_mapping_t(y_zeroing_position, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                         { return this->setYZeroingPosition(val); }));
 
     setting_mapping.emplace("z_lead_length", puncher_setting_mapping_t(z_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                        { return this->setZLeadLength(val); }));
@@ -154,6 +158,9 @@ void PuncherScheduler::begin()
     }
 
     this->loadSettings();
+
+    this->x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
+    this->y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
     this->motor_evt_group = xEventGroupCreate();
     // this->evt_queue = xQueueCreate(128, sizeof(puncher_event_t));

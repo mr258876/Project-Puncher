@@ -93,6 +93,14 @@ bool PuncherScheduler::setXZeroingSpeed(std::any val)
     this->x_zeroing_speed = val;
     return true;
 }
+bool PuncherScheduler::setXZeroingPosition(std::any val)
+{
+    if (std::any_cast<int32_t>(this->x_zeroing_position) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->x_zeroing_position = val;
+    return true;
+}
 
 bool PuncherScheduler::setYLeadLength(std::any val)
 {
@@ -185,6 +193,14 @@ bool PuncherScheduler::setYZeroingSpeed(std::any val)
         return false;
 
     this->y_zeroing_speed = val;
+    return true;
+}
+bool PuncherScheduler::setYZeroingPosition(std::any val)
+{
+    if (std::any_cast<int32_t>(this->y_zeroing_position) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->y_zeroing_position = val;
     return true;
 }
 
