@@ -43,6 +43,7 @@ extern lv_obj_t * ui_setting_y_zeroing_torch_thres;
 extern lv_obj_t * ui_setting_y_zeroing_current;
 extern lv_obj_t * ui_setting_y_zeroing_speed;
 extern lv_obj_t * ui_setting_y_zeroing_position;
+extern lv_obj_t * ui_setting_y_punch_depth;
 
 extern lv_obj_t * ui_setting_z_lead_length;
 extern lv_obj_t * ui_setting_z_operational_speed;

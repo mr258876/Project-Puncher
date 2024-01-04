@@ -37,7 +37,8 @@ en-US:
   Auto Zeroing: ~
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
   Zeroing Current (mA): ~
-  Zeroing Speed (mm/s): "Zeroing\nSpeed (mm/s)"
+  Zeroing Speed (mm/s): "Zeroing Speed\n(mm/s)"
+  Zeroing Position (mm): "Zeroing Position\n(mm)"
   Power: ~
   Voltage: ~
   Motor_Voltage: ~
@@ -51,3 +52,4 @@ en-US:
   Target Bar: ~
   Measured Bar: ~
   Measured Residual (mm): "Measured\nResidual (mm)"
+  Punch Depth (mm): "Punch Depth\n(mm)"

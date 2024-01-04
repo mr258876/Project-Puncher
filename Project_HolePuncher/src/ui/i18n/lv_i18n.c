@@ -23,10 +23,12 @@ static lv_i18n_phrase_t en_us_singulars[] = {
     {"Operational Current (mA)", "Operational\nCurrent (mA)"},
     {"_idle_behavior_options", "Keep Current\nReduce Current\nCut Power"},
     {"Zeroing Torch Threshold", "Zeroing Torch\nThreshold"},
-    {"Zeroing Speed (mm/s)", "Zeroing\nSpeed (mm/s)"},
+    {"Zeroing Speed (mm/s)", "Zeroing Speed\n(mm/s)"},
+    {"Zeroing Position (mm)", "Zeroing Position\n(mm)"},
     {"_motor_voltage_options", "5V\n9V\n12V\n15V\n20V"},
     {"_language_options", "English\n简体中文"},
     {"Measured Residual (mm)", "Measured\nResidual (mm)"},
+    {"Punch Depth (mm)", "Punch Depth\n(mm)"},
     {NULL, NULL} // End mark
 };
 
@@ -85,6 +87,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Zeroing Torch Threshold", "归位力矩阈值"},
     {"Zeroing Current (mA)", "归位电流(mA)"},
     {"Zeroing Speed (mm/s)", "归位速度(mm/s)"},
+    {"Zeroing Position (mm)", "归位后位置(mm)"},
     {"Power", "供电"},
     {"Voltage", "电压"},
     {"Motor_Voltage", "电机电压"},
@@ -97,6 +100,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Target Bar", "目标小节数"},
     {"Measured Bar", "测量小节数"},
     {"Measured Residual (mm)", "测量残差(mm)"},
+    {"Punch Depth (mm)", "打孔深度(mm)"},
     {NULL, NULL} // End mark
 };
 

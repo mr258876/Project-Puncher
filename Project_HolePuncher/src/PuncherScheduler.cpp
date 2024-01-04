@@ -10,19 +10,22 @@ void evtHandleLoop(void *param)
 
     while (1)
     {
-        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
+        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdFALSE, pdFALSE, portMAX_DELAY);
 
         if (evt & OnFinishX)
         {
             scheduler->onFinishX();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishX);
         }
         if (evt & OnFinishY)
         {
             scheduler->onFinishY();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishY);
         }
         if (evt & OnFinishZ)
         {
             scheduler->onFinishZ();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishZ);
         }
 
         if (scheduler->status.basic_status.status_flags.is_running)
@@ -107,6 +110,8 @@ PuncherScheduler::PuncherScheduler()
                                                                          { return this->setYZeroingSpeed(val); }));
     setting_mapping.emplace("y_zeroing_position", puncher_setting_mapping_t(y_zeroing_position, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setYZeroingPosition(val); }));
+    setting_mapping.emplace("y_punch_depth", puncher_setting_mapping_t(y_punch_depth, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
+                                                                         { return this->setYPunchDepth(val); }));
 
     setting_mapping.emplace("z_lead_length", puncher_setting_mapping_t(z_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                        { return this->setZLeadLength(val); }));
@@ -477,14 +482,15 @@ void PuncherScheduler::get_setting_values(void *p_ui)
 
 void PuncherScheduler::handleMotorFinish()
 {
+    double y_depth = std::any_cast<int32_t>(y_punch_depth) / 100.0;
     if ((x_finished && z_finished))
     {
         if (y_finished == 0)
         {
             // Move down Y
             Yawake();
-            Y->move(calc_Y_steps(Y_PUNCH_MOVEMENT_LENGTH - y_pos));
-            y_target_pos = Y_PUNCH_MOVEMENT_LENGTH;
+            Y->move(calc_Y_steps(y_depth - y_pos));
+            y_target_pos = y_depth;
 
             y_status = 1;
         }
@@ -494,8 +500,8 @@ void PuncherScheduler::handleMotorFinish()
             {
                 // Y movoed down, now move back
                 Yawake();
-                Y->move(calc_Y_steps(-Y_PUNCH_MOVEMENT_LENGTH));
-                y_target_pos = 0;
+                Y->move(calc_Y_steps(-y_depth));
+                y_target_pos -= y_depth;
 
                 y_status = 2;
             }
@@ -535,12 +541,15 @@ int PuncherScheduler::nextHole()
 
     if (hole.x > 0)
     {
+        ESP_LOGI(TAG, "Next X: %d", hole.x);
         int32_t x_steps = calc_X_steps((30 - hole.x) * 1.0 * 2 - x_pos);
         if (x_steps)
         {
             Xawake();
             X->move(x_steps);
             x_target_pos = (30 - hole.x) * 1.0 * 2;
+            ESP_LOGI(TAG, "X current pos: %4f", x_pos);
+            ESP_LOGI(TAG, "X target pos: %4f", x_target_pos);
         }
         else
         {

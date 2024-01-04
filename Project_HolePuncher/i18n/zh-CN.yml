@@ -38,6 +38,7 @@ zh-CN:
   Zeroing Torch Threshold: 归位力矩阈值
   Zeroing Current (mA): 归位电流(mA)
   Zeroing Speed (mm/s): 归位速度(mm/s)
+  Zeroing Position (mm): 归位后位置(mm)
   Power: 供电
   Voltage: 电压
   Motor_Voltage: 电机电压
@@ -51,3 +52,4 @@ zh-CN:
   Target Bar: 目标小节数
   Measured Bar: 测量小节数
   Measured Residual (mm): 测量残差(mm)
+  Punch Depth (mm): 打孔深度(mm)

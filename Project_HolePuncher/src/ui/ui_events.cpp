@@ -307,6 +307,16 @@ void ui_event_YZeroingPosition(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_YPunchDepth(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"y_punch_depth", lv_spinbox_get_value(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 
 void ui_event_ZLeadLength(lv_event_t *e)
 {

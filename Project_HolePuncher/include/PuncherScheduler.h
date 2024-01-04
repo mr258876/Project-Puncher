@@ -173,6 +173,7 @@ private:
     std::any y_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
     std::any y_zeroing_position = std::any(static_cast<int32_t>(Y_ZEROING_POSITION*100));
+    std::any y_punch_depth = std::any(static_cast<int32_t>(Y_PUNCH_MOVEMENT_LENGTH*100));
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(1000));
@@ -368,6 +369,7 @@ public:
     bool setYZeroingCurrent(std::any val);
     bool setYZeroingSpeed(std::any val);
     bool setYZeroingPosition(std::any val);
+    bool setYPunchDepth(std::any val);
 
     bool setZLeadLength(std::any val);
     bool setZOperationalSpeed(std::any val);

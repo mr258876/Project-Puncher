@@ -203,6 +203,14 @@ bool PuncherScheduler::setYZeroingPosition(std::any val)
     this->y_zeroing_position = val;
     return true;
 }
+bool PuncherScheduler::setYPunchDepth(std::any val)
+{
+    if (std::any_cast<int32_t>(this->y_punch_depth) == std::any_cast<int32_t>(val))
+        return false;
+
+    this->y_punch_depth = val;
+    return true;
+}
 
 bool PuncherScheduler::setZLeadLength(std::any val)
 {
