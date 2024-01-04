@@ -66,11 +66,11 @@ static void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
     if (ret == ESP_OK)
     {
         buf[rx_size] = '\0';
-        ESP_LOGI(TAG, "Got data (%d bytes): %s", rx_size, buf);
+        ESP_LOGD(TAG, "Got data (%d bytes): %s", rx_size, buf);
 
         int x, y, z;
         int scan_res = sscanf((const char *)buf, "M%d Y%d P%d", &x, &y, &z);
-        ESP_LOGI(TAG, "Mcode sscanf Result: %d", scan_res);
+        ESP_LOGD(TAG, "Mcode sscanf Result: %d", scan_res);
         int add_res = 0;
         if (scan_res == 3)
         {
@@ -93,7 +93,7 @@ static void tinyusb_cdc_line_state_changed_callback(int itf, cdcacm_event_t *eve
 {
     int dtr = event->line_state_changed_data.dtr;
     int rst = event->line_state_changed_data.rts;
-    ESP_LOGI(TAG, "Line state changed! dtr:%d, rst:%d", dtr, rst);
+    ESP_LOGD(TAG, "Line state changed! dtr:%d, rst:%d", dtr, rst);
 }
 
 static void tinyusb_cdc_line_coding_changed_callback(int itf, cdcacm_event_t *event)
@@ -102,5 +102,5 @@ static void tinyusb_cdc_line_coding_changed_callback(int itf, cdcacm_event_t *ev
     int data_bits = event->line_coding_changed_data.p_line_coding->data_bits;
     int parity = event->line_coding_changed_data.p_line_coding->parity;
     int stop_bits = event->line_coding_changed_data.p_line_coding->stop_bits;
-    ESP_LOGI(TAG, "Line coding changed! bit_rate:%d, data_bits:%d, parity:%d, stop_bits:%d", bit_rate, data_bits, parity, stop_bits);
+    ESP_LOGD(TAG, "Line coding changed! bit_rate:%d, data_bits:%d, parity:%d, stop_bits:%d", bit_rate, data_bits, parity, stop_bits);
 }

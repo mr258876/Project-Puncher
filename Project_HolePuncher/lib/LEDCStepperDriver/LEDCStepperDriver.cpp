@@ -412,7 +412,7 @@ void LEDCStepperDriver::startMove(long steps)
     steps_remaining = steps;
     enable();
     driver_pcnt_start(steps);
-    ESP_LOGI("LEDCStepperDriver", "start move steps:%ld", steps);
+    ESP_LOGD("LEDCStepperDriver", "start move steps:%ld", steps);
 
     digitalWrite(dir_pin, dir_state);
     driver_pwm_start();
