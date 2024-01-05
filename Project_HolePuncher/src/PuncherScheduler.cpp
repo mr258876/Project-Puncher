@@ -312,6 +312,7 @@ int PuncherScheduler::start_workload()
         updateUIstatus();
 
         z_pos = 0;
+        z_target_pos = 0;
         if (sensor_Z_avaliable)
         {
             sensor_Z->clearRelativePosition();
