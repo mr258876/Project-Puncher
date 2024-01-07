@@ -80,7 +80,7 @@ void ui_SettingScreen_screen_init(void);
 extern lv_obj_t *ui_SettingScreen;
 extern lv_obj_t *ui____initial_actions0;
 
-
+extern lv_timer_t *ui_ETA_timer;
 
 
 void ui_init(void);

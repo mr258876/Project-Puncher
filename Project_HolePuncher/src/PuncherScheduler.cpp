@@ -84,7 +84,7 @@ PuncherScheduler::PuncherScheduler()
     setting_mapping.emplace("x_zeroing_speed", puncher_setting_mapping_t(x_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setXZeroingSpeed(val); }));
     setting_mapping.emplace("x_zeroing_position", puncher_setting_mapping_t(x_zeroing_position, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                                         { return this->setXZeroingPosition(val); }));
+                                                                            { return this->setXZeroingPosition(val); }));
 
     setting_mapping.emplace("y_lead_length", puncher_setting_mapping_t(y_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                        { return this->setYLeadLength(val); }));
@@ -109,9 +109,9 @@ PuncherScheduler::PuncherScheduler()
     setting_mapping.emplace("y_zeroing_speed", puncher_setting_mapping_t(y_zeroing_speed, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setYZeroingSpeed(val); }));
     setting_mapping.emplace("y_zeroing_position", puncher_setting_mapping_t(y_zeroing_position, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                                         { return this->setYZeroingPosition(val); }));
+                                                                            { return this->setYZeroingPosition(val); }));
     setting_mapping.emplace("y_punch_depth", puncher_setting_mapping_t(y_punch_depth, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
-                                                                         { return this->setYPunchDepth(val); }));
+                                                                       { return this->setYPunchDepth(val); }));
 
     setting_mapping.emplace("z_lead_length", puncher_setting_mapping_t(z_lead_length, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                        { return this->setZLeadLength(val); }));
@@ -173,6 +173,9 @@ void PuncherScheduler::begin()
 
     this->status.basic_status.status_data = 0;
     this->status.connectivity_status.status_data = 0;
+    this->status.task_length = 0;
+    this->status.finished_length = 0;
+    this->status.ETA = 0;
 }
 
 void PuncherScheduler::loadSettings()
@@ -433,18 +436,19 @@ time_t PuncherScheduler::get_ETA()
 {
     double _eta = 0;
 
-    int _lastX = 0;
-    double _lastZ = 0;
+    double _lastX = x_pos;
 
-    // for (size_t i = 0; i < holeList.size(); i++)
-    // {
-    //     _eta += abs(holeList.at(i).x - _lastX) * 2.0 / X->getSpeed(); // X轴
-    //     _eta += abs(holeList.at(i).z - _lastZ) / Z->getSpeed();       // Y轴
-    //     _eta += 11 / Y->getSpeed();                                   // Z轴
+    for (size_t i = 0; i < holeList.size(); i++)
+    {
+        _eta += abs(holeList.at(i).z) / (std::any_cast<int32_t>(z_operational_speed) / 100.0 * (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979)); // Z轴
+        if (holeList.at(i).x > 0)
+        {
+            _eta += abs((30 - holeList.at(i).x) * 2.0 - _lastX) / (std::any_cast<int32_t>(x_operational_speed) / 100.0 * (std::any_cast<uint16_t>(x_length_type) ? 1 : 3.14159265358979));           // X轴
+            _eta += 2.0 * (std::any_cast<int32_t>(y_punch_depth) / 100.0) / (std::any_cast<int32_t>(y_operational_speed) / 100.0 * (std::any_cast<uint16_t>(y_length_type) ? 1 : 3.14159265358979)); // Y轴
+            _lastX = (30 - holeList.at(i).x) * 2.0;
+        }
 
-    //     _lastX = holeList.at(i).x;
-    //     _lastZ = holeList.at(i).z;
-    // }
+    }
 
     return (long)_eta;
 }
@@ -543,12 +547,12 @@ int PuncherScheduler::nextHole()
     if (hole.x > 0)
     {
         ESP_LOGI(TAG, "Next X: %d", hole.x);
-        int32_t x_steps = calc_X_steps((30 - hole.x) * 1.0 * 2 - x_pos);
+        int32_t x_steps = calc_X_steps((30 - hole.x) * 2.0 - x_pos);
         if (x_steps)
         {
             Xawake();
             X->move(x_steps);
-            x_target_pos = (30 - hole.x) * 1.0 * 2;
+            x_target_pos = (30 - hole.x) * 2.0;
             ESP_LOGI(TAG, "X current pos: %4f", x_pos);
             ESP_LOGI(TAG, "X target pos: %4f", x_target_pos);
         }
@@ -586,6 +590,7 @@ int PuncherScheduler::nextHole()
     holeList.erase(holeList.begin());
 
     status.finished_length += 1;
+    status.ETA = get_ETA();
     updateUIstatus();
 
     return 0;

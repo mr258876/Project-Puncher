@@ -33,6 +33,8 @@ void ui_event_SettingButton(lv_event_t *e);
 lv_obj_t *ui_SettingButton;
 lv_obj_t *ui_SettingButtonLabel;
 
+lv_timer_t *ui_ETA_timer;
+
 // SCREEN: ui_FeedScreen
 void ui_FeedScreen_screen_init(void);
 void ui_event_FeedScreen(lv_event_t *e);

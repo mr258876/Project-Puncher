@@ -140,6 +140,26 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
         lv_obj_clear_flag(ui_FeedButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_SettingButton, LV_OBJ_FLAG_HIDDEN);
     }
+
+    // display ETA
+    if (msg->basic_status.status_flags.is_running)
+    {
+        lv_obj_clear_flag(ui_Label6, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
+
+        lv_label_set_text_fmt(ui_Label7, "%02ld:%02ld:%02ld", msg->ETA / 3600, msg->ETA % 3600 / 60, msg->ETA % 60);
+        time_t *timer_eta = (time_t *)ui_ETA_timer->user_data;
+        *timer_eta = msg->ETA;
+        lv_timer_reset(ui_ETA_timer);
+        lv_timer_resume(ui_ETA_timer);
+    }
+    else
+    {
+        lv_obj_add_flag(ui_Label6, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
+        lv_timer_pause(ui_ETA_timer);
+    }
+
     xSemaphoreGive(LVGLMutex);
 }
 

@@ -3,6 +3,7 @@
 
 #include <sys/cdefs.h>
 #include <stdint.h>
+#include <time.h>
 
 struct __packed scheduler_hole_t
 {
@@ -57,6 +58,9 @@ struct __packed puncher_status_t
     // data
     uint32_t task_length;
     uint32_t finished_length;
+
+    // ETA
+    time_t ETA;
 };
 
 inline int puncher_is_busy(puncher_status_t &status)
