@@ -271,6 +271,7 @@ public:
     inline void attachUI(PuncherUI *ui)
     {
         this->ui_list.push_back(ui);
+        ui->onStatusCode(&status);
         ui->attachScheduler(this);
     }
 
