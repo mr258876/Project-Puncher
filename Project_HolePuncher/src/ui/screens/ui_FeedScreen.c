@@ -52,7 +52,7 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_set_height(ui_FeedTitle, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_FeedTitle, LV_ALIGN_CENTER);
     lv_label_set_text(ui_FeedTitle, _("Feed"));
-    lv_obj_set_style_text_font(ui_FeedTitle, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_FeedTitle, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_FeedPanel = lv_obj_create(ui_FeedScreen);
     lv_obj_set_width(ui_FeedPanel, lv_pct(100));
@@ -76,6 +76,7 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_set_height(ui_FeedStopButtonLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_FeedStopButtonLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_FeedStopButtonLabel, _("STOP"));
+    lv_obj_set_style_text_font(ui_FeedStopButtonLabel, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_FeedSpeedPanel = lv_obj_create(ui_FeedPanel);
     lv_obj_set_width(ui_FeedSpeedPanel, lv_pct(50));
@@ -98,12 +99,12 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_add_flag(ui_FeedPlusButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(ui_FeedPlusButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
-    ui_FeedPlusButtonLabel = lv_label_create(ui_FeedPlusButton);
+    ui_FeedPlusButtonLabel = lv_img_create(ui_FeedPlusButton);
     lv_obj_set_width(ui_FeedPlusButtonLabel, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height(ui_FeedPlusButtonLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_FeedPlusButtonLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_FeedPlusButtonLabel, LV_SYMBOL_UP);
-    lv_obj_set_style_text_font(ui_FeedPlusButtonLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_img_set_src(ui_FeedPlusButtonLabel, LV_SYMBOL_UP);
+    lv_obj_set_style_text_font(ui_FeedPlusButtonLabel, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_FeedRoller = lv_roller_create(ui_FeedSpeedPanel);
     lv_roller_set_options(ui_FeedRoller, "+4\n+3\n+2\n+1\n0\n-1\n-2\n-3\n-4", LV_ROLLER_MODE_NORMAL);
@@ -118,12 +119,12 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_add_flag(ui_FeedMinusButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(ui_FeedMinusButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
 
-    ui_FeedMinusButtonLabel = lv_label_create(ui_FeedMinusButton);
+    ui_FeedMinusButtonLabel = lv_img_create(ui_FeedMinusButton);
     lv_obj_set_width(ui_FeedMinusButtonLabel, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height(ui_FeedMinusButtonLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_FeedMinusButtonLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_FeedMinusButtonLabel, LV_SYMBOL_DOWN);
-    lv_obj_set_style_text_font(ui_FeedMinusButtonLabel, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_img_set_src(ui_FeedMinusButtonLabel, LV_SYMBOL_DOWN);
+    lv_obj_set_style_text_font(ui_FeedMinusButtonLabel, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_FeedBackButton, ui_event_FeedBackButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedStopButton, ui_event_FeedStopButton, LV_EVENT_ALL, NULL);

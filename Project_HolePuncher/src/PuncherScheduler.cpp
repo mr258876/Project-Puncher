@@ -169,7 +169,7 @@ void PuncherScheduler::begin()
 
     this->motor_evt_group = xEventGroupCreate();
     // this->evt_queue = xQueueCreate(128, sizeof(puncher_event_t));
-    xTaskCreate(evtHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
+    xTaskCreate(evtHandleLoop, "SchedulerEvtLoop", 6144, this, 3, NULL);
 
     this->status.basic_status.status_data = 0;
     this->status.connectivity_status.status_data = 0;

@@ -11,9 +11,10 @@
 #include "PositionSensor/AS5600PositionSensor.h"
 #include "ui/LVGL_PuncherUI.h"
 #include "SerialInterface/SerialInterface.h"
+#include "esp_vfs_fat.h"
 
 static PuncherScheduler *scheduler;
-
+static wl_handle_t wl_handle_flash = WL_INVALID_HANDLE;
 
 
 // ---------- Function declarations
@@ -21,6 +22,7 @@ void motor_init();
 void encoder_init();
 void lvgl_init();
 void serial_init();
+void fatfs_init();
 
 void setup()
 {
@@ -34,6 +36,8 @@ void setup()
     motor_init();
 
     encoder_init();
+
+    fatfs_init();
 
     lvgl_init();
 
@@ -85,10 +89,10 @@ void serial_init()
 {
     ESP_LOGI("Puncher_Main", "Starting USB Serial Interface...");
 
-    usbInterface->begin();
-    usbInterface->enableLog();
+    // usbInterface->begin();
+    // usbInterface->enableLog();
 
-    scheduler->attachUI(usbInterface);
+    // scheduler->attachUI(usbInterface);
 
     ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
 }
@@ -105,6 +109,21 @@ void encoder_init()
     scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
 
     ESP_LOGI("Puncher_Main", "Encoder initialized!");
+}
+
+void fatfs_init()
+{
+    ESP_LOGI("Puncher_Main", "Mounting flash...");
+
+    const esp_vfs_fat_mount_config_t mount_cfg = {
+        .format_if_mount_failed = false,
+        .max_files = 4,
+        .allocation_unit_size = CONFIG_WL_SECTOR_SIZE,
+    };
+
+    ESP_ERROR_CHECK(esp_vfs_fat_spiflash_mount(FLASH_MOUNT_POINT, "fatfs", &mount_cfg, &wl_handle_flash));
+
+    ESP_LOGI("Puncher_Main", "Flash mounted!");
 }
 
 void loop()

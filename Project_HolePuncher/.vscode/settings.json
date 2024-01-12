@@ -78,6 +78,9 @@
         "any": "cpp",
         "bitset": "cpp",
         "iostream": "cpp",
-        "esp32-hal-tinyusb.h": "c"
+        "esp32-hal-tinyusb.h": "c",
+        "ui_setting_menu.h": "c",
+        "ui_font_noto_sans.h": "c",
+        "ffat.h": "c"
     }
 }

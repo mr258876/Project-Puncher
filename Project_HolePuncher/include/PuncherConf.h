@@ -39,4 +39,7 @@
 #define I2C0_SDA    38
 #define I2C0_SCL    21
 
+/* flash storage */
+#define FLASH_MOUNT_POINT   "/flash"
+
 #endif

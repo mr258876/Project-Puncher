@@ -82,6 +82,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Operational Current (mA)", "运行电流(mA)"},
     {"Idle Behavior", "空闲行为"},
     {"_idle_behavior_options", "保持电流\n减小电流\n切断电源"},
+    {"Sleep Current (mA)", "睡眠电流(mA)"},
     {"Zeroing", "归位"},
     {"Auto Zeroing", "自动归位"},
     {"Zeroing Torch Threshold", "归位力矩阈值"},
@@ -90,7 +91,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Zeroing Position (mm)", "归位后位置(mm)"},
     {"Power", "供电"},
     {"Voltage", "电压"},
-    {"Motor_Voltage", "电机电压"},
+    {"Motor Voltage", "电机电压"},
     {"Screen", "屏幕"},
     {"System", "系统"},
     {"Language", "语言"},
@@ -101,6 +102,8 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Measured Bar", "测量小节数"},
     {"Measured Residual (mm)", "测量残差(mm)"},
     {"Punch Depth (mm)", "打孔深度(mm)"},
+    {"Idle", "空闲"},
+    {"Ready", "就绪"},
     {NULL, NULL} // End mark
 };
 

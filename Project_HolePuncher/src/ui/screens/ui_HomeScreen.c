@@ -29,7 +29,7 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_height(ui_InfoBarTitle1, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_InfoBarTitle1, LV_ALIGN_LEFT_MID);
     lv_label_set_text(ui_InfoBarTitle1, _("Project Puncher"));
-    lv_obj_set_style_text_font(ui_InfoBarTitle1, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_InfoBarTitle1, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_InfoBarTitle2 = lv_label_create(ui_InfoBar);
     lv_obj_set_width(ui_InfoBarTitle2, LV_SIZE_CONTENT);  /// 1
@@ -37,7 +37,7 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_align(ui_InfoBarTitle2, LV_ALIGN_CENTER);
     lv_label_set_text(ui_InfoBarTitle2, _("Next Gen"));
     lv_obj_set_style_text_decor(ui_InfoBarTitle2, LV_TEXT_DECOR_UNDERLINE, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_InfoBarTitle2, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_InfoBarTitle2, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_StatusPanel = lv_obj_create(ui_HomeScreen);
     lv_obj_set_width(ui_StatusPanel, lv_pct(75));
@@ -53,28 +53,28 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_height(ui_Label4, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_Label4, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label4, _("Status"));
-    lv_obj_set_style_text_font(ui_Label4, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label4, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label5 = lv_label_create(ui_StatusPanel);
     lv_obj_set_width(ui_Label5, lv_pct(100));
     lv_obj_set_height(ui_Label5, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_Label5, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label5, "Idle");
-    lv_obj_set_style_text_font(ui_Label5, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_label_set_text(ui_Label5, _("Idle"));
+    lv_obj_set_style_text_font(ui_Label5, ui_font_noto_sans_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label6 = lv_label_create(ui_StatusPanel);
     lv_obj_set_width(ui_Label6, lv_pct(100));
     lv_obj_set_height(ui_Label6, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_Label6, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label6, _("ETA"));
-    lv_obj_set_style_text_font(ui_Label6, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label6, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label7 = lv_label_create(ui_StatusPanel);
     lv_obj_set_width(ui_Label7, lv_pct(100));
     lv_obj_set_height(ui_Label7, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label7, "88:88:88");
-    lv_obj_set_style_text_font(ui_Label7, &lv_font_montserrat_36, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label7, ui_font_noto_sans_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_OperationPanel = lv_obj_create(ui_HomeScreen);
     lv_obj_set_width(ui_OperationPanel, lv_pct(25));

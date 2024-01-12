@@ -33,6 +33,7 @@ en-US:
   Operational Current (mA): "Operational\nCurrent (mA)"
   Idle Behavior: ~
   _idle_behavior_options: "Keep Current\nReduce Current\nCut Power"
+  Sleep Current (mA): ~
   Zeroing: ~
   Auto Zeroing: ~
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
@@ -41,7 +42,7 @@ en-US:
   Zeroing Position (mm): "Zeroing Position\n(mm)"
   Power: ~
   Voltage: ~
-  Motor_Voltage: ~
+  Motor Voltage: ~
   _motor_voltage_options: "5V\n9V\n12V\n15V\n20V"
   Screen: ~
   System: ~
@@ -53,3 +54,5 @@ en-US:
   Measured Bar: ~
   Measured Residual (mm): "Measured\nResidual (mm)"
   Punch Depth (mm): "Punch Depth\n(mm)"
+  Idle: ~
+  Ready: ~

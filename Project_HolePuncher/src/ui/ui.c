@@ -133,7 +133,7 @@ void ui_init(void)
     lv_theme_t *theme = lv_theme_default_init(dispp,                                                   /*Use the DPI, size, etc from this display*/
                                               lv_color_make(94, 166, 156), lv_color_make(156, 49, 41), /*Primary and secondary palette*/
                                               false,                                                   /*Light or dark mode*/
-                                              LV_FONT_DEFAULT);                                        /*Small, normal, large fonts*/
+                                              ui_font_noto_sans_16);                                   /*Small, normal, large fonts*/
     lv_disp_set_theme(dispp, theme);
     ui_HomeScreen_screen_init();
     ui_FeedScreen_screen_init();

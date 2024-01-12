@@ -15,45 +15,56 @@
 
 static const char *TAG = "LVGLPuncherUI";
 
-void evtQueueHandleLoop(void *param)
-{
-    LVGLPuncherUI *ui = (LVGLPuncherUI *)param;
-    uint8_t evt_tmp[MAXIUM(sizeof(puncher_status_t), sizeof(puncher_event_t))];
-    while (1)
-    {
-        uint32_t evt_bits = xEventGroupWaitBits(ui->evt_group, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
-
-        if (evt_bits & OnEventCode)
-        {
-            xQueueReceive(ui->event_code_queue, evt_tmp, portMAX_DELAY);
-            ui->handleEventCodeChange((puncher_status_t *)evt_tmp);
-        }
-
-        if (evt_bits & OnSettingValueChange)
-        {
-            xQueueReceive(ui->setting_value_queue, evt_tmp, portMAX_DELAY);
-            ui->handleSettingValueChange((puncher_event_setting_change_t *)evt_tmp);
-        }
-
-        /* If there's still data in queue */
-        if (uxQueueMessagesWaiting(ui->event_code_queue))
-            xEventGroupSetBits(ui->evt_group, OnEventCode);
-        if (uxQueueMessagesWaiting(ui->setting_value_queue))
-            xEventGroupSetBits(ui->evt_group, OnSettingValueChange);
-    }
-}
-
 void lvglLoop(void *param)
 {
+    LVGLPuncherUI *ui = (LVGLPuncherUI *)param;
+
+    ui_init();
+    ui_menu_ptr_update();
+    xEventGroupSetBits(ui->evt_group, (1 << 8));
+
+    uint8_t evt_tmp[MAXIUM(sizeof(puncher_status_t), sizeof(puncher_event_t))];
+    uint32_t evt_bits = 0;
+
     while (1)
     {
+        // Process Events
+        evt_bits = xEventGroupWaitBits(ui->evt_group, 0xFF, pdTRUE, pdFALSE, pdMS_TO_TICKS(5));
+
+        while (evt_bits)
+        {
+            xEventGroupClearBits(ui->evt_group, 0xFF);
+
+            if (evt_bits & OnEventCode)
+            {
+                xQueueReceive(ui->event_code_queue, evt_tmp, portMAX_DELAY);
+                ui->handleEventCodeChange((puncher_status_t *)evt_tmp);
+            }
+
+            if (evt_bits & OnSettingValueChange)
+            {
+                xQueueReceive(ui->setting_value_queue, evt_tmp, portMAX_DELAY);
+                ui->handleSettingValueChange((puncher_event_setting_change_t *)evt_tmp);
+            }
+
+            /* If there's still data in queue */
+            if (uxQueueMessagesWaiting(ui->event_code_queue))
+                xEventGroupSetBits(ui->evt_group, OnEventCode);
+            if (uxQueueMessagesWaiting(ui->setting_value_queue))
+                xEventGroupSetBits(ui->evt_group, OnSettingValueChange);
+
+            evt_bits = xEventGroupGetBits(ui->evt_group);
+        }
+
+        // Handle UI
         xSemaphoreTake(LVGLMutex, portMAX_DELAY);
         {
             lv_timer_handler(); /* let the GUI do its work */
         }
         xSemaphoreGive(LVGLMutex);
-        vTaskDelay(pdMS_TO_TICKS(5));
     }
+
+    vTaskDelete(NULL);
 }
 
 LVGLPuncherUI::LVGLPuncherUI()
@@ -66,29 +77,30 @@ LVGLPuncherUI::~LVGLPuncherUI()
 
 void LVGLPuncherUI::begin()
 {
+    this->event_code_queue = xQueueCreate(16, sizeof(puncher_status_t));
+    this->setting_value_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
+    this->evt_group = xEventGroupCreate();
+
     lv_port_init();
 
     /* Initialize input device driver */
     lv_port_indev_init();
 
+    /* Initialize NotoSans */
+    lv_font_notosans_init();
+
     /* Initialize Multilanguage */
     lv_i18n_init(lv_i18n_language_pack);
     lv_i18n_set_locale(lv_i18n_language_pack[lang_id]->locale_name);
 
-    ui_init();
-    ui_menu_ptr_update();
-    xTaskCreate(lvglLoop, "lvglLoop", 8192, this, 1, NULL);
+    xTaskCreatePinnedToCore(lvglLoop, "lvglLoop", 32768, this, 1, NULL, 1);
+    xEventGroupWaitBits(evt_group, (1 << 8), pdTRUE, pdTRUE, portMAX_DELAY);
 
     LV_LOG_INFO("LVGL Booted.");
 
     ledcSetup(LCD_LEDC_CHANNEL, 48000, 8);
     ledcAttachPin(BL_PIN, LCD_LEDC_CHANNEL);
     this->setBrightness(1);
-
-    this->event_code_queue = xQueueCreate(16, sizeof(puncher_status_t));
-    this->setting_value_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
-    this->evt_group = xEventGroupCreate();
-    xTaskCreate(evtQueueHandleLoop, "SchedulerEvtLoop", 8192, this, 3, NULL);
 }
 
 void LVGLPuncherUI::onStatusCode(puncher_status_t *msg)
@@ -126,12 +138,12 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
     }
     else if (msg->basic_status.status_flags.has_mission)
     {
-        lv_label_set_text(ui_Label5, "Ready");
+        lv_label_set_text(ui_Label5, _("Ready"));
         lv_obj_clear_flag(ui_StartButton, LV_OBJ_FLAG_HIDDEN);
     }
     else
     {
-        lv_label_set_text(ui_Label5, "Idle");
+        lv_label_set_text(ui_Label5, _("Idle"));
 
         lv_obj_add_flag(ui_StartButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_PauseButton, LV_OBJ_FLAG_HIDDEN);

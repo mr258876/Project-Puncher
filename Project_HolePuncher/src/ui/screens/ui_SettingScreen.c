@@ -303,7 +303,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_x_axis_page);
     ui_setting_x_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, ui_event_XOperationalCurrent);
     ui_setting_x_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_XIdleBehavior);
-    ui_setting_x_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, ui_event_XSleepCurrent);
+    ui_setting_x_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, ui_event_XSleepCurrent);
 
     create_text(ui_setting_x_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
@@ -330,7 +330,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_y_axis_page);
     ui_setting_y_operational_current = create_spinbox(section, NULL, _("Operational Current (mA)"), 1, 2048, 1024, 4, 0, ui_event_YOperationalCurrent);
     ui_setting_y_idle_behavior = create_dropdown(section, NULL, _("Idle Behavior"), _("_idle_behavior_options"), 0, ui_event_YIdleBehavior);
-    ui_setting_y_sleep_current = create_spinbox(section, NULL, _("Sleep Current(mA)"), 1, 2048, 512, 4, 0, ui_event_YSleepCurrent);
+    ui_setting_y_sleep_current = create_spinbox(section, NULL, _("Sleep Current (mA)"), 1, 2048, 512, 4, 0, ui_event_YSleepCurrent);
 
     create_text(ui_setting_y_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
@@ -372,7 +372,7 @@ void ui_SettingScreen_screen_init(void)
     lv_menu_separator_create(ui_setting_power_page);
     // create_text(sub_power_page, NULL, _("Volatge"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_power_page);
-    ui_setting_power_voltage = create_dropdown(section, NULL, _("Motor Volatge"), _("_motor_voltage_options"), 0, ui_event_VoltageDropDown);
+    ui_setting_power_voltage = create_dropdown(section, NULL, _("Motor Voltage"), _("_motor_voltage_options"), 0, ui_event_VoltageDropDown);
 
 
     /*Create display page*/

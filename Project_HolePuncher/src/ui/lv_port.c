@@ -23,9 +23,9 @@ static uint8_t *p_disp_buf2;
 //     lv_tick_inc(1);
 // }
 
-static bool lv_port_flush_ready(void)
+static bool lv_port_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
-    lv_disp_flush_ready(&disp_drv);
+    lv_disp_flush_ready((lv_disp_drv_t *) user_ctx);
     return false;
 }
 
@@ -42,8 +42,8 @@ static void disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *co
 static void lv_port_disp_init(void)
 {
     static lv_disp_draw_buf_t draw_buf_dsc;
-    p_disp_buf = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
-    p_disp_buf2 = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
+    p_disp_buf = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_DMA);
+    // p_disp_buf2 = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
 
     spi_bus_config_t buscfg = {
         .sclk_io_num = SCLK_PIN,
@@ -64,7 +64,8 @@ static void lv_port_disp_init(void)
         .lcd_cmd_bits = 8,
         .lcd_param_bits = 8,
         .on_color_trans_done = lv_port_flush_ready,
-        .user_ctx = &disp_drv};
+        .user_ctx = &disp_drv,
+    };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI_PORT, &io_config, &io_handle));
 
     ESP_LOGI(TAG, "Install LCD driver of st7789");
@@ -87,33 +88,33 @@ static void lv_port_disp_init(void)
         esp_lcd_panel_swap_xy(panel_handle, 0);
         esp_lcd_panel_mirror(panel_handle, false, false);
     }
-    else if(LCD_DIRECTION == 90)
+    else if (LCD_DIRECTION == 90)
     {
         esp_lcd_panel_swap_xy(panel_handle, 1);
         esp_lcd_panel_mirror(panel_handle, true, false);
     }
-    else if(LCD_DIRECTION == 180)
+    else if (LCD_DIRECTION == 180)
     {
         esp_lcd_panel_swap_xy(panel_handle, 0);
         esp_lcd_panel_mirror(panel_handle, true, true);
     }
-    else if(LCD_DIRECTION == 270)
+    else if (LCD_DIRECTION == 270)
     {
         esp_lcd_panel_swap_xy(panel_handle, 1);
         esp_lcd_panel_mirror(panel_handle, false, true);
     }
     else
     {
-        ESP_LOGE(TAG,"LCD_DIRECTION error");
+        ESP_LOGE(TAG, "LCD_DIRECTION error");
     }
 
     // IDF 5.0 need it
     if (ESP_IDF_VERSION_MAJOR > 4)
     {
-        esp_lcd_panel_disp_on_off(panel_handle,true);
+        esp_lcd_panel_disp_on_off(panel_handle, true);
     }
-    
-    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, p_disp_buf2, LCD_WIDTH * LCD_BUF_HEIGHT);
+
+    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, NULL, LCD_WIDTH * LCD_BUF_HEIGHT);
     lv_disp_drv_init(&disp_drv);
     disp_drv.hor_res = LCD_WIDTH;
     disp_drv.ver_res = LCD_HEIGHT;

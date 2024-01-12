@@ -20,6 +20,7 @@ private:
     QueueHandle_t setting_value_queue;
     EventGroupHandle_t evt_group;
     friend void evtQueueHandleLoop(void *param);
+    friend void lvglLoop(void *param);
     uint16_t lang_id = 0;
 
     void handleEventCodeChange(puncher_status_t *msg);

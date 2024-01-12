@@ -385,10 +385,10 @@
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
-// #define LV_FONT_CUSTOM_DECLARE  LV_FONT_DECLARE(ui_font_Ark16)
+#define LV_FONT_CUSTOM_DECLARE  extern lv_font_t * ui_font_noto_sans_16;    extern lv_font_t * ui_font_noto_sans_36;
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_montserrat_16
+#define LV_FONT_DEFAULT ui_font_noto_sans_16
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -645,10 +645,10 @@
 #define LV_USE_QRCODE 1
 
 /*FreeType library*/
-#define LV_USE_FREETYPE 0
+#define LV_USE_FREETYPE 1
 #if LV_USE_FREETYPE
     /*Memory used by FreeType to cache characters [bytes] (-1: no caching)*/
-    #define LV_FREETYPE_CACHE_SIZE (16 * 1024)
+    #define LV_FREETYPE_CACHE_SIZE (24 * 1024)
     #if LV_FREETYPE_CACHE_SIZE >= 0
         /* 1: bitmap cache use the sbit cache, 0:bitmap cache use the image cache. */
         /* sbit cache:it is much more memory efficient for small bitmaps(font size < 256) */
