@@ -55,6 +55,8 @@ extern lv_obj_t * ui_setting_z_sleep_current;
 extern lv_obj_t * ui_setting_z_cali_target;
 extern lv_obj_t * ui_setting_z_cali_measure;
 extern lv_obj_t * ui_setting_z_cali_residual;
+extern lv_obj_t * ui_setting_z_encoder_switch;
+extern lv_obj_t * ui_setting_z_encoder_type;
 
 extern lv_obj_t * ui_setting_power_voltage;
 

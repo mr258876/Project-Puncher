@@ -76,7 +76,14 @@ static void tinyusb_cdc_rx_callback(int itf, cdcacm_event_t *event)
         {
             add_res = usbInterface->getScheduler()->add_hold_mcode(x, y, z);
             memset(buf, 0, rx_size);
-            rx_size = sprintf((char *)buf, "S%d\n", add_res);
+            if (add_res)
+            {
+                rx_size = sprintf((char *)buf, "S%d\n", add_res);
+            }
+            else
+            {
+                rx_size = sprintf((char *)buf, "OK\n");
+            }
         }
     }
     else

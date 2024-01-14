@@ -133,6 +133,10 @@ PuncherScheduler::PuncherScheduler()
                                                                             { return this->setZCaliMeasureBar(val); }));
     setting_mapping.emplace("z_cali_residual", puncher_setting_mapping_t(z_cali_residual, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                          { return this->setZCaliResidual(val); }));
+    setting_mapping.emplace("z_encoder_enable", puncher_setting_mapping_t(z_encoder_enable, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
+                                                                          { return this->setZEncoderEnable(val); }));
+    setting_mapping.emplace("z_encoder_type", puncher_setting_mapping_t(z_encoder_type, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
+                                                                        { return this->setZEncoderType(val); }));
 
     setting_mapping.emplace("power_voltage", puncher_setting_mapping_t(power_voltage, PUNCHER_STORAGE_TYPE_UINT16, [this](std::any val)
                                                                        { return this->setPowerVoltage(val); }));
@@ -316,7 +320,7 @@ int PuncherScheduler::start_workload()
 
         z_pos = 0;
         z_target_pos = 0;
-        if (sensor_Z_avaliable)
+        if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
         {
             sensor_Z->clearRelativePosition();
         }
@@ -447,7 +451,6 @@ time_t PuncherScheduler::get_ETA()
             _eta += 2.0 * (std::any_cast<int32_t>(y_punch_depth) / 100.0) / (std::any_cast<int32_t>(y_operational_speed) / 100.0 * (std::any_cast<uint16_t>(y_length_type) ? 1 : 3.14159265358979)); // Y轴
             _lastX = (30 - holeList.at(i).x) * 2.0;
         }
-
     }
 
     return (long)_eta;
@@ -612,7 +615,7 @@ void PuncherScheduler::onFinishY()
 
 void PuncherScheduler::onFinishZ()
 {
-    if (sensor_Z_avaliable)
+    if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
     {
         double pos = sensor_Z->getRelativePosition();
         double pos_target = z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;

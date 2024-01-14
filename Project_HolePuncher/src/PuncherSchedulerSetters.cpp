@@ -297,6 +297,22 @@ bool PuncherScheduler::setZCaliResidual(std::any val)
     this->z_cali_residual = val;
     return true;
 }
+bool PuncherScheduler::setZEncoderEnable(std::any val)
+{
+    if (std::any_cast<uint8_t>(this->z_encoder_enable) == std::any_cast<uint8_t>(val))
+        return false;
+
+    this->z_encoder_enable = val;
+    return true;
+}
+bool PuncherScheduler::setZEncoderType(std::any val)
+{
+    if (std::any_cast<uint16_t>(this->z_encoder_type) == std::any_cast<uint16_t>(val))
+        return false;
+
+    this->z_encoder_type = val;
+    return true;
+}
 
 bool PuncherScheduler::setPowerVoltage(std::any option)
 {

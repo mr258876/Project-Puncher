@@ -185,6 +185,8 @@ private:
     std::any z_cali_target_bar = std::any(static_cast<int32_t>(50));
     std::any z_cali_measure_bar = std::any(static_cast<int32_t>(50));
     std::any z_cali_residual = std::any(static_cast<int32_t>(0));
+    std::any z_encoder_enable = std::any(static_cast<uint8_t>(0));
+    std::any z_encoder_type = std::any(static_cast<uint16_t>(0)); // 0->AS5600
 
     std::any power_voltage = std::any(static_cast<uint16_t>(0)); // 0->5V 1->9V 2->12V 3->15V 4->20V
 
@@ -382,6 +384,8 @@ public:
     bool setZCaliTargetBar(std::any val);
     bool setZCaliMeasureBar(std::any val);
     bool setZCaliResidual(std::any val);
+    bool setZEncoderEnable(std::any val);
+    bool setZEncoderType(std::any val);
 
     bool setPowerVoltage(std::any option);
 
@@ -390,6 +394,7 @@ public:
 
     bool setMcodeDefaultTickRate(std::any val);
 
+    /* getters */
     inline uint16_t getDisplayLanguage() { return std::any_cast<uint16_t>(display_language); }
 };
 

@@ -48,6 +48,8 @@ void ui_event_ZSleepCurrent(lv_event_t *e);
 void ui_event_ZCaliTarget(lv_event_t *e);
 void ui_event_ZCaliMeasure(lv_event_t *e);
 void ui_event_ZCaliResidual(lv_event_t *e);
+void ui_event_ZEncoderSwitch(lv_event_t *e);
+void ui_event_ZEncoderType(lv_event_t *e);
 
 void ui_event_VoltageDropDown(lv_event_t * e);
 

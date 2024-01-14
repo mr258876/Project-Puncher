@@ -29,6 +29,7 @@ static lv_i18n_phrase_t en_us_singulars[] = {
     {"_language_options", "English\n简体中文"},
     {"Measured Residual (mm)", "Measured\nResidual (mm)"},
     {"Punch Depth (mm)", "Punch Depth\n(mm)"},
+    {"_encoder_type_options", "AS5600"},
     {NULL, NULL} // End mark
 };
 
@@ -98,12 +99,16 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"_language_options", "English\n简体中文"},
     {"Mcode Tickrate", "Mcode 每小节tick数"},
     {"Calibration", "校准"},
-    {"Target Bar", "目标小节数"},
-    {"Measured Bar", "测量小节数"},
+    {"Target Beats", "目标拍数"},
+    {"Measured Beats", "测量拍数"},
     {"Measured Residual (mm)", "测量残差(mm)"},
     {"Punch Depth (mm)", "打孔深度(mm)"},
     {"Idle", "空闲"},
     {"Ready", "就绪"},
+    {"Encoder", "编码器"},
+    {"Use Encoder", "启用编码器"},
+    {"Encoder Type", "编码器类型"},
+    {"_encoder_type_options", "AS5600"},
     {NULL, NULL} // End mark
 };
 

@@ -50,9 +50,13 @@ en-US:
   _language_options: "English\n简体中文"
   Mcode Tickrate: ~
   Calibration: ~
-  Target Bar: ~
-  Measured Bar: ~
+  Target Beats: ~
+  Measured Beats: ~
   Measured Residual (mm): "Measured\nResidual (mm)"
   Punch Depth (mm): "Punch Depth\n(mm)"
   Idle: ~
   Ready: ~
+  Encoder: ~
+  Use Encoder: ~
+  Encoder Type: ~
+  _encoder_type_options: "AS5600"

@@ -76,6 +76,8 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("z_cali_target_bar", ui_setting_menu_mapping_t(ui_setting_z_cali_target, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("z_cali_measure_bar", ui_setting_menu_mapping_t(ui_setting_z_cali_measure, _ui_menu_spinbox_set_value));
     ui_setting_mapping.emplace("z_cali_residual", ui_setting_menu_mapping_t(ui_setting_z_cali_residual, _ui_menu_spinbox_set_value));
+    ui_setting_mapping.emplace("z_encoder_enable", ui_setting_menu_mapping_t(ui_setting_z_encoder_switch, _ui_menu_switch_set_value));
+    ui_setting_mapping.emplace("z_encoder_type", ui_setting_menu_mapping_t(ui_setting_z_encoder_type, _ui_menu_dropdown_set_value));
 
     ui_setting_mapping.emplace("power_voltage", ui_setting_menu_mapping_t(ui_setting_power_voltage, _ui_menu_dropdown_set_value));
 

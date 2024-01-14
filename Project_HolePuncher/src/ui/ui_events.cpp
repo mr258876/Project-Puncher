@@ -418,6 +418,26 @@ void ui_event_ZCaliResidual(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_ZEncoderSwitch(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        puncher_event_setting_change_t evt = {"z_encoder_enable", (uint8_t)lv_obj_has_state(obj, LV_STATE_CHECKED)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_ZEncoderType(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_VALUE_CHANGED)
+    {
+        puncher_event_setting_change_t evt = {"z_encoder_type", lv_dropdown_get_selected(obj)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 
 void ui_event_VoltageDropDown(lv_event_t *e)
 {

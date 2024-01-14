@@ -89,10 +89,10 @@ void serial_init()
 {
     ESP_LOGI("Puncher_Main", "Starting USB Serial Interface...");
 
-    // usbInterface->begin();
+    usbInterface->begin();
     // usbInterface->enableLog();
 
-    // scheduler->attachUI(usbInterface);
+    scheduler->attachUI(usbInterface);
 
     ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
 }
