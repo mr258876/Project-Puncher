@@ -60,3 +60,4 @@ en-US:
   Use Encoder: ~
   Encoder Type: ~
   _encoder_type_options: "AS5600"
+  _version: "Firmware Version\n%s"

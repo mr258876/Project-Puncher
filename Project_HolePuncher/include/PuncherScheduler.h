@@ -159,7 +159,7 @@ private:
     std::any x_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any x_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any x_zeroing_speed = std::any(static_cast<int32_t>(1000));
-    std::any x_zeroing_position = std::any(static_cast<int32_t>(X_ZEROING_POSITION*100));
+    std::any x_zeroing_position = std::any(static_cast<int32_t>(X_ZEROING_POSITION * 100));
 
     std::any y_lead_length = std::any(static_cast<int32_t>(800));
     std::any y_operational_speed = std::any(static_cast<int32_t>(800));
@@ -172,8 +172,8 @@ private:
     std::any y_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any y_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
-    std::any y_zeroing_position = std::any(static_cast<int32_t>(Y_ZEROING_POSITION*100));
-    std::any y_punch_depth = std::any(static_cast<int32_t>(Y_PUNCH_MOVEMENT_LENGTH*100));
+    std::any y_zeroing_position = std::any(static_cast<int32_t>(Y_ZEROING_POSITION * 100));
+    std::any y_punch_depth = std::any(static_cast<int32_t>(Y_PUNCH_MOVEMENT_LENGTH * 100));
 
     std::any z_lead_length = std::any(static_cast<int32_t>(2000));
     std::any z_operational_speed = std::any(static_cast<int32_t>(1000));
@@ -327,7 +327,8 @@ public:
         {
             Z->sleep(false);
             Zsleep();
-            if (sensor_Z) sensor_Z->clearRelativePosition();
+            if (sensor_Z)
+                sensor_Z->clearRelativePosition();
         }
 
         return 0;
@@ -396,6 +397,8 @@ public:
 
     /* getters */
     inline uint16_t getDisplayLanguage() { return std::any_cast<uint16_t>(display_language); }
+    inline uint8_t getZencoderEnabled() { return std::any_cast<uint8_t>(z_encoder_enable); }
+    inline uint16_t getZencoderType() { return std::any_cast<uint16_t>(z_encoder_type); }
 };
 
 #endif

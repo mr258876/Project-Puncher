@@ -16,7 +16,6 @@
 static PuncherScheduler *scheduler;
 static wl_handle_t wl_handle_flash = WL_INVALID_HANDLE;
 
-
 // ---------- Function declarations
 void motor_init();
 void encoder_init();
@@ -28,7 +27,7 @@ void setup()
 {
     ESP_LOGI("Puncher_Main", "Initializing...");
 
-    pm_init();  // Init power manager first or voltage acquire will fail
+    pm_init(); // Init power manager first or voltage acquire will fail
 
     scheduler = new PuncherScheduler();
     scheduler->begin();
@@ -56,7 +55,7 @@ void motor_init()
     controller_Y = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Y, ydirPin, ystepPin, yenablePin, Y_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b01);
     controller_Z = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Z, zdirPin, zstepPin, zenablePin, Z_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b10);
 
-    controller_X->begin();  // begin before attach
+    controller_X->begin(); // begin before attach
     controller_Y->begin();
     controller_Z->begin();
 
@@ -74,7 +73,7 @@ void lvgl_init()
     ESP_LOGI("Puncher_Main", "Starting LVGL...");
 
     lvgl_ui->setLanguage(scheduler->getDisplayLanguage());
-    lvgl_ui->begin();   // begin before attach
+    lvgl_ui->begin(); // begin before attach
 
     ESP_LOGI("Puncher_Main", "LVGL initialized!");
 
@@ -101,12 +100,23 @@ void encoder_init()
 {
     ESP_LOGI("Puncher_Main", "Encoder initializing...");
 
-    Wire.begin(I2C0_SDA, I2C0_SCL, 400000U);
+    if (scheduler->getZencoderEnabled())
+    {
+        switch (scheduler->getZencoderType())
+        {
+        case 0:
+            Wire.begin(I2C0_SDA, I2C0_SCL, 400000U);
 
-    sensor_Z = new AS5600PositionSensor(&Wire, &I2C0Mutex);
-    sensor_Z->begin();
+            sensor_Z = new AS5600PositionSensor(&Wire, &I2C0Mutex);
+            sensor_Z->begin();
 
-    scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
+            scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
+            break;
+
+        default:
+            break;
+        }
+    }
 
     ESP_LOGI("Puncher_Main", "Encoder initialized!");
 }

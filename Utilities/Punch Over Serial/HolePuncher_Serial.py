@@ -31,23 +31,54 @@ class HolePuncher():
             time.sleep(0.5)
 
     def _phraseMidi(self, midi, pitch=0) -> List:
+        ticks_per_beat = midi.ticks_per_beat
+
+        # read all tempo events
+        tempoList = []
+        tick = 0
+        for msg in mido.merge_tracks(midi.tracks):
+            tick += msg.time
+            if msg.type == "set_tempo":
+                m = (tick, msg.tempo)
+                if m not in tempoList:
+                    tempoList.append(m)
+
+        # read all notes
+        tmp_noteList = []
+        tick = 0
+        for msg in mido.merge_tracks(midi.tracks):
+            tick += msg.time
+            if msg.type == "note_on" and msg.velocity > 0 and msg.note+pitch in self.PITCH_TO_MBNUM.keys():
+                note = (tick, self.PITCH_TO_MBNUM[msg.note+pitch])
+                if note not in tmp_noteList:
+                    tmp_noteList.append(note)
+        
+        del tick
+        
+        # adjust note time
         noteList = []
+        real_tick = 0
+        relative_tick = 0
+        init_sec_per_beat = tempoList[0][1] if tempoList[0][0] == 0 else 500000 # Default 120 BPM (500000 microseconds per beat (quarter note).)
+        tick_scale = 1
+        for note in tmp_noteList:
+            note_delta_tick = note[0] - real_tick
 
-        def getNotes(track):
-            notes = []
-            tick = 0
-            for msg in track:
-                tick += msg.time
-                if msg.type == "note_on" and msg.velocity > 0 and msg.note+pitch in self.PITCH_TO_MBNUM.keys():
-                    notes.append((tick, self.PITCH_TO_MBNUM[msg.note+pitch]))
-            return notes
+            while len(tempoList) > 1 and note[0] > tempoList[1][0]:
+                tempoList.pop(0)
+                new_tick_scale = tempoList[0][1] / init_sec_per_beat
 
-        for track in midi.tracks:
-            notes = getNotes(track)
-            for i in notes:
-                if i not in noteList:
-                    noteList.append(i)
-        noteList.sort(key=lambda x: x[0])
+                relative_tick += (tempoList[0][0] - real_tick) * tick_scale     # ticks before tempo change
+                note_delta_tick -= tempoList[0][0] - real_tick                  # ticks after tempo change still not calculated
+                real_tick = tempoList[0][0]
+
+                tick_scale = new_tick_scale
+
+            real_tick += note_delta_tick
+            relative_tick += note_delta_tick * tick_scale
+            note = (relative_tick / ticks_per_beat, note[1])
+            noteList.append(note)
+
         return noteList
 
     def _optimizeNoteSequence(self, nL) -> List:
@@ -72,8 +103,6 @@ class HolePuncher():
         return resultList
 
     def punchMidi(self, midi, pitch=0, zoom=1):
-        ticks_per_beat = midi.ticks_per_beat/zoom
-
         logging.info("Punch mission started.")
 
         logging.info("Midi file processment started.")
@@ -96,7 +125,8 @@ class HolePuncher():
 
         last_tick = 0
         for note in self.noteList:
-            comm = f"M{note[1]} Y{int((note[0]-last_tick)/ticks_per_beat*96)} P1".encode("ASCII")
+            comm = f"M{note[1]} Y{int((note[0]-last_tick)*zoom*96)} P1".encode("ASCII")
+            # print(comm)
             last_tick = note[0]
 
             ba = bytearray(comm)

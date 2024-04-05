@@ -60,3 +60,4 @@ zh-CN:
   Use Encoder: 启用编码器
   Encoder Type: 编码器类型
   _encoder_type_options: "AS5600"
+  _version: "固件版本\n%s"

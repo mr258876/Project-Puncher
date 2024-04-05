@@ -30,6 +30,7 @@ static lv_i18n_phrase_t en_us_singulars[] = {
     {"Measured Residual (mm)", "Measured\nResidual (mm)"},
     {"Punch Depth (mm)", "Punch Depth\n(mm)"},
     {"_encoder_type_options", "AS5600"},
+    {"_version", "Firmware Version\n%s"},
     {NULL, NULL} // End mark
 };
 
@@ -109,6 +110,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Use Encoder", "启用编码器"},
     {"Encoder Type", "编码器类型"},
     {"_encoder_type_options", "AS5600"},
+    {"_version", "固件版本\n%s"},
     {NULL, NULL} // End mark
 };
 

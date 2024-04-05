@@ -400,7 +400,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_about_page);
     cont = create_text(section, NULL, "Project Puncher\nNext Gen", LV_MENU_ITEM_BUILDER_VARIANT_1);
     cont = create_text(section, NULL, "Version", LV_MENU_ITEM_BUILDER_VARIANT_1);
-    cont = create_text(section, NULL, PROJECT_VER, LV_MENU_ITEM_BUILDER_VARIANT_1);
+    lv_label_set_text_fmt(lv_obj_get_child(cont, -1), _("_version"), PROJECT_VER);
 
     /*Create a root page*/
     ui_setting_root_page = lv_menu_page_create(menu, NULL);
