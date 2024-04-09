@@ -59,6 +59,9 @@ public:
 
     /* Load monitor */
     virtual int getLoad() = 0;
+    
+    /* Start Zeroing */
+    virtual motor_res_t startZeroing(int dir, int thres) = 0;
 
     /* Movement finish callback */
     virtual motor_res_t setMoveFinishCallBack(std::function<void()> cb) = 0;

@@ -29,8 +29,13 @@ private:
     /* basic values */
     uint8_t active_state;
 
+    /* for zeroing */
+    std::function<void()> finish_callback = NULL;
+
+    friend void driver_diag_intr_handler(void *arg);
+
 public:
-    TMC_LEDCMotorController(int motor_steps, int micro_steps, int dir_pin, int step_pin, int enable_pin, int ledc_pcnt_channel, HardwareSerial *SerialPort, float RS, uint8_t addr);
+    TMC_LEDCMotorController(int motor_steps, int micro_steps, int dir_pin, int step_pin, int enable_pin, int int_pin, int ledc_pcnt_channel, HardwareSerial *SerialPort, float RS, uint8_t addr);
     ~TMC_LEDCMotorController();
 
     /* Begin function */
@@ -66,6 +71,9 @@ public:
 
     /* Load monitor */
     int getLoad();
+
+    /* Start Zeroing */
+    motor_res_t startZeroing(int dir, int thres);
 
     /* Movement finish callback */
     motor_res_t setMoveFinishCallBack(std::function<void()> cb);

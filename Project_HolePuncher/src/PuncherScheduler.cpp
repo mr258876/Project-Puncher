@@ -77,6 +77,8 @@ PuncherScheduler::PuncherScheduler()
                                                                          { return this->setXSleepCurrent(val); }));
     setting_mapping.emplace("x_auto_zreoing", puncher_setting_mapping_t(x_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
                                                                         { return this->setXAutoZreoing(val); }));
+    setting_mapping.emplace("x_zeroing_reverse_dir", puncher_setting_mapping_t(x_zeroing_reverse_dir, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
+                                                                        { return this->setXZeroingReverseDir(val); }));
     setting_mapping.emplace("x_zeroing_torch_thres", puncher_setting_mapping_t(x_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                                { return this->setXZeroingTorchThres(val); }));
     setting_mapping.emplace("x_zeroing_current", puncher_setting_mapping_t(x_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
@@ -102,6 +104,8 @@ PuncherScheduler::PuncherScheduler()
                                                                          { return this->setYSleepCurrent(val); }));
     setting_mapping.emplace("y_auto_zreoing", puncher_setting_mapping_t(y_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
                                                                         { return this->setYAutoZreoing(val); }));
+    setting_mapping.emplace("y_zeroing_reverse_dir", puncher_setting_mapping_t(y_zeroing_reverse_dir, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
+                                                                        { return this->setYZeroingReverseDir(val); }));
     setting_mapping.emplace("y_zeroing_torch_thres", puncher_setting_mapping_t(y_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                                { return this->setYZeroingTorchThres(val); }));
     setting_mapping.emplace("y_zeroing_current", puncher_setting_mapping_t(y_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
@@ -495,11 +499,11 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
         else
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
 
-        this->X->setSpeed(calcMotorSpeedPulse(
+        this->Y->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->y_lead_length),
             std::any_cast<uint16_t>(this->y_length_type),
             y_speed,
-            MICROSTEPS_X));
+            MICROSTEPS_Y));
         this->Y->rotate_infinite(dir);
     }
     else
@@ -544,6 +548,41 @@ int PuncherScheduler::read_sg_result(int axis)
         puncher_event_setting_change_t e = {"z_sg_result", res};
         this->notifyValueChange(&e);
     }
+
+    return 0;
+}
+
+int PuncherScheduler::start_auto_zeroing(int axis)
+{
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
+        return 1;
+    
+    if (!axis) axis = ~axis;
+
+    if (axis & 0b1)
+    {
+        this->X->setSpeed(calcMotorSpeedPulse(
+            std::any_cast<int32_t>(this->x_lead_length),
+            std::any_cast<uint16_t>(this->x_length_type),
+            std::any_cast<int32_t>(x_zeroing_speed),
+            MICROSTEPS_X));
+        this->X->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
+        this->X->sleep(false);
+        this->X->startZeroing(std::any_cast<uint8_t>(x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(x_zeroing_torch_thres));
+    }
+
+    if (axis & 0b10)
+    {
+        this->Y->setSpeed(calcMotorSpeedPulse(
+            std::any_cast<int32_t>(this->y_lead_length),
+            std::any_cast<uint16_t>(this->y_length_type),
+            std::any_cast<int32_t>(y_zeroing_speed),
+            MICROSTEPS_Y));
+        this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
+        this->Y->sleep(false);
+        this->Y->startZeroing(std::any_cast<uint8_t>(y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(y_zeroing_torch_thres));
+    }
+
 
     return 0;
 }

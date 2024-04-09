@@ -51,9 +51,9 @@ void motor_init()
 
     DRIVER_SERIAL.begin(DRIVER_UART_BANDRATE);
 
-    controller_X = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_X, xdirPin, xstepPin, xenablePin, X_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b00);
-    controller_Y = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Y, ydirPin, ystepPin, yenablePin, Y_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b01);
-    controller_Z = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Z, zdirPin, zstepPin, zenablePin, Z_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b10);
+    controller_X = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_X, xdirPin, xstepPin, xenablePin, xdiagPin, X_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b00);
+    controller_Y = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Y, ydirPin, ystepPin, yenablePin, ydiagPin, Y_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b01);
+    controller_Z = new TMC_LEDCMotorController(MOTOR_STEPS, MICROSTEPS_Z, zdirPin, zstepPin, zenablePin, zdiagPin, Z_CONTROL_CHANNEL, &DRIVER_SERIAL, R_SENSE, 0b10);
 
     controller_X->begin(); // begin before attach
     controller_Y->begin();

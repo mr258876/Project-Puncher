@@ -48,6 +48,7 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("x_idle_behavior", ui_setting_menu_mapping_t(ui_setting_x_idle_behavior, _ui_menu_dropdown_set_value, NULL));
     ui_setting_mapping.emplace("x_sleep_current", ui_setting_menu_mapping_t(ui_setting_x_sleep_current, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("x_auto_zreoing", ui_setting_menu_mapping_t(ui_setting_x_auto_zreoing, _ui_menu_switch_set_value, NULL));
+    ui_setting_mapping.emplace("x_zeroing_reverse_dir", ui_setting_menu_mapping_t(ui_setting_x_zreoing_reverse_dir, _ui_menu_switch_set_value, NULL));
     ui_setting_mapping.emplace("x_zeroing_torch_thres", ui_setting_menu_mapping_t(ui_setting_x_zeroing_torch_thres, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("x_zeroing_current", ui_setting_menu_mapping_t(ui_setting_x_zeroing_current, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("x_zeroing_speed", ui_setting_menu_mapping_t(ui_setting_x_zeroing_speed, _ui_menu_spinbox_set_value, NULL));
@@ -62,6 +63,7 @@ void ui_menu_ptr_update()
     ui_setting_mapping.emplace("y_idle_behavior", ui_setting_menu_mapping_t(ui_setting_y_idle_behavior, _ui_menu_dropdown_set_value, NULL));
     ui_setting_mapping.emplace("y_sleep_current", ui_setting_menu_mapping_t(ui_setting_y_sleep_current, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("y_auto_zreoing", ui_setting_menu_mapping_t(ui_setting_y_auto_zreoing, _ui_menu_switch_set_value, NULL));
+    ui_setting_mapping.emplace("y_zeroing_reverse_dir", ui_setting_menu_mapping_t(ui_setting_y_zreoing_reverse_dir, _ui_menu_switch_set_value, NULL));
     ui_setting_mapping.emplace("y_zeroing_torch_thres", ui_setting_menu_mapping_t(ui_setting_y_zeroing_torch_thres, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("y_zeroing_current", ui_setting_menu_mapping_t(ui_setting_y_zeroing_current, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("y_zeroing_speed", ui_setting_menu_mapping_t(ui_setting_y_zeroing_speed, _ui_menu_spinbox_set_value, NULL));

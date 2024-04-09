@@ -78,6 +78,10 @@ private:
     bool pwm_running;
     bool pcnt_running;
 
+    friend void driver_diag_intr_handler(void *arg);
+
+    void __stop_from_int();
+
 public:
     LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, int driver_id);
     LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, ledc_mode_t ledc_mode, ledc_timer_t ledc_timer, ledc_channel_t ledc_channel, pcnt_unit_t pcnt_unit, pcnt_channel_t pcnt_channel = PCNT_CHANNEL_0, bool count_falling_edge = false);

@@ -26,10 +26,12 @@ lv_obj_t * ui_setting_x_operational_current;
 lv_obj_t * ui_setting_x_idle_behavior;
 lv_obj_t * ui_setting_x_sleep_current;
 lv_obj_t * ui_setting_x_auto_zreoing;
+lv_obj_t * ui_setting_x_zreoing_reverse_dir;
 lv_obj_t * ui_setting_x_zeroing_torch_thres;
 lv_obj_t * ui_setting_x_zeroing_current;
 lv_obj_t * ui_setting_x_zeroing_speed;
 lv_obj_t * ui_setting_x_zeroing_position;
+lv_obj_t * ui_setting_x_zeroing_start;
 lv_obj_t * ui_setting_x_util_move_left;
 lv_obj_t * ui_setting_x_util_move_right;
 lv_obj_t * ui_setting_x_util_sg_result;
@@ -39,15 +41,17 @@ lv_obj_t * ui_setting_y_lead_length;
 lv_obj_t * ui_setting_y_operational_speed;
 lv_obj_t * ui_setting_y_length_type;
 lv_obj_t * ui_setting_y_reverse_axis;
+lv_obj_t * ui_setting_y_punch_depth;
 lv_obj_t * ui_setting_y_operational_current;
 lv_obj_t * ui_setting_y_idle_behavior;
 lv_obj_t * ui_setting_y_sleep_current;
 lv_obj_t * ui_setting_y_auto_zreoing;
+lv_obj_t * ui_setting_y_zreoing_reverse_dir;
 lv_obj_t * ui_setting_y_zeroing_torch_thres;
 lv_obj_t * ui_setting_y_zeroing_current;
 lv_obj_t * ui_setting_y_zeroing_speed;
 lv_obj_t * ui_setting_y_zeroing_position;
-lv_obj_t * ui_setting_y_punch_depth;
+lv_obj_t * ui_setting_y_zeroing_start;
 lv_obj_t * ui_setting_y_util_move_up;
 lv_obj_t * ui_setting_y_util_move_down;
 lv_obj_t * ui_setting_y_util_sg_result;
@@ -253,6 +257,31 @@ static lv_obj_t *create_switch(lv_obj_t *parent, const char *icon, const char *t
     return obj;
 }
 
+static lv_obj_t *create_btn(lv_obj_t *parent, const char *icon, const char *txt, const char *btn_icon, const char *btn_txt, lv_event_cb_t event_cb)
+{
+    lv_obj_t *obj = create_text(parent, icon, txt, LV_MENU_ITEM_BUILDER_VARIANT_1);
+
+    lv_obj_t *btn = lv_btn_create(obj);
+    // lv_obj_set_size(btn, 44, 44);
+    if (btn_icon)
+    {
+        lv_obj_set_style_bg_img_src(btn, btn_icon, 0);
+    }
+    else if (btn_txt)
+    {
+        lv_obj_t * lbl = lv_label_create(btn);
+        lv_label_set_text(lbl, btn_txt);
+        lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0);
+    }
+
+    if (event_cb)
+    {
+        lv_obj_add_event_cb(btn, event_cb, LV_EVENT_ALL, NULL);
+    }
+
+    return obj;
+}
+
 void ui_SettingScreen_screen_init(void)
 {
     ui_SettingScreen = lv_obj_create(NULL);
@@ -317,11 +346,13 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_x_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_x_axis_page);
-    ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_XAutoZreoing);
+    ui_setting_x_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing on Boot"), false, ui_event_XAutoZreoing);
+    ui_setting_x_zreoing_reverse_dir = create_switch(section, NULL, _("Reverse Zeroing Direction"), false, ui_event_XZeroingReverseDir);
     ui_setting_x_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_XZeroingTorchThres);
     ui_setting_x_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_XZeroingCurrent);
     ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_XZeroingSpeed);
     ui_setting_x_zeroing_position = create_spinbox(section, NULL, _("Zeroing Position (mm)"), -9999, 9999, 0, 4, 2, ui_event_XZeroingPosition);
+    ui_setting_x_zeroing_start = create_btn(section, NULL, _("Auto Zeroing"), NULL, _("Execute"), ui_event_XZeroingStart);
 
     /* X axis utility */
     create_text(ui_setting_x_axis_page, NULL, _("Utility"), LV_MENU_ITEM_BUILDER_VARIANT_1);
@@ -361,6 +392,7 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_y_operational_speed = create_spinbox(section, NULL, _("Operational Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YOperationalSpeed);
     ui_setting_y_length_type = create_dropdown(section, NULL, _("Length Type"), _("_length_type_options"), 0, ui_event_YLengthType);
     ui_setting_y_reverse_axis = create_switch(section, NULL, _("Reverse Axis"), false, ui_event_YReverseAxis);
+    ui_setting_y_punch_depth = create_spinbox(section, NULL, _("Punch Depth (mm)"), -999, 999, 0, 3, 1, ui_event_YPunchDepth);
 
     create_text(ui_setting_y_axis_page, NULL, _("Electrical"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
@@ -370,12 +402,13 @@ void ui_SettingScreen_screen_init(void)
 
     create_text(ui_setting_y_axis_page, NULL, _("Zeroing"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_y_axis_page);
-    ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing"), false, ui_event_YAutoZreoing);
+    ui_setting_y_auto_zreoing = create_switch(section, NULL, _("Auto Zeroing on Boot"), false, ui_event_YAutoZreoing);
+    ui_setting_y_zreoing_reverse_dir = create_switch(section, NULL, _("Reverse Zeroing Direction"), false, ui_event_YZeroingReverseDir);
     ui_setting_y_zeroing_torch_thres = create_spinbox(section, NULL, _("Zeroing Torch Threshold"), 1, 255, 127, 3, 0, ui_event_YZeroingTorchThres);
     ui_setting_y_zeroing_current = create_spinbox(section, NULL, _("Zeroing Current (mA)"), 1, 2048, 512, 4, 0, ui_event_YZeroingCurrent);
     ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YZeroingSpeed);
     ui_setting_y_zeroing_position = create_spinbox(section, NULL, _("Zeroing Position (mm)"), -9999, 9999, 0, 4, 2, ui_event_YZeroingPosition);
-    ui_setting_y_punch_depth = create_spinbox(section, NULL, _("Punch Depth (mm)"), -999, 999, 0, 3, 1, ui_event_YPunchDepth);
+    ui_setting_y_zeroing_start = create_btn(section, NULL, _("Auto Zeroing"), NULL, _("Execute"), ui_event_YZeroingStart);
 
     /* Y axis utility */
     create_text(ui_setting_y_axis_page, NULL, _("Utility"), LV_MENU_ITEM_BUILDER_VARIANT_1);

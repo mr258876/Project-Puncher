@@ -19,10 +19,12 @@ void ui_event_XOperationalCurrent(lv_event_t *e);
 void ui_event_XIdleBehavior(lv_event_t *e);
 void ui_event_XSleepCurrent(lv_event_t *e);
 void ui_event_XAutoZreoing(lv_event_t *e);
+void ui_event_XZeroingReverseDir(lv_event_t *e);
 void ui_event_XZeroingTorchThres(lv_event_t *e);
 void ui_event_XZeroingCurrent(lv_event_t *e);
 void ui_event_XZeroingSpeed(lv_event_t *e);
 void ui_event_XZeroingPosition(lv_event_t *e);
+void ui_event_XZeroingStart(lv_event_t *e);
 void ui_event_XUtilMove(lv_event_t *e);
 
 void ui_event_YLeadLength(lv_event_t *e);
@@ -33,10 +35,12 @@ void ui_event_YOperationalCurrent(lv_event_t *e);
 void ui_event_YIdleBehavior(lv_event_t *e);
 void ui_event_YSleepCurrent(lv_event_t *e);
 void ui_event_YAutoZreoing(lv_event_t *e);
+void ui_event_YZeroingReverseDir(lv_event_t *e);
 void ui_event_YZeroingTorchThres(lv_event_t *e);
 void ui_event_YZeroingCurrent(lv_event_t *e);
 void ui_event_YZeroingSpeed(lv_event_t *e);
 void ui_event_YZeroingPosition(lv_event_t *e);
+void ui_event_YZeroingStart(lv_event_t *e);
 void ui_event_YPunchDepth(lv_event_t *e);
 void ui_event_YUtilMove(lv_event_t *e);
 

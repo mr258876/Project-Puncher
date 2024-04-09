@@ -167,6 +167,20 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
     taskEXIT_CRITICAL_ISR(&driver_spinlock);
 }
 
+void IRAM_ATTR LEDCStepperDriver::__stop_from_int()
+{
+    taskENTER_CRITICAL_ISR(&driver_spinlock);
+
+    __ledc_timer_pause(ledc_mode, ledc_timer);
+    __pcnt_pause(pcnt_unit);
+    int16_t count = __pcnt_get_count(pcnt_unit);
+    steps_remaining -= count;
+    __ledc_stop(ledc_mode, ledc_channel, LOW);
+    __pcnt_clear(pcnt_unit);
+
+    taskEXIT_CRITICAL_ISR(&driver_spinlock);
+}
+
 LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, int driver_id)
 {
     if (driver_id > 7 || driver_id < 0)

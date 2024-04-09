@@ -146,6 +146,16 @@ void ui_event_XAutoZreoing(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_XZeroingReverseDir(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        puncher_event_setting_change_t evt = {"x_zeroing_reverse_dir", (uint8_t)lv_obj_has_state(obj, LV_STATE_CHECKED)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 void ui_event_XZeroingTorchThres(lv_event_t *e)
 {
     lv_obj_t *obj = e->target;
@@ -184,6 +194,15 @@ void ui_event_XZeroingPosition(lv_event_t *e)
     {
         puncher_event_setting_change_t evt = {"x_zeroing_position", lv_spinbox_get_value(obj)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_XZeroingStart(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        lvgl_ui->getScheduler()->start_auto_zeroing(0b1);
     }
 }
 void ui_event_XUtilMove(lv_event_t *e)
@@ -301,6 +320,16 @@ void ui_event_YUtilMove(lv_event_t *e)
         lvgl_ui->getScheduler()->util_move_Y(0, lv_dropdown_get_selected(lv_obj_get_child(ui_setting_y_util_speed_type, -1)));
     }
 }
+void ui_event_YZeroingReverseDir(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        puncher_event_setting_change_t evt = {"y_zeroing_reverse_dir", (uint8_t)lv_obj_has_state(obj, LV_STATE_CHECKED)};
+        lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
 void ui_event_YZeroingTorchThres(lv_event_t *e)
 {
     lv_obj_t *obj = e->target;
@@ -339,6 +368,15 @@ void ui_event_YZeroingPosition(lv_event_t *e)
     {
         puncher_event_setting_change_t evt = {"y_zeroing_position", lv_spinbox_get_value(obj)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_YZeroingStart(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        lvgl_ui->getScheduler()->start_auto_zeroing(0b10);
     }
 }
 void ui_event_YPunchDepth(lv_event_t *e)

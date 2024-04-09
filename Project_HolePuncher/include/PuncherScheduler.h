@@ -164,6 +164,7 @@ private:
     std::any x_idle_behavior = std::any(static_cast<uint16_t>(0));
     std::any x_sleep_current = std::any(static_cast<int32_t>(500));
     std::any x_auto_zreoing = std::any(static_cast<uint8_t>(0));
+    std::any x_zeroing_reverse_dir = std::any(static_cast<uint8_t>(0));
     std::any x_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any x_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any x_zeroing_speed = std::any(static_cast<int32_t>(1000));
@@ -177,6 +178,7 @@ private:
     std::any y_idle_behavior = std::any(static_cast<uint16_t>(0));
     std::any y_sleep_current = std::any(static_cast<int32_t>(500));
     std::any y_auto_zreoing = std::any(static_cast<uint8_t>(0));
+    std::any y_zeroing_reverse_dir = std::any(static_cast<uint8_t>(0));
     std::any y_zeroing_torch_thres = std::any(static_cast<int32_t>(128));
     std::any y_zeroing_current = std::any(static_cast<int32_t>(500));
     std::any y_zeroing_speed = std::any(static_cast<int32_t>(1000));
@@ -346,7 +348,8 @@ public:
     int feed_paper(int gear);
     int util_move_X(int dir, bool use_zeroing_speed);
     int util_move_Y(int dir, bool use_zeroing_speed);
-    int read_sg_result(int axis);   // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
+    int read_sg_result(int axis);       // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
+    int start_auto_zeroing(int axis);   // Same as above
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();
@@ -367,6 +370,7 @@ public:
     bool setXIdleBehavior(std::any val);
     bool setXSleepCurrent(std::any val);
     bool setXAutoZreoing(std::any val);
+    bool setXZeroingReverseDir(std::any val);
     bool setXZeroingTorchThres(std::any val);
     bool setXZeroingCurrent(std::any val);
     bool setXZeroingSpeed(std::any val);
@@ -380,6 +384,7 @@ public:
     bool setYIdleBehavior(std::any val);
     bool setYSleepCurrent(std::any val);
     bool setYAutoZreoing(std::any val);
+    bool setYZeroingReverseDir(std::any val);
     bool setYZeroingTorchThres(std::any val);
     bool setYZeroingCurrent(std::any val);
     bool setYZeroingSpeed(std::any val);

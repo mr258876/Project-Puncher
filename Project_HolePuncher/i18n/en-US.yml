@@ -36,10 +36,13 @@ en-US:
   Sleep Current (mA): ~
   Zeroing: ~
   Auto Zeroing: ~
+  Auto Zeroing on Boot: "Auto Zeroing\non Boot"
+  Reverse Zeroing Direction: "Reverse\nZeroing Direction"
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
   Zeroing Current (mA): ~
   Zeroing Speed (mm/s): "Zeroing Speed\n(mm/s)"
   Zeroing Position (mm): "Zeroing Position\n(mm)"
+  Execute: ~
   Utility: ~
   Move Axis: ~
   SG Result: "SG Result: -1"

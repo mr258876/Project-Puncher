@@ -36,10 +36,13 @@ zh-CN:
   Sleep Current (mA): 睡眠电流(mA)
   Zeroing: 归位
   Auto Zeroing: 自动归位
+  Auto Zeroing on Boot: 开机自动归位
+  Reverse Zeroing Direction: 反转归位方向
   Zeroing Torch Threshold: 归位力矩阈值
   Zeroing Current (mA): 归位电流(mA)
   Zeroing Speed (mm/s): 归位速度(mm/s)
   Zeroing Position (mm): 归位后位置(mm)
+  Execute: 执行
   Utility: 微调工具
   Move Axis: 启动电机
   SG Result: "力矩读数: -1"

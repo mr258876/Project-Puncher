@@ -69,6 +69,14 @@ bool PuncherScheduler::setXAutoZreoing(std::any val)
     this->x_auto_zreoing = val;
     return true;
 }
+bool PuncherScheduler::setXZeroingReverseDir(std::any val)
+{
+    if (std::any_cast<uint8_t>(this->x_zeroing_reverse_dir) == std::any_cast<uint8_t>(val))
+        return false;
+
+    this->x_zeroing_reverse_dir = val;
+    return true;
+}
 bool PuncherScheduler::setXZeroingTorchThres(std::any val)
 {
     if (std::any_cast<int32_t>(this->x_zeroing_torch_thres) == std::any_cast<int32_t>(val))
@@ -169,6 +177,14 @@ bool PuncherScheduler::setYAutoZreoing(std::any val)
         return false;
 
     this->y_auto_zreoing = val;
+    return true;
+}
+bool PuncherScheduler::setYZeroingReverseDir(std::any val)
+{
+    if (std::any_cast<uint8_t>(this->y_zeroing_reverse_dir) == std::any_cast<uint8_t>(val))
+        return false;
+
+    this->y_zeroing_reverse_dir = val;
     return true;
 }
 bool PuncherScheduler::setYZeroingTorchThres(std::any val)
