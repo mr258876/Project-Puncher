@@ -40,6 +40,12 @@ en-US:
   Zeroing Current (mA): ~
   Zeroing Speed (mm/s): "Zeroing Speed\n(mm/s)"
   Zeroing Position (mm): "Zeroing Position\n(mm)"
+  Utility: ~
+  Move Axis: ~
+  SG Result: "SG Result: -1"
+  _sg_result_fmt: "SG Result: %d"
+  Speed Type: ~
+  _move_axis_speed_options: "Operational\nZeroing"
   Power: ~
   Voltage: ~
   Motor Voltage: ~

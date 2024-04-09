@@ -23,6 +23,7 @@ void ui_event_XZeroingTorchThres(lv_event_t *e);
 void ui_event_XZeroingCurrent(lv_event_t *e);
 void ui_event_XZeroingSpeed(lv_event_t *e);
 void ui_event_XZeroingPosition(lv_event_t *e);
+void ui_event_XUtilMove(lv_event_t *e);
 
 void ui_event_YLeadLength(lv_event_t *e);
 void ui_event_YOperationalSpeed(lv_event_t *e);
@@ -37,6 +38,7 @@ void ui_event_YZeroingCurrent(lv_event_t *e);
 void ui_event_YZeroingSpeed(lv_event_t *e);
 void ui_event_YZeroingPosition(lv_event_t *e);
 void ui_event_YPunchDepth(lv_event_t *e);
+void ui_event_YUtilMove(lv_event_t *e);
 
 void ui_event_ZLeadLength(lv_event_t *e);
 void ui_event_ZOperationalSpeed(lv_event_t *e);

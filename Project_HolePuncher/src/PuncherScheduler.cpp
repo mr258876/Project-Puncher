@@ -424,6 +424,130 @@ int PuncherScheduler::feed_paper(int gear)
     return 0;
 }
 
+int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
+{
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
+        return 1;
+
+    if (dir)
+    {
+        int32_t x_speed;
+        if (use_zeroing_conf)
+            x_speed = std::any_cast<int32_t>(this->x_zeroing_speed);
+        else
+            x_speed = std::any_cast<int32_t>(this->x_operational_speed);
+
+        x_speed = x_speed * abs(dir);
+
+        if (std::any_cast<uint8_t>(this->x_reverse_axis))
+            dir = -dir;
+
+        this->X->sleep(false);
+
+        if (use_zeroing_conf)
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
+        else
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
+
+        this->X->setSpeed(calcMotorSpeedPulse(
+            std::any_cast<int32_t>(this->x_lead_length),
+            std::any_cast<uint16_t>(this->x_length_type),
+            x_speed,
+            MICROSTEPS_X));
+        this->X->rotate_infinite(dir);
+    }
+    else
+    {
+        this->X->stop();
+
+        if (use_zeroing_conf)
+            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
+
+        this->X->sleep(true);
+        updateXspeed();
+    }
+
+    return 0;
+}
+
+int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
+{
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
+        return 1;
+
+    if (dir)
+    {
+        int32_t y_speed;
+        if (use_zeroing_conf)
+            y_speed = std::any_cast<int32_t>(this->y_zeroing_speed);
+        else
+            y_speed = std::any_cast<int32_t>(this->y_operational_speed);
+
+        y_speed = y_speed * abs(dir);
+
+        if (std::any_cast<uint8_t>(this->y_reverse_axis))
+            dir = -dir;
+
+        this->Y->sleep(false);
+
+        if (use_zeroing_conf)
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
+        else
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
+
+        this->X->setSpeed(calcMotorSpeedPulse(
+            std::any_cast<int32_t>(this->y_lead_length),
+            std::any_cast<uint16_t>(this->y_length_type),
+            y_speed,
+            MICROSTEPS_X));
+        this->Y->rotate_infinite(dir);
+    }
+    else
+    {
+        this->Y->stop();
+
+        if (use_zeroing_conf)
+            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
+
+        this->Y->sleep(true);
+        updateYspeed();
+    }
+
+    return 0;
+}
+
+/*
+    @brief Read motor SG results
+    @param axis: int, 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
+*/
+int PuncherScheduler::read_sg_result(int axis)
+{
+    if (!axis) axis = ~axis;
+
+    if (axis & 0b1)
+    {
+        int res = this->X->getLoad();
+        puncher_event_setting_change_t e = {"x_sg_result", res};
+        this->notifyValueChange(&e);
+    }
+
+    if (axis & 0b10)
+    {
+        int res = this->Y->getLoad();
+        puncher_event_setting_change_t e = {"y_sg_result", res};
+        this->notifyValueChange(&e);
+    }
+
+    if (axis & 0b100)
+    {
+        int res = this->Z->getLoad();
+        puncher_event_setting_change_t e = {"z_sg_result", res};
+        this->notifyValueChange(&e);
+    }
+
+    return 0;
+}
+
 unsigned int PuncherScheduler::set_status(unsigned int status_code)
 {
     // TODO
@@ -463,11 +587,7 @@ void PuncherScheduler::set_setting_value(puncher_event_setting_change_t *evt)
     {
         saveValue(evt->item_name, item_mapping);
 
-        /* Notify all UI after value change */
-        for (auto &ui : this->ui_list)
-        {
-            ui->onSettingValueChange(evt);
-        }
+        notifyValueChange(evt);
     }
 }
 

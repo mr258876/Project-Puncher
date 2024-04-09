@@ -64,6 +64,9 @@ public:
     /* Check motor existance */
     motor_res_t pingMotor();
 
+    /* Load monitor */
+    int getLoad();
+
     /* Movement finish callback */
     motor_res_t setMoveFinishCallBack(std::function<void()> cb);
 };

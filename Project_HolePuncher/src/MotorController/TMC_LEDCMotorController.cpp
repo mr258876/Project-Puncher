@@ -162,6 +162,11 @@ motor_res_t TMC_LEDCMotorController::pingMotor()
     return MOTOR_RES_SUCCESS;
 }
 
+int TMC_LEDCMotorController::getLoad()
+{
+    return driver->SG_RESULT();
+}
+
 motor_res_t TMC_LEDCMotorController::setMoveFinishCallBack(std::function<void()> cb)
 {
     stepper->setFinishCallBack(cb);

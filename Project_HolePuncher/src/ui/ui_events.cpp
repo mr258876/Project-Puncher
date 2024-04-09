@@ -186,6 +186,23 @@ void ui_event_XZeroingPosition(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_XUtilMove(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_PRESSED)
+    {
+        lvgl_ui->getScheduler()->util_move_X(e->user_data ? 1:-1, lv_dropdown_get_selected(lv_obj_get_child(ui_setting_x_util_speed_type, -1)));
+    }
+    else if (e->code == LV_EVENT_PRESSING)
+    {
+        lvgl_ui->getScheduler()->read_sg_result(0b1);
+    }
+    else if (e->code == LV_EVENT_RELEASED)
+    {
+        lvgl_ui->getScheduler()->util_move_X(0, lv_dropdown_get_selected(lv_obj_get_child(ui_setting_x_util_speed_type, -1)));
+    }
+}
 
 void ui_event_YLeadLength(lv_event_t *e)
 {
@@ -265,6 +282,23 @@ void ui_event_YAutoZreoing(lv_event_t *e)
     {
         puncher_event_setting_change_t evt = {"y_auto_zreoing", (uint8_t)lv_obj_has_state(obj, LV_STATE_CHECKED)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_YUtilMove(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_PRESSED)
+    {
+        lvgl_ui->getScheduler()->util_move_Y(e->user_data ? 1:-1, lv_dropdown_get_selected(lv_obj_get_child(ui_setting_y_util_speed_type, -1)));
+    }
+    else if (e->code == LV_EVENT_PRESSING)
+    {
+        lvgl_ui->getScheduler()->read_sg_result(0b10);
+    }
+    else if (e->code == LV_EVENT_RELEASED)
+    {
+        lvgl_ui->getScheduler()->util_move_Y(0, lv_dropdown_get_selected(lv_obj_get_child(ui_setting_y_util_speed_type, -1)));
     }
 }
 void ui_event_YZeroingTorchThres(lv_event_t *e)

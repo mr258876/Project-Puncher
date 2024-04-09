@@ -30,6 +30,10 @@ lv_obj_t * ui_setting_x_zeroing_torch_thres;
 lv_obj_t * ui_setting_x_zeroing_current;
 lv_obj_t * ui_setting_x_zeroing_speed;
 lv_obj_t * ui_setting_x_zeroing_position;
+lv_obj_t * ui_setting_x_util_move_left;
+lv_obj_t * ui_setting_x_util_move_right;
+lv_obj_t * ui_setting_x_util_sg_result;
+lv_obj_t * ui_setting_x_util_speed_type;
 
 lv_obj_t * ui_setting_y_lead_length;
 lv_obj_t * ui_setting_y_operational_speed;
@@ -44,6 +48,10 @@ lv_obj_t * ui_setting_y_zeroing_current;
 lv_obj_t * ui_setting_y_zeroing_speed;
 lv_obj_t * ui_setting_y_zeroing_position;
 lv_obj_t * ui_setting_y_punch_depth;
+lv_obj_t * ui_setting_y_util_move_up;
+lv_obj_t * ui_setting_y_util_move_down;
+lv_obj_t * ui_setting_y_util_sg_result;
+lv_obj_t * ui_setting_y_util_speed_type;
 
 lv_obj_t * ui_setting_z_lead_length;
 lv_obj_t * ui_setting_z_operational_speed;
@@ -315,6 +323,32 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_x_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_XZeroingSpeed);
     ui_setting_x_zeroing_position = create_spinbox(section, NULL, _("Zeroing Position (mm)"), -9999, 9999, 0, 4, 2, ui_event_XZeroingPosition);
 
+    /* X axis utility */
+    create_text(ui_setting_x_axis_page, NULL, _("Utility"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_x_axis_page);
+    {
+        lv_obj_t * menu = lv_menu_cont_create(section);
+
+        ui_setting_x_util_move_left = lv_btn_create(menu);
+        lv_obj_set_size(ui_setting_x_util_move_left, 44, 44);
+        lv_obj_set_style_bg_img_src(ui_setting_x_util_move_left, LV_SYMBOL_LEFT, 0);
+
+        lv_obj_t * label = lv_label_create(menu);
+        lv_label_set_text(label, _("Move Axis"));
+
+        ui_setting_x_util_move_right = lv_btn_create(menu);
+        lv_obj_set_size(ui_setting_x_util_move_right, 44, 44);
+        lv_obj_set_style_bg_img_src(ui_setting_x_util_move_right, LV_SYMBOL_RIGHT, 0);
+
+        lv_obj_set_flex_grow(label, 1);
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+
+        lv_obj_add_event_cb(ui_setting_x_util_move_left, ui_event_XUtilMove, LV_EVENT_ALL, 1);
+        lv_obj_add_event_cb(ui_setting_x_util_move_right, ui_event_XUtilMove, LV_EVENT_ALL, NULL);
+    }
+    ui_setting_x_util_sg_result = create_text(section, NULL, _("SG Result"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    ui_setting_x_util_speed_type = create_dropdown(section, NULL, _("Speed Type"), _("_move_axis_speed_options"), 0, NULL);
+
 
     /*Create y axis page*/
     ui_setting_y_axis_page = lv_menu_page_create(menu, _("Y Axis"));
@@ -342,6 +376,32 @@ void ui_SettingScreen_screen_init(void)
     ui_setting_y_zeroing_speed = create_spinbox(section, NULL, _("Zeroing Speed (mm/s)"), 1, 9999, 2000, 4, 2, ui_event_YZeroingSpeed);
     ui_setting_y_zeroing_position = create_spinbox(section, NULL, _("Zeroing Position (mm)"), -9999, 9999, 0, 4, 2, ui_event_YZeroingPosition);
     ui_setting_y_punch_depth = create_spinbox(section, NULL, _("Punch Depth (mm)"), -999, 999, 0, 3, 1, ui_event_YPunchDepth);
+
+    /* Y axis utility */
+    create_text(ui_setting_y_axis_page, NULL, _("Utility"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    section = lv_menu_section_create(ui_setting_y_axis_page);
+    {
+        lv_obj_t * menu = lv_menu_cont_create(section);
+
+        ui_setting_y_util_move_up = lv_btn_create(menu);
+        lv_obj_set_size(ui_setting_y_util_move_up, 44, 44);
+        lv_obj_set_style_bg_img_src(ui_setting_y_util_move_up, LV_SYMBOL_UP, 0);
+
+        lv_obj_t * label = lv_label_create(menu);
+        lv_label_set_text(label, _("Move Axis"));
+
+        ui_setting_y_util_move_down = lv_btn_create(menu);
+        lv_obj_set_size(ui_setting_y_util_move_down, 44, 44);
+        lv_obj_set_style_bg_img_src(ui_setting_y_util_move_down, LV_SYMBOL_DOWN, 0);
+
+        lv_obj_set_flex_grow(label, 1);
+        lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
+
+        lv_obj_add_event_cb(ui_setting_y_util_move_up, ui_event_YUtilMove, LV_EVENT_ALL, 1);
+        lv_obj_add_event_cb(ui_setting_y_util_move_down, ui_event_YUtilMove, LV_EVENT_ALL, NULL);
+    }
+    ui_setting_y_util_sg_result = create_text(section, NULL, _("SG Result"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    ui_setting_y_util_speed_type = create_dropdown(section, NULL, _("Speed Type"), _("_move_axis_speed_options"), 0, NULL);
     
     /*Create z aixs page*/
     ui_setting_z_axis_page = lv_menu_page_create(menu, _("Z Axis"));
@@ -398,8 +458,8 @@ void ui_SettingScreen_screen_init(void)
     lv_obj_set_style_pad_hor(ui_setting_about_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
     lv_menu_separator_create(ui_setting_about_page);
     section = lv_menu_section_create(ui_setting_about_page);
-    cont = create_text(section, NULL, "Project Puncher\nNext Gen", LV_MENU_ITEM_BUILDER_VARIANT_1);
-    cont = create_text(section, NULL, "Version", LV_MENU_ITEM_BUILDER_VARIANT_1);
+    cont = create_text(section, NULL, _("Project Puncher\nNext Gen"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    cont = create_text(section, NULL, _("Version"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_label_set_text_fmt(lv_obj_get_child(cont, -1), _("_version"), PROJECT_VER);
 
     /*Create a root page*/

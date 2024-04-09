@@ -20,16 +20,19 @@
 
 ## Compilation Note
 
+### lv_i18n commands
+Run `compile` in this folder to generate i18n files:
+```bash
+lv_i18n compile -t 'i18n/*.yml' -o 'src/ui/i18n'
+```
+
 ### Arduino TinyUSB Header BUG
 In `.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp`
 
-Change Line 14-15 From
-```c
-#include "USB.h"
-#if CONFIG_TINYUSB_CDC_ENABLED
-```
-To
-```c
-#include "USB.h"
-#if CONFIG_TINYUSB_CDC_ENABLED && CONFIG_TINYUSB_ENABLED
+Line 14-15
+```patch
+-14 #include "USB.h"
+-15 #if CONFIG_TINYUSB_CDC_ENABLED
++14 #include "USB.h"
++15 #if CONFIG_TINYUSB_CDC_ENABLED && CONFIG_TINYUSB_ENABLED
 ```

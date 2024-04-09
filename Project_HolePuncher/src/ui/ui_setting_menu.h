@@ -30,6 +30,10 @@ extern lv_obj_t * ui_setting_x_zeroing_torch_thres;
 extern lv_obj_t * ui_setting_x_zeroing_current;
 extern lv_obj_t * ui_setting_x_zeroing_speed;
 extern lv_obj_t * ui_setting_x_zeroing_position;
+extern lv_obj_t * ui_setting_x_util_move_left;
+extern lv_obj_t * ui_setting_x_util_move_right;
+extern lv_obj_t * ui_setting_x_util_sg_result;
+extern lv_obj_t * ui_setting_x_util_speed_type;
 
 extern lv_obj_t * ui_setting_y_lead_length;
 extern lv_obj_t * ui_setting_y_operational_speed;
@@ -44,6 +48,10 @@ extern lv_obj_t * ui_setting_y_zeroing_current;
 extern lv_obj_t * ui_setting_y_zeroing_speed;
 extern lv_obj_t * ui_setting_y_zeroing_position;
 extern lv_obj_t * ui_setting_y_punch_depth;
+extern lv_obj_t * ui_setting_y_util_move_up;
+extern lv_obj_t * ui_setting_y_util_move_down;
+extern lv_obj_t * ui_setting_y_util_sg_result;
+extern lv_obj_t * ui_setting_y_util_speed_type;
 
 extern lv_obj_t * ui_setting_z_lead_length;
 extern lv_obj_t * ui_setting_z_operational_speed;

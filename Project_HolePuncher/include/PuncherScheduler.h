@@ -146,6 +146,14 @@ private:
 
     /* user interfaces */
     std::vector<PuncherUI *> ui_list;
+    void notifyValueChange(puncher_event_setting_change_t *evt)
+    {
+        /* Notify all UI after value change */
+        for (auto &ui : this->ui_list)
+        {
+            ui->onSettingValueChange(evt);
+        }
+    }
 
     /* Setting Values */
     std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
@@ -336,6 +344,9 @@ public:
     int add_hole(scheduler_hole_t &h);
     int add_hold_mcode(int x, int y, int z);
     int feed_paper(int gear);
+    int util_move_X(int dir, bool use_zeroing_speed);
+    int util_move_Y(int dir, bool use_zeroing_speed);
+    int read_sg_result(int axis);   // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();
