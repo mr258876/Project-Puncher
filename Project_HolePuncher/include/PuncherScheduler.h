@@ -22,6 +22,9 @@
 #define OnFinishX (1 << 0) // 0b1
 #define OnFinishY (1 << 1) // 0b10
 #define OnFinishZ (1 << 2) // 0b100
+#define OnZeroingFinishX (1 << 3)   // 0b1000
+#define OnZeroingFinishY (1 << 4)   // 0b10000
+#define OnZeroingFinishZ (1 << 5)   // 0b100000
 
 class PuncherScheduler : PuncherSchedulerInterface
 {
@@ -114,6 +117,28 @@ private:
             this->Z->setReverse(std::any_cast<uint8_t>(this->z_reverse_axis));
             this->Z->setCurrent(std::any_cast<int32_t>(this->z_operational_current));
         }
+    }
+
+    inline void onFinishZeroingX()
+    {
+        this->status.basic_status.status_flags.is_zeroing_x = 0;
+        this->updateXspeed();
+        this->updateXdriver();
+        this->Xsleep();
+    }
+    inline void onFinishZeroingY()
+    {
+        this->status.basic_status.status_flags.is_zeroing_y = 0;
+        this->updateYspeed();
+        this->updateYdriver();
+        this->Ysleep();
+    }
+    inline void onFinishZeroingZ()
+    {
+        this->status.basic_status.status_flags.is_zeroing_z = 0;
+        this->updateZspeed();
+        this->updateZdriver();
+        this->Zsleep();
     }
 
     // Enter / Leave idle mode
@@ -331,11 +356,9 @@ public:
         if (feed_paper_mode)
         {
             Zawake();
-            Z->sleep(true);
         }
         else
         {
-            Z->sleep(false);
             Zsleep();
             if (sensor_Z)
                 sensor_Z->clearRelativePosition();

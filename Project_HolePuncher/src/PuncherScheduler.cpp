@@ -28,6 +28,22 @@ void evtHandleLoop(void *param)
             xEventGroupClearBits(scheduler->motor_evt_group, OnFinishZ);
         }
 
+        if (evt & OnZeroingFinishX)
+        {
+            scheduler->onFinishZeroingX();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishX);
+        }
+        if (evt & OnZeroingFinishY)
+        {
+            scheduler->onFinishZeroingY();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishY);
+        }
+        if (evt & OnZeroingFinishZ)
+        {
+            scheduler->onFinishZeroingZ();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishZ);
+        }
+
         if (scheduler->status.basic_status.status_flags.is_running)
         {
             scheduler->handleMotorFinish();
@@ -78,7 +94,7 @@ PuncherScheduler::PuncherScheduler()
     setting_mapping.emplace("x_auto_zreoing", puncher_setting_mapping_t(x_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
                                                                         { return this->setXAutoZreoing(val); }));
     setting_mapping.emplace("x_zeroing_reverse_dir", puncher_setting_mapping_t(x_zeroing_reverse_dir, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                                        { return this->setXZeroingReverseDir(val); }));
+                                                                               { return this->setXZeroingReverseDir(val); }));
     setting_mapping.emplace("x_zeroing_torch_thres", puncher_setting_mapping_t(x_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                                { return this->setXZeroingTorchThres(val); }));
     setting_mapping.emplace("x_zeroing_current", puncher_setting_mapping_t(x_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
@@ -105,7 +121,7 @@ PuncherScheduler::PuncherScheduler()
     setting_mapping.emplace("y_auto_zreoing", puncher_setting_mapping_t(y_auto_zreoing, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
                                                                         { return this->setYAutoZreoing(val); }));
     setting_mapping.emplace("y_zeroing_reverse_dir", puncher_setting_mapping_t(y_zeroing_reverse_dir, PUNCHER_STORAGE_TYPE_UINT8, [this](std::any val)
-                                                                        { return this->setYZeroingReverseDir(val); }));
+                                                                               { return this->setYZeroingReverseDir(val); }));
     setting_mapping.emplace("y_zeroing_torch_thres", puncher_setting_mapping_t(y_zeroing_torch_thres, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
                                                                                { return this->setYZeroingTorchThres(val); }));
     setting_mapping.emplace("y_zeroing_current", puncher_setting_mapping_t(y_zeroing_current, PUNCHER_STORAGE_TYPE_INT32, [this](std::any val)
@@ -410,7 +426,7 @@ int PuncherScheduler::feed_paper(int gear)
         int32_t z_speed = std::any_cast<int32_t>(this->z_operational_speed);
         z_speed = z_speed * abs(gear) / 3;
 
-        this->Z->sleep(false);
+        this->Zawake();
         this->Z->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->z_lead_length),
             std::any_cast<uint16_t>(this->z_length_type),
@@ -421,7 +437,7 @@ int PuncherScheduler::feed_paper(int gear)
     else
     {
         this->Z->stop();
-        this->Z->sleep(true);
+        this->Zsleep();
         updateZspeed();
     }
 
@@ -430,7 +446,7 @@ int PuncherScheduler::feed_paper(int gear)
 
 int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
 {
-    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
 
     if (dir)
@@ -446,7 +462,7 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
         if (std::any_cast<uint8_t>(this->x_reverse_axis))
             dir = -dir;
 
-        this->X->sleep(false);
+        this->Xawake();
 
         if (use_zeroing_conf)
             this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
@@ -458,17 +474,17 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
             std::any_cast<uint16_t>(this->x_length_type),
             x_speed,
             MICROSTEPS_X));
+
+        this->status.basic_status.status_flags.is_zeroing_x = 1;
         this->X->rotate_infinite(dir);
     }
     else
     {
         this->X->stop();
-
-        if (use_zeroing_conf)
-            this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
-
-        this->X->sleep(true);
+        this->Xsleep();
+        this->status.basic_status.status_flags.is_zeroing_x = 0;
         updateXspeed();
+        updateXdriver();
     }
 
     return 0;
@@ -476,7 +492,7 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
 
 int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
 {
-    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
+    if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
 
     if (dir)
@@ -492,7 +508,7 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
         if (std::any_cast<uint8_t>(this->y_reverse_axis))
             dir = -dir;
 
-        this->Y->sleep(false);
+        this->Yawake();
 
         if (use_zeroing_conf)
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
@@ -504,17 +520,17 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
             std::any_cast<uint16_t>(this->y_length_type),
             y_speed,
             MICROSTEPS_Y));
+
+        this->status.basic_status.status_flags.is_zeroing_y = 1;
         this->Y->rotate_infinite(dir);
     }
     else
     {
         this->Y->stop();
-
-        if (use_zeroing_conf)
-            this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
-
-        this->Y->sleep(true);
+        this->Ysleep();
+        this->status.basic_status.status_flags.is_zeroing_y = 0;
         updateYspeed();
+        updateYdriver();
     }
 
     return 0;
@@ -526,7 +542,8 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
 */
 int PuncherScheduler::read_sg_result(int axis)
 {
-    if (!axis) axis = ~axis;
+    if (!axis)
+        axis = ~axis;
 
     if (axis & 0b1)
     {
@@ -556,8 +573,9 @@ int PuncherScheduler::start_auto_zeroing(int axis)
 {
     if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
-    
-    if (!axis) axis = ~axis;
+
+    if (!axis)
+        axis = ~axis;
 
     if (axis & 0b1)
     {
@@ -567,7 +585,10 @@ int PuncherScheduler::start_auto_zeroing(int axis)
             std::any_cast<int32_t>(x_zeroing_speed),
             MICROSTEPS_X));
         this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
-        this->X->sleep(false);
+        this->Xawake();
+        this->status.basic_status.status_flags.is_zeroing_x = 1;
+        this->X->setZeroingFinishCallBack([this]()
+                                          {BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnZeroingFinishX, &xHigherPriorityTaskWoken); });
         this->X->startZeroing(std::any_cast<uint8_t>(x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(x_zeroing_torch_thres));
     }
 
@@ -579,10 +600,12 @@ int PuncherScheduler::start_auto_zeroing(int axis)
             std::any_cast<int32_t>(y_zeroing_speed),
             MICROSTEPS_Y));
         this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
-        this->Y->sleep(false);
+        this->Yawake();
+        this->status.basic_status.status_flags.is_zeroing_y = 1;
+        this->Y->setZeroingFinishCallBack([this]()
+                                          {BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnZeroingFinishY, &xHigherPriorityTaskWoken); });
         this->Y->startZeroing(std::any_cast<uint8_t>(y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(y_zeroing_torch_thres));
     }
-
 
     return 0;
 }

@@ -2,10 +2,59 @@
 #include "PuncherConf.h"
 #include <hal/gpio_hal.h>
 
+static TaskHandle_t evt_loop_handler = NULL;
+static QueueHandle_t evt_queue = NULL;
+
+typedef enum
+{
+    MC_EVT_NONE = 0,
+    MC_EVT_ZEROING_DONE,
+} TMC_LEDCMotorController_evt_t;
+
+struct TMC_LEDCMotorController_evt_msg
+{
+    TMC_LEDCMotorController *controller;
+    TMC_LEDCMotorController_evt_t msg;
+};
+
+void evt_loop(void *param)
+{
+    QueueHandle_t queue = *(QueueHandle_t *)param;
+    TMC_LEDCMotorController_evt_msg msg;
+
+    while (1)
+    {
+        xQueueReceive(queue, &msg, portMAX_DELAY);
+        switch (msg.msg)
+        {
+        case MC_EVT_ZEROING_DONE:
+            xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
+            {
+                msg.controller->driver->TCOOLTHRS(0);
+            }
+            xSemaphoreGive(*DUARTMutex);
+            msg.controller->zeroing_finish_callback();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    vTaskDelete(NULL);
+}
+
 void IRAM_ATTR driver_diag_intr_handler(void *arg)
 {
-    TMC_LEDCMotorController *motor = (TMC_LEDCMotorController *)arg;
-    motor->stepper->__stop_from_int();
+    TMC_LEDCMotorController *controller = (TMC_LEDCMotorController *)arg;
+
+    if (controller->is_zeroing)
+    {
+        controller->stepper->__stop_from_int();
+        TMC_LEDCMotorController_evt_msg msg = {controller, MC_EVT_ZEROING_DONE};
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        xQueueSendFromISR(evt_queue, &msg, &xHigherPriorityTaskWoken);
+    }
 }
 
 TMC_LEDCMotorController::TMC_LEDCMotorController(int motor_steps, int micro_steps, int dir_pin, int step_pin, int enable_pin, int int_pin, int ledc_pcnt_channel, HardwareSerial *SerialPort, float RS, uint8_t addr)
@@ -27,6 +76,13 @@ TMC_LEDCMotorController::~TMC_LEDCMotorController()
 
 motor_res_t TMC_LEDCMotorController::begin()
 {
+    /* Create queue and evt loop to process events */
+    if (!evt_loop_handler)
+    {
+        evt_queue = xQueueCreate(8, sizeof(TMC_LEDCMotorController_evt_msg));
+        xTaskCreatePinnedToCore(evt_loop, "TLMCevtLoop", 4096, &evt_queue, 2, &evt_loop_handler, 1);
+    }
+
     /*  Notice:
         init process must follows:
             stepper init -> ISR init -> UART driver init
@@ -204,13 +260,20 @@ motor_res_t TMC_LEDCMotorController::startZeroing(int dir, int thres)
         driver->SGTHRS(thres / 2);  // stall when SG_RESULT ≤ SGTHRS*2
     }
     xSemaphoreGive(*DUARTMutex);
+    this->is_zeroing = true;
     stepper->rotate_infinite(dir);
     return MOTOR_RES_SUCCESS;
 }
 
 motor_res_t TMC_LEDCMotorController::setMoveFinishCallBack(std::function<void()> cb)
 {
-    this->finish_callback = cb;
     stepper->setFinishCallBack(cb);
+    return MOTOR_RES_SUCCESS;
+}
+
+
+motor_res_t TMC_LEDCMotorController::setZeroingFinishCallBack(std::function<void()> cb)
+{
+    this->zeroing_finish_callback = cb;
     return MOTOR_RES_SUCCESS;
 }

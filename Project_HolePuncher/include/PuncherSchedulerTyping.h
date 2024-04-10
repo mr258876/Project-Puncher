@@ -18,7 +18,9 @@ struct __packed puncher_basic_status_t
     uint8_t is_transmitting_data : 1;
     uint8_t is_feeding_paper : 1;
     uint8_t is_running : 1;
-    uint8_t is_zeroing: 1;
+    uint8_t is_zeroing_x: 1;
+    uint8_t is_zeroing_y: 1;
+    uint8_t is_zeroing_z: 1;
 };
 
 #define PUNCHER_STATUS_HAS_ERROR            (1 << 0)
@@ -26,8 +28,11 @@ struct __packed puncher_basic_status_t
 #define PUNCHER_STATUS_IS_TRANSMITTING_DATA (1 << 2)
 #define PUNCHER_STATUS_IS_FEEDING_PAPER     (1 << 3)
 #define PUNCHER_STATUS_IS_RUNNING           (1 << 4)
-#define PUNCHER_STATUS_IS_ZEROING           (1 << 5)
+#define PUNCHER_STATUS_IS_ZEROING_X         (1 << 6)
+#define PUNCHER_STATUS_IS_ZEROING_Y         (1 << 7)
+#define PUNCHER_STATUS_IS_ZEROING_Z         (1 << 8)
 #define PUNCHER_STATUS_BUSY_MASK            (~0b11)
+#define PUNCHER_STATUS_IS_ZEROING           (0b11100000)
 
 
 struct __packed puncher_connectivity_status_t

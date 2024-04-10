@@ -35,16 +35,16 @@ en-US:
   _idle_behavior_options: "Keep Current\nReduce Current\nCut Power"
   Sleep Current (mA): ~
   Zeroing: ~
-  Auto Zeroing: ~
+  Auto Zeroing: "Auto\nZeroing"
   Auto Zeroing on Boot: "Auto Zeroing\non Boot"
-  Reverse Zeroing Direction: "Reverse\nZeroing Direction"
+  Reverse Zeroing Direction: "Reverse\nZeroing Dir."
   Zeroing Torch Threshold: "Zeroing Torch\nThreshold"
   Zeroing Current (mA): ~
   Zeroing Speed (mm/s): "Zeroing Speed\n(mm/s)"
   Zeroing Position (mm): "Zeroing Position\n(mm)"
   Execute: ~
   Utility: ~
-  Move Axis: ~
+  Move Axis: "Move\nAxis"
   SG Result: "SG Result: -1"
   _sg_result_fmt: "SG Result: %d"
   Speed Type: ~

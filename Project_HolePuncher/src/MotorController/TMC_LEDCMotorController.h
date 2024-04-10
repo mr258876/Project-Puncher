@@ -28,10 +28,14 @@ private:
 
     /* basic values */
     uint8_t active_state;
+    
+    /* status for isr */
+    bool is_zeroing;
 
     /* for zeroing */
-    std::function<void()> finish_callback = NULL;
+    std::function<void()> zeroing_finish_callback = NULL;
 
+    friend void evt_loop(void *param);
     friend void driver_diag_intr_handler(void *arg);
 
 public:
@@ -77,6 +81,8 @@ public:
 
     /* Movement finish callback */
     motor_res_t setMoveFinishCallBack(std::function<void()> cb);
+    /* Zeroing finish callback */
+    motor_res_t setZeroingFinishCallBack(std::function<void()> cb);
 };
 
 #endif // _TMC_LEDCMOTORCONTROLLER_H_

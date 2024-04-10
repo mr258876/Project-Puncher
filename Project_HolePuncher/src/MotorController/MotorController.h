@@ -65,6 +65,8 @@ public:
 
     /* Movement finish callback */
     virtual motor_res_t setMoveFinishCallBack(std::function<void()> cb) = 0;
+    /* Zeroing finish callback */
+    virtual motor_res_t setZeroingFinishCallBack(std::function<void()> cb) = 0;
 };
 
 #endif // _MOTORCONTROL_H_
