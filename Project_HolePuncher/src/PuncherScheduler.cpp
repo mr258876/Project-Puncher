@@ -566,7 +566,7 @@ int PuncherScheduler::start_auto_zeroing(int axis)
             std::any_cast<uint16_t>(this->x_length_type),
             std::any_cast<int32_t>(x_zeroing_speed),
             MICROSTEPS_X));
-        this->X->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
+        this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
         this->X->sleep(false);
         this->X->startZeroing(std::any_cast<uint8_t>(x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(x_zeroing_torch_thres));
     }

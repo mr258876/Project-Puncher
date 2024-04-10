@@ -32,6 +32,8 @@ void setup()
     scheduler = new PuncherScheduler();
     scheduler->begin();
 
+    serial_init();
+
     motor_init();
 
     encoder_init();
@@ -39,8 +41,6 @@ void setup()
     fatfs_init();
 
     lvgl_init();
-
-    serial_init();
 
     ESP_LOGI("Puncher_Main", "System booted.");
 }

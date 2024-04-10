@@ -178,6 +178,17 @@ void IRAM_ATTR LEDCStepperDriver::__stop_from_int()
     __ledc_stop(ledc_mode, ledc_channel, LOW);
     __pcnt_clear(pcnt_unit);
 
+    pcnt_running = false;
+    pwm_running = false;
+
+    if (auto_sleep)
+    {
+        if IS_CONNECTED (enable_pin)
+        {
+            digitalWrite(enable_pin, (enable_active_state == HIGH) ? LOW : HIGH);
+        }
+    }
+
     taskEXIT_CRITICAL_ISR(&driver_spinlock);
 }
 
@@ -316,7 +327,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
 
     // pcnt_isr_service_install(ESP_INTR_FLAG_SHARED | ESP_INTR_FLAG_IRAM);
     // pcnt_isr_handler_add(pcnt_unit, driver_pcnt_intr_handler, this);
-    pcnt_isr_register(driver_pcnt_intr_handler, this, ESP_INTR_FLAG_SHARED | ESP_INTR_FLAG_IRAM, &pcnt_isr_handle);
+    pcnt_isr_register(driver_pcnt_intr_handler, this, ESP_INTR_FLAG_IRAM, &pcnt_isr_handle);
     ESP_ERROR_CHECK(pcnt_intr_enable(pcnt_unit));
 
     pcnt_running = false;

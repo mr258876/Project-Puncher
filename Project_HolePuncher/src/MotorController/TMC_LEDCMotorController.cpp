@@ -1,5 +1,6 @@
 #include "MotorController/TMC_LEDCMotorController.h"
 #include "PuncherConf.h"
+#include <hal/gpio_hal.h>
 
 void IRAM_ATTR driver_diag_intr_handler(void *arg)
 {
@@ -26,21 +27,29 @@ TMC_LEDCMotorController::~TMC_LEDCMotorController()
 
 motor_res_t TMC_LEDCMotorController::begin()
 {
+    /*  Notice:
+        init process must follows:
+            stepper init -> ISR init -> UART driver init
+        or LEDC in stepper will not work.
+        Nobody knows why :(
+     */
+
     stepper->begin(60, micro_steps);
     stepper->setEnableActiveState(LOW);
+
+    if (int_pin != 255)
+    {
+        pinMode(int_pin, INPUT_PULLDOWN);
+        attachInterruptArg(digitalPinToInterrupt(int_pin), driver_diag_intr_handler, this, RISING);
+    }
 
     xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
     {
         driver->begin();
         driver->microsteps(micro_steps);
+        driver->TCOOLTHRS(0);
     }
     xSemaphoreGive(*DUARTMutex);
-
-    if (int_pin >= 0)
-    {
-        pinMode(int_pin, INPUT);
-        attachInterruptArg(digitalPinToInterrupt(int_pin), driver_diag_intr_handler, this, RISING);
-    }
 
     return MOTOR_RES_SUCCESS;
 }
@@ -180,7 +189,7 @@ int TMC_LEDCMotorController::getLoad()
     int res = -1;
     xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
     {
-        driver->SG_RESULT();
+        res = driver->SG_RESULT();
     }
     xSemaphoreGive(*DUARTMutex);
     return res;
