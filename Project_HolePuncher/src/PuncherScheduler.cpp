@@ -179,6 +179,9 @@ PuncherScheduler::~PuncherScheduler()
 
 void PuncherScheduler::begin()
 {
+    /*
+        Start NVS
+    */
     this->storage->begin();
 
     if (storage->get_uint8("initialized") == 0)
@@ -188,6 +191,9 @@ void PuncherScheduler::begin()
 
     this->loadSettings();
 
+    /*
+        Init values
+    */
     this->x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
     this->y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
@@ -481,10 +487,10 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
     else
     {
         this->X->stop();
-        this->Xsleep();
         this->status.basic_status.status_flags.is_zeroing_x = 0;
         updateXspeed();
         updateXdriver();
+        this->Xsleep();
     }
 
     return 0;
@@ -527,10 +533,10 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
     else
     {
         this->Y->stop();
-        this->Ysleep();
         this->status.basic_status.status_flags.is_zeroing_y = 0;
         updateYspeed();
         updateYdriver();
+        this->Ysleep();
     }
 
     return 0;
