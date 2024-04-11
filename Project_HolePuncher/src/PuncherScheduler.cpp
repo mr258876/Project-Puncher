@@ -446,9 +446,11 @@ int PuncherScheduler::feed_paper_mode(bool feed_paper_mode)
     if (feed_paper_mode)
     {
         Zawake();
+        Z->sleep(true);     // or motor is still powered after entering feeding mode
     }
     else
     {
+        Z->sleep(false);    // or motor might not powered after entering feeding mode
         Zsleep();
         if (sensor_Z)
             sensor_Z->clearRelativePosition();
@@ -546,6 +548,7 @@ int PuncherScheduler::feed_paper(int gear)
         z_speed = z_speed * abs(gear) / 3;
 
         this->Zawake();
+        this->Z->sleep(false);  // force power
         this->Z->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->z_lead_length),
             std::any_cast<uint16_t>(this->z_length_type),
@@ -556,7 +559,7 @@ int PuncherScheduler::feed_paper(int gear)
     else
     {
         this->Z->stop();
-        this->Zsleep();
+        this->Z->sleep(true);   // cut power
         updateZspeed();
     }
 
