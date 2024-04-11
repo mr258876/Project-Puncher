@@ -151,6 +151,40 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
 
         lv_obj_clear_flag(ui_FeedButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_SettingButton, LV_OBJ_FLAG_HIDDEN);
+
+        lv_label_set_text(ui_Home_TipsLabel, _("_tips_1"));
+    }
+
+    if (msg->basic_status.status_flags.has_error)
+    {
+        lv_label_set_text(ui_Label5, _("Error Occured"));
+
+        lv_obj_add_flag(ui_FeedButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_SettingButton, LV_OBJ_FLAG_HIDDEN);
+
+        std::string s;
+        if (msg->basic_status.status_flags.driver_err_x || msg->basic_status.status_flags.driver_err_y || msg->basic_status.status_flags.driver_err_z)
+        {
+            if (msg->basic_status.status_flags.driver_err_x) s.append("X ");
+            if (msg->basic_status.status_flags.driver_err_y) s.append("Y ");
+            if (msg->basic_status.status_flags.driver_err_z) s.append("Z ");
+            s.append(_("_driver_err_template_cpp_tips"));
+            s.append("\n");
+        }
+        if (msg->basic_status.status_flags.motor_err_x || msg->basic_status.status_flags.motor_err_y || msg->basic_status.status_flags.motor_err_z)
+        {
+            if (msg->basic_status.status_flags.motor_err_x) s.append("X ");
+            if (msg->basic_status.status_flags.motor_err_y) s.append("Y ");
+            if (msg->basic_status.status_flags.motor_err_z) s.append("Z ");
+            s.append(_("_motor_err_template_cpp_tips"));
+            s.append("\n");
+        }
+        if (msg->basic_status.status_flags.power_err)
+        {
+            s.append(_("_power_err_template_tips"));
+            s.append("\n");
+        }
+        lv_label_set_text(ui_Home_TipsLabel, s.c_str());
     }
 
     // display ETA
@@ -158,6 +192,7 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
     {
         lv_obj_clear_flag(ui_Label6, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_Home_TipsLabel, LV_OBJ_FLAG_HIDDEN);
 
         lv_label_set_text_fmt(ui_Label7, "%02ld:%02ld:%02ld", msg->ETA / 3600, msg->ETA % 3600 / 60, msg->ETA % 60);
         time_t *timer_eta = (time_t *)ui_ETA_timer->user_data;
@@ -169,6 +204,7 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
     {
         lv_obj_add_flag(ui_Label6, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_Home_TipsLabel, LV_OBJ_FLAG_HIDDEN);
         lv_timer_pause(ui_ETA_timer);
     }
 

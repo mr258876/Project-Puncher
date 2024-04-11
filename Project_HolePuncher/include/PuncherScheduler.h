@@ -19,18 +19,24 @@
 #include <Arduino.h>
 
 // event group definitions
-#define OnFinishX (1 << 0) // 0b1
-#define OnFinishY (1 << 1) // 0b10
-#define OnFinishZ (1 << 2) // 0b100
-#define OnZeroingFinishX (1 << 3)   // 0b1000
-#define OnZeroingFinishY (1 << 4)   // 0b10000
-#define OnZeroingFinishZ (1 << 5)   // 0b100000
+#define OnFinishX (1 << 0)        // 0b1
+#define OnFinishY (1 << 1)        // 0b10
+#define OnFinishZ (1 << 2)        // 0b100
+#define OnZeroingFinishX (1 << 3) // 0b1000
+#define OnZeroingFinishY (1 << 4) // 0b10000
+#define OnZeroingFinishZ (1 << 5) // 0b100000
+#define OnPowerStatusChange (1 << 15)
+#define OnMotorFinish    (0b111)
 
 class PuncherScheduler : PuncherSchedulerInterface
 {
 private:
+    /* init flag */
+    bool has_begin = false;
+
     /* Status codes*/
     puncher_status_t status;
+    inline bool status_has_error() { return status.basic_status.status_data & PUNCHER_STATUS_ERROR_CHECK; }
     bool x_finished = 1;
     bool y_finished = 1;
     uint8_t y_status = 0; // 0->Idle, 1->Moved down, 2->Moved up
@@ -169,6 +175,18 @@ private:
         return (int32_t)steps;
     }
 
+    void initMotors();
+
+
+    /* init seneors */
+    inline void initSensors()
+    {
+        if (sensor_Z)
+        {
+            sensor_Z_avaliable = (sensor_Z->ping() == 0);
+        }
+    }
+
     /* user interfaces */
     std::vector<PuncherUI *> ui_list;
     void notifyValueChange(puncher_event_setting_change_t *evt)
@@ -179,6 +197,25 @@ private:
             ui->onSettingValueChange(evt);
         }
     }
+
+    inline void initUI()
+    {
+        for (auto ui : ui_list)
+        {
+            ui->onStatusCode(&status);
+            ui->attachScheduler(this);
+        }
+    }
+
+    /* power manager*/
+    PowerManager *pm;
+    inline void initPower()
+    {
+        pm->set_pgood_cb([this](uint8_t res)
+                         { this->status.basic_status.status_flags.power_err = res; BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnPowerStatusChange, &xHigherPriorityTaskWoken); });
+        pm->acquire_voltage(std::any_cast<uint16_t>(power_voltage));
+    }
+    void onPowerStatusChange();
 
     /* Setting Values */
     std::any x_lead_length = std::any(static_cast<int32_t>(800));       // 8mm, last 2 digits for decimal
@@ -260,36 +297,19 @@ public:
     ~PuncherScheduler();
 
     void begin();
+    void beginNVS();
 
-    /* Attach motors before begin() ! */
+    /* Attach motors after begin() ! */
     inline void attachMotors(MotorController *X, MotorController *Y, MotorController *Z)
     {
         this->X = X;
         this->Y = Y;
         this->Z = Z;
 
-        ESP_LOGI("PuncherScheduler", "X driver status: %d", X->pingDriver());
-        ESP_LOGI("PuncherScheduler", "Y driver status: %d", Y->pingDriver());
-        ESP_LOGI("PuncherScheduler", "Z driver status: %d", Z->pingDriver());
-
-        updateXspeed();
-        updateYspeed();
-        updateZspeed();
-
-        updateXdriver();
-        updateYdriver();
-        updateZdriver();
-
-        this->X->setMoveFinishCallBack([this]()
-                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishX, &xHigherPriorityTaskWoken); });
-        this->Y->setMoveFinishCallBack([this]()
-                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishY, &xHigherPriorityTaskWoken); });
-        this->Z->setMoveFinishCallBack([this]()
-                                       { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishZ, &xHigherPriorityTaskWoken); });
-
-        Xsleep();
-        Ysleep();
-        Zsleep();
+        if (has_begin)
+        {
+            initMotors();
+        }
     }
 
     inline void attachPositionSensors(PositionSensor *sensor_X, PositionSensor *sensor_Y, PositionSensor *sensor_Z)
@@ -298,18 +318,21 @@ public:
         this->sensor_Y = sensor_Y;
         this->sensor_Z = sensor_Z;
 
-        if (sensor_Z)
+        if (has_begin)
         {
-            sensor_Z_avaliable = (sensor_Z->ping() == 0);
+            initSensors();
         }
     }
 
-    /* Attach UI before begin() ! */
+    /* Attach UI after begin() ! */
     inline void attachUI(PuncherUI *ui)
     {
         this->ui_list.push_back(ui);
-        ui->onStatusCode(&status);
-        ui->attachScheduler(this);
+        if (has_begin)
+        {
+            ui->onStatusCode(&status);
+            ui->attachScheduler(this);
+        }
     }
 
     /* update status to UI */
@@ -321,58 +344,25 @@ public:
         }
     }
 
+    /* Attach PowerManager BEFORE begin() ! */
+    inline void attachPower(PowerManager *pm)
+    {
+        this->pm = pm;
+    }
+
     /* From PuncherSchedulerInterface */
     int start_workload();
     int pause_workload();
     int delete_workload();
-    inline int data_transmit_mode(bool transmit_mode)
-    {
-        if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_TRANSMITTING_DATA | PUNCHER_STATUS_IS_FEEDING_PAPER)))
-            return 1;
-
-        status.basic_status.status_flags.is_transmitting_data = transmit_mode;
-
-        if (transmit_mode)
-        {
-            holeList.clear();
-        }
-        else
-        {
-            status.task_length = holeList.size();
-            status.finished_length = 0;
-            if (status.task_length > 0)
-                status.basic_status.status_flags.has_mission = 1;
-        }
-
-        updateUIstatus();
-        return 0;
-    }
-    int feed_paper_mode(bool feed_paper_mode)
-    {
-        if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_FEEDING_PAPER | PUNCHER_STATUS_IS_TRANSMITTING_DATA)))
-            return 1;
-
-        status.basic_status.status_flags.is_feeding_paper = feed_paper_mode;
-        if (feed_paper_mode)
-        {
-            Zawake();
-        }
-        else
-        {
-            Zsleep();
-            if (sensor_Z)
-                sensor_Z->clearRelativePosition();
-        }
-
-        return 0;
-    }
+    int data_transmit_mode(bool transmit_mode);
+    int feed_paper_mode(bool feed_paper_mode);
     int add_hole(scheduler_hole_t &h);
     int add_hold_mcode(int x, int y, int z);
     int feed_paper(int gear);
     int util_move_X(int dir, bool use_zeroing_speed);
     int util_move_Y(int dir, bool use_zeroing_speed);
-    int read_sg_result(int axis);       // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
-    int start_auto_zeroing(int axis);   // Same as above
+    int read_sg_result(int axis);     // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
+    int start_auto_zeroing(int axis); // Same as above
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();

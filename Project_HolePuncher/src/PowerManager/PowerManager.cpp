@@ -1,16 +1,7 @@
 #include "PowerManager.h"
-#include "PCF8574.h"
-#include "PuncherSemaphore.h"
 
-#define CTP_I2C_SCL 6
-#define CTP_I2C_SDA 7
-#define PCF8574_INT 14
-
-#define IsrEvent (1 << 0) // 1
-
-static EventGroupHandle_t eg;
-static pm_pgood_cb_t cb = NULL;
-static PCF8574 io(0x20, &Wire1);
+#define IsrEvent            (1 << 0)    // 0b1
+#define PowerLevelSetEvent  (1 << 1)    // 0b10
 
 static uint8_t get_power_io(pm_votage_t votage)
 {
@@ -31,60 +22,91 @@ static uint8_t get_power_io(pm_votage_t votage)
     }
 }
 
-static void IRAM_ATTR pm_isr()
+void IRAM_ATTR pm_isr(void *pvParameters)
 {
+    PowerManager *pm = (PowerManager *)pvParameters;
     BaseType_t xHigherPriorityTaskWoken;
-    xEventGroupSetBitsFromISR(eg, IsrEvent, &xHigherPriorityTaskWoken);
+    xEventGroupSetBitsFromISR(pm->eg, IsrEvent, &xHigherPriorityTaskWoken);
 }
 
-static void TaskProcessPGood(void *pvParameters)
+void TaskProcessPGood(void *pvParameters)
 {
+    PowerManager *pm = (PowerManager *)pvParameters;
+    uint32_t evt;
+
     for (;;)
     {
-        xEventGroupWaitBits(eg, IsrEvent, pdTRUE, pdTRUE, portMAX_DELAY);
+        evt = xEventGroupWaitBits(pm->eg, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
+
+        if (evt & PowerLevelSetEvent) evt = xEventGroupWaitBits(pm->eg, IsrEvent, pdTRUE, pdTRUE, pdMS_TO_TICKS(pm->timeout));
+
+        if (evt & IsrEvent)
         {
             uint8_t val = 0;
             xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
             {
-                val = io.read8();
-                io.write8(val);
+                val = pm->io->read8();
+                pm->io->write8(val);
             }
             xSemaphoreGive(I2C1Mutex);
 
-            if (cb)
+            if (pm->cb)
             {
-                cb(val >> 7);
+                pm->cb(val >> 7);    // 0 for power good
+                ESP_LOGI("PowerManager", "readings: %d", val);
+            }
+        } 
+        else
+        {
+            if (pm->cb)
+            {
+                pm->cb(1);    // error on timeout
+                ESP_LOGI("PowerManager", "Acquire Fail!");
             }
         }
     }
 }
 
-void pm_init()
+void PowerManager::begin()
 {
+    io = new PCF8574(0x20, &Wire1);
+
     xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
     {
-        io.begin(CTP_I2C_SDA, CTP_I2C_SCL, get_power_io(PM_VOLTAGE_5V));
+        io->begin(i2c_sda, i2c_scl, get_power_io(PM_VOLTAGE_5V));
     }
     xSemaphoreGive(I2C1Mutex);
 
     eg = xEventGroupCreate();
 
-    pinMode(PCF8574_INT, INPUT_PULLUP);
-    attachInterrupt(PCF8574_INT, pm_isr, FALLING);
+    pinMode(int_pin, INPUT_PULLUP);
+    attachInterruptArg(int_pin, pm_isr, this, FALLING);
 
-    xTaskCreatePinnedToCore(TaskProcessPGood, "fTaskProcessPGood", 4096, NULL, 3, NULL, 1);
+    xTaskCreatePinnedToCore(TaskProcessPGood, "fTaskProcessPGood", 4096, this, 3, NULL, 1);
 }
 
-void pm_acquire_voltage(pm_votage_t votage)
+void PowerManager::acquire_voltage(pm_votage_t votage)
 {
+    xEventGroupSetBits(eg, PowerLevelSetEvent);
     xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
     {
-        io.write8(get_power_io(votage));
+        io->write8(get_power_io(votage));
     }
     xSemaphoreGive(I2C1Mutex);
 }
 
-void pm_set_pgood_cb(pm_pgood_cb_t event_cb)
+void PowerManager::set_pgood_cb(std::function<void(uint8_t)> event_cb)
 {
     cb = event_cb;
+}
+
+PowerManager::PowerManager(uint8_t scl, uint8_t sda, uint8_t int_p)
+{
+    this->i2c_scl = scl;
+    this->i2c_sda = sda;
+    this->int_pin = int_p;
+}
+
+PowerManager::~PowerManager()
+{
 }

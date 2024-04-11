@@ -336,7 +336,7 @@ bool PuncherScheduler::setPowerVoltage(std::any option)
         return false;
 
     this->power_voltage = option;
-    pm_acquire_voltage(std::any_cast<uint16_t>(option));
+    pm->acquire_voltage(std::any_cast<uint16_t>(option));
     return true;
 }
 

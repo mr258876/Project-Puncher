@@ -8,6 +8,7 @@ en-US:
   Info: ~
   Warning: ~
   Error: ~
+  Error Occured: ~
   Back: ~
   OK: ~
   About: ~
@@ -70,3 +71,10 @@ en-US:
   Encoder Type: ~
   _encoder_type_options: "AS5600"
   _version: "Firmware Version\n%s"
+  _tips_1: "tips: You could send mission by USB, Wi-Fi or Bluetooth."
+  _driver_err_template: "Driver error on axis %s"
+  _motor_err_template: "Motor error on axis %s"
+  _power_err_template: "Failed to acquire votage."
+  _driver_err_template_tips: "Driver error on axis %s. Please check driver installation."
+  _motor_err_template_tips: "Motor error on axis %s. Please check cable connections."
+  _power_err_template_tips: "Failed to acquire votage. Please check compatibility of your power supply."

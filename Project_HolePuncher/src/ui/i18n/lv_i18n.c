@@ -38,6 +38,13 @@ static lv_i18n_phrase_t en_us_singulars[] = {
     {"Punch Depth (mm)", "Punch Depth\n(mm)"},
     {"_encoder_type_options", "AS5600"},
     {"_version", "Firmware Version\n%s"},
+    {"_tips_1", "tips: You could send mission by USB, Wi-Fi or Bluetooth."},
+    {"_driver_err_template", "Driver error on axis %s"},
+    {"_motor_err_template", "Motor error on axis %s"},
+    {"_power_err_template", "Failed to acquire votage."},
+    {"_driver_err_template_tips", "Driver error on axis %s. Please check driver installation."},
+    {"_motor_err_template_tips", "Motor error on axis %s. Please check cable connections."},
+    {"_power_err_template_tips", "Failed to acquire votage. Please check compatibility of your power supply."},
     {NULL, NULL} // End mark
 };
 
@@ -68,6 +75,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Info", "信息"},
     {"Warning", "警告"},
     {"Error", "错误"},
+    {"Error Occured", "有错误发生"},
     {"Back", "返回"},
     {"About", "关于"},
     {"STOP", "停止"},
@@ -127,6 +135,17 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Encoder Type", "编码器类型"},
     {"_encoder_type_options", "AS5600"},
     {"_version", "固件版本\n%s"},
+    {"_tips_1", "提示: 您可以通过USB, 无线网络或蓝牙传输作业任务。"},
+    {"_driver_err_template", "%s 轴驱动器异常"},
+    {"_motor_err_template", "%s 轴电机异常"},
+    {"_power_err_template", "请求电压失败"},
+    {"_driver_err_template_tips", "%s 轴驱动器异常。请检查驱动器是否已正确安装。"},
+    {"_motor_err_template_tips", "%s 轴电机异常。请检查电机线缆是否断开。"},
+    {"_power_err_template_tips", "请求电压失败。请检查电源兼容性。"},
+    {"_driver_err_template_cpp", "轴驱动器异常"},
+    {"_motor_err_template_cpp", "轴电机异常"},
+    {"_driver_err_template_cpp_tips", "轴驱动器异常。请检查驱动器是否已正确安装。"},
+    {"_motor_err_template_cpp_tips", "轴电机异常。请检查电机线缆是否断开。"},
     {NULL, NULL} // End mark
 };
 

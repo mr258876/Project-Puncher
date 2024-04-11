@@ -19,6 +19,7 @@ lv_obj_t *ui_Label4;
 lv_obj_t *ui_Label5;
 lv_obj_t *ui_Label6;
 lv_obj_t *ui_Label7;
+lv_obj_t *ui_Home_TipsLabel;
 lv_obj_t *ui_OperationPanel;
 void ui_event_FeedButton(lv_event_t *e);
 lv_obj_t *ui_FeedButton;

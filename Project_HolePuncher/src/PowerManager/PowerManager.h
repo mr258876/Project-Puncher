@@ -2,27 +2,44 @@
 #define _POWERMANAGER_H_
 
 #include <stdint.h>
+#include "PCF8574.h"
+#include "PuncherSemaphore.h"
 
-enum {
-    PM_VOLTAGE_5V,
+enum
+{
+    PM_VOLTAGE_5V = 0,
     PM_VOLTAGE_9V,
     PM_VOLTAGE_12V,
     PM_VOLTAGE_15V,
-    PM_VOLTAGE_20V
+    PM_VOLTAGE_20V,
+    PM_VOLTAGE_NONE = 255,
 };
 typedef uint8_t pm_votage_t;
 
-enum {
-    PM_STATUS_POWER_GOOD,
-    PM_STATUS_POWER_BAD
+class PowerManager
+{
+private:
+    uint8_t i2c_scl;
+    uint8_t i2c_sda;
+    uint8_t int_pin;
+
+    int timeout = 5000;
+
+    PCF8574 *io;
+    EventGroupHandle_t eg;
+    std::function<void(uint8_t)> cb = NULL;
+
+    friend void pm_isr(void *pvParameters);
+    friend void TaskProcessPGood(void *pvParameters);
+
+public:
+    PowerManager(uint8_t i2c_scl, uint8_t i2c_sda, uint8_t int_pin);
+    ~PowerManager();
+
+    void begin();
+    void acquire_voltage(uint8_t votage);
+    void set_pgood_cb(std::function<void(uint8_t)> cb);
+    inline void set_timeout(int timeout) { this->timeout = timeout; }
 };
-typedef uint8_t pm_power_status_t;
-
-typedef void (*pm_pgood_cb_t)(pm_power_status_t status);
-
-void pm_init();
-void pm_acquire_voltage(pm_votage_t votage);
-void pm_set_pgood_cb(pm_pgood_cb_t event_cb);
-
 
 #endif

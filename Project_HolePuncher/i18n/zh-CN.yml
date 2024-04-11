@@ -8,6 +8,7 @@ zh-CN:
   Info: 信息
   Warning: 警告
   Error: 错误
+  Error Occured: 有错误发生
   Back: 返回
   OK: ~
   About: 关于
@@ -70,3 +71,18 @@ zh-CN:
   Encoder Type: 编码器类型
   _encoder_type_options: "AS5600"
   _version: "固件版本\n%s"
+  _tips_1: "提示: 您可以通过USB, 无线网络或蓝牙传输作业任务。"
+  _driver_err_template: "%s 轴驱动器异常"
+  _motor_err_template: "%s 轴电机异常"
+  _power_err_template: "请求电压失败"
+  _driver_err_template_tips: "%s 轴驱动器异常。请检查驱动器是否已正确安装。"
+  _motor_err_template_tips: "%s 轴电机异常。请检查电机线缆是否断开。"
+  _power_err_template_tips: "请求电压失败。请检查电源兼容性。"
+  # _driver_err_template_cpp: "{}轴驱动器异常"
+  # _motor_err_template_cpp: "{}轴电机异常"
+  # _driver_err_template_cpp_tips: "{}轴驱动器异常。请检查驱动器是否已正确安装。"
+  # _motor_err_template_cpp_tips: "{}轴电机异常。请检查电机线缆是否断开。"
+  _driver_err_template_cpp: "轴驱动器异常"
+  _motor_err_template_cpp: "轴电机异常"
+  _driver_err_template_cpp_tips: "轴驱动器异常。请检查驱动器是否已正确安装。"
+  _motor_err_template_cpp_tips: "轴电机异常。请检查电机线缆是否断开。"

@@ -38,6 +38,7 @@ extern lv_obj_t *ui_Label4;
 extern lv_obj_t *ui_Label5;
 extern lv_obj_t *ui_Label6;
 extern lv_obj_t *ui_Label7;
+extern lv_obj_t *ui_Home_TipsLabel;
 extern lv_obj_t *ui_OperationPanel;
 void ui_event_FeedButton( lv_event_t * e);
 extern lv_obj_t *ui_FeedButton;

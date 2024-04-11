@@ -14,9 +14,11 @@
 #include "esp_vfs_fat.h"
 
 static PuncherScheduler *scheduler;
+static PowerManager *pm;
 static wl_handle_t wl_handle_flash = WL_INVALID_HANDLE;
 
 // ---------- Function declarations
+void pm_init();
 void motor_init();
 void encoder_init();
 void lvgl_init();
@@ -27,10 +29,11 @@ void setup()
 {
     ESP_LOGI("Puncher_Main", "Initializing...");
 
+    scheduler = new PuncherScheduler();    
+    
     pm_init(); // Init power manager first or voltage acquire will fail
 
-    scheduler = new PuncherScheduler();
-    scheduler->begin();
+    scheduler->beginNVS();
 
     serial_init();
 
@@ -38,11 +41,25 @@ void setup()
 
     encoder_init();
 
-    fatfs_init();
+    fatfs_init();   // must before lvgl_init
 
     lvgl_init();
 
+    scheduler->begin();
+
     ESP_LOGI("Puncher_Main", "System booted.");
+}
+
+void pm_init()
+{
+    ESP_LOGI("Puncher_Main", "Power initializing...");
+
+    pm = new PowerManager(CTP_I2C_SCL, CTP_I2C_SDA, PCF8574_INT);
+    pm->begin();
+    
+    scheduler->attachPower(pm);
+
+    ESP_LOGI("Puncher_Main", "Power initialized!");
 }
 
 void motor_init()
@@ -89,7 +106,7 @@ void serial_init()
     ESP_LOGI("Puncher_Main", "Starting USB Serial Interface...");
 
     usbInterface->begin();
-    // usbInterface->enableLog();
+    usbInterface->enableLog();
 
     scheduler->attachUI(usbInterface);
 

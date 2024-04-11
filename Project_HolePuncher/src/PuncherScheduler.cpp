@@ -10,22 +10,29 @@ void evtHandleLoop(void *param)
 
     while (1)
     {
-        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFF, pdFALSE, pdFALSE, portMAX_DELAY);
+        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFFFF, pdFALSE, pdFALSE, portMAX_DELAY);
 
-        if (evt & OnFinishX)
+        if (evt & OnMotorFinish)
         {
-            scheduler->onFinishX();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishX);
-        }
-        if (evt & OnFinishY)
-        {
-            scheduler->onFinishY();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishY);
-        }
-        if (evt & OnFinishZ)
-        {
-            scheduler->onFinishZ();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnFinishZ);
+            if (evt & OnFinishX)
+            {
+                scheduler->onFinishX();
+                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishX);
+            }
+            if (evt & OnFinishY)
+            {
+                scheduler->onFinishY();
+                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishY);
+            }
+            if (evt & OnFinishZ)
+            {
+                scheduler->onFinishZ();
+                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishZ);
+            }
+            if (scheduler->status.basic_status.status_flags.is_running)
+            {
+                scheduler->handleMotorFinish();
+            }
         }
 
         if (evt & OnZeroingFinishX)
@@ -44,9 +51,10 @@ void evtHandleLoop(void *param)
             xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishZ);
         }
 
-        if (scheduler->status.basic_status.status_flags.is_running)
+        if (evt & OnPowerStatusChange)
         {
-            scheduler->handleMotorFinish();
+            scheduler->onPowerStatusChange();
+            xEventGroupClearBits(scheduler->motor_evt_group, OnPowerStatusChange);
         }
     }
 
@@ -177,7 +185,7 @@ PuncherScheduler::~PuncherScheduler()
 {
 }
 
-void PuncherScheduler::begin()
+void PuncherScheduler::beginNVS()
 {
     /*
         Start NVS
@@ -190,7 +198,10 @@ void PuncherScheduler::begin()
     }
 
     this->loadSettings();
+}
 
+void PuncherScheduler::begin()
+{
     /*
         Init values
     */
@@ -206,6 +217,28 @@ void PuncherScheduler::begin()
     this->status.task_length = 0;
     this->status.finished_length = 0;
     this->status.ETA = 0;
+
+    /*
+        Init UI
+    */
+    initUI();
+
+    /*
+        Init Power
+    */
+    initPower();
+
+    /*
+        Init Motors
+    */
+    initMotors();
+
+    /*
+        Init Sensors
+    */
+    initSensors();
+
+    has_begin = true;
 }
 
 void PuncherScheduler::loadSettings()
@@ -381,6 +414,49 @@ int PuncherScheduler::delete_workload()
     return 0;
 }
 
+int PuncherScheduler::data_transmit_mode(bool transmit_mode)
+{
+    if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_TRANSMITTING_DATA | PUNCHER_STATUS_IS_FEEDING_PAPER)))
+        return 1;
+
+    status.basic_status.status_flags.is_transmitting_data = transmit_mode;
+
+    if (transmit_mode)
+    {
+        holeList.clear();
+    }
+    else
+    {
+        status.task_length = holeList.size();
+        status.finished_length = 0;
+        if (status.task_length > 0)
+            status.basic_status.status_flags.has_mission = 1;
+    }
+
+    updateUIstatus();
+    return 0;
+}
+
+int PuncherScheduler::feed_paper_mode(bool feed_paper_mode)
+{
+    if (status.basic_status.status_data & (~(PUNCHER_STATUS_IS_FEEDING_PAPER | PUNCHER_STATUS_IS_TRANSMITTING_DATA)))
+        return 1;
+
+    status.basic_status.status_flags.is_feeding_paper = feed_paper_mode;
+    if (feed_paper_mode)
+    {
+        Zawake();
+    }
+    else
+    {
+        Zsleep();
+        if (sensor_Z)
+            sensor_Z->clearRelativePosition();
+    }
+
+    return 0;
+}
+
 int PuncherScheduler::add_hole(scheduler_hole_t &h)
 {
     /* Reject data if not in transmit mode */
@@ -420,6 +496,43 @@ int PuncherScheduler::add_hold_mcode(int x, int y, int z)
     }
 
     return res;
+}
+
+void PuncherScheduler::initMotors()
+{
+    ESP_LOGI("PuncherScheduler", "X driver status: %d", X->pingDriver());
+    ESP_LOGI("PuncherScheduler", "Y driver status: %d", Y->pingDriver());
+    ESP_LOGI("PuncherScheduler", "Z driver status: %d", Z->pingDriver());
+
+    updateXspeed();
+    updateYspeed();
+    updateZspeed();
+
+    updateXdriver();
+    updateYdriver();
+    updateZdriver();
+
+    this->X->setMoveFinishCallBack([this]()
+                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishX, &xHigherPriorityTaskWoken); });
+    this->Y->setMoveFinishCallBack([this]()
+                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishY, &xHigherPriorityTaskWoken); });
+    this->Z->setMoveFinishCallBack([this]()
+                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishZ, &xHigherPriorityTaskWoken); });
+
+    Xsleep();
+    Ysleep();
+    Zsleep();
+}
+
+void PuncherScheduler::onPowerStatusChange()
+{
+    ESP_LOGI(TAG, "onPowerStatusChange");
+    status.basic_status.status_flags.has_error = status_has_error();
+
+    for (auto ui : ui_list)
+    {
+        ui->onStatusCode(&status);
+    }
 }
 
 int PuncherScheduler::feed_paper(int gear)

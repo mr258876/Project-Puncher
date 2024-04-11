@@ -76,6 +76,13 @@ void ui_HomeScreen_screen_init(void)
     lv_label_set_text(ui_Label7, "88:88:88");
     lv_obj_set_style_text_font(ui_Label7, ui_font_noto_sans_36, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Home_TipsLabel = lv_label_create(ui_StatusPanel);
+    lv_obj_set_width(ui_Home_TipsLabel, lv_pct(100));
+    lv_obj_set_height(ui_Home_TipsLabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_Home_TipsLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Home_TipsLabel, _("_tips_1"));
+    lv_obj_set_style_text_font(ui_Home_TipsLabel, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     ui_OperationPanel = lv_obj_create(ui_HomeScreen);
     lv_obj_set_width(ui_OperationPanel, lv_pct(25));
     lv_obj_set_height(ui_OperationPanel, lv_pct(80));

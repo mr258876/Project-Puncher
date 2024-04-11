@@ -39,6 +39,10 @@
 #define I2C0_SDA    38
 #define I2C0_SCL    21
 
+#define CTP_I2C_SCL 6
+#define CTP_I2C_SDA 7
+#define PCF8574_INT 14
+
 /* flash storage */
 #define FLASH_MOUNT_POINT   "/flash"
 
