@@ -88,4 +88,20 @@ inline int puncher_is_busy(puncher_status_t &status)
     return status.basic_status.status_data & ~(0b1 << 31);
 }
 
+typedef enum {
+    EVT_NONE = 0,
+    EVT_ON_MOVE_FINISH_X,
+    EVT_ON_MOVE_FINISH_Y,
+    EVT_ON_MOVE_FINISH_Z,
+    EVT_ON_ZEROING_FINISH_X,
+    EVT_ON_ZEROING_FINISH_Y,
+    EVT_ON_ZEROING_FINISH_Z,
+
+    EVT_ON_WORKLOAD_START=128,
+    EVT_ON_WORKLOAD_PAUSE,
+    EVT_ON_WORKLOAD_DELETE,
+
+    EVT_ON_POWER_STATUS_CHANGE=256,
+} scheduler_evt_t;
+
 #endif // _PUNCHERSCHEDULERTYPING_H_

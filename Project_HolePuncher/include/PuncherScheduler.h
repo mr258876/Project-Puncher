@@ -18,16 +18,6 @@
 
 #include <Arduino.h>
 
-// event group definitions
-#define OnFinishX (1 << 0)        // 0b1
-#define OnFinishY (1 << 1)        // 0b10
-#define OnFinishZ (1 << 2)        // 0b100
-#define OnZeroingFinishX (1 << 3) // 0b1000
-#define OnZeroingFinishY (1 << 4) // 0b10000
-#define OnZeroingFinishZ (1 << 5) // 0b100000
-#define OnPowerStatusChange (1 << 15)
-#define OnMotorFinish    (0b111)
-
 class PuncherScheduler : PuncherSchedulerInterface
 {
 private:
@@ -63,6 +53,10 @@ private:
     SemaphoreHandle_t holeListHandle;
     void handleMotorFinish();
     int nextHole();
+
+    int start_workload_cb();
+    int pause_workload_cb();
+    int delete_workload_cb();
 
     /* Motor related */
     MotorController *X = NULL;
@@ -212,7 +206,7 @@ private:
     inline void initPower()
     {
         pm->set_pgood_cb([this](uint8_t res)
-                         { this->status.basic_status.status_flags.power_err = res; BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnPowerStatusChange, &xHigherPriorityTaskWoken); });
+                         { this->status.basic_status.status_flags.power_err = res; scheduler_evt_t evt = EVT_ON_POWER_STATUS_CHANGE; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
         pm->acquire_voltage(std::any_cast<uint16_t>(power_voltage));
     }
     void onPowerStatusChange();
@@ -288,7 +282,7 @@ private:
     void saveValue(std::string name, puncher_setting_mapping_t item);
 
     /* event loop task & event queue */
-    EventGroupHandle_t motor_evt_group;
+    QueueHandle_t evt_queue;
     // QueueHandle_t evt_queue;
     friend void evtHandleLoop(void *param);
 

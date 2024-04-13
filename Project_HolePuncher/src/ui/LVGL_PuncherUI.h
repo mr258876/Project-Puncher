@@ -2,7 +2,7 @@
 #define _LVGL_PUNCHERUI_H_
 
 #include "PuncherUI.h"
-#include "FreeRTOS.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
 #include <lvgl.h>

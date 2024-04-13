@@ -11,37 +11,43 @@
 #include "PositionSensor/AS5600PositionSensor.h"
 #include "ui/LVGL_PuncherUI.h"
 #include "SerialInterface/SerialInterface.h"
+#include "BLEInterface/BLEInterface.h"
 #include "esp_vfs_fat.h"
+#include "esp_spiram.h"
 
 static PuncherScheduler *scheduler;
 static PowerManager *pm;
 static wl_handle_t wl_handle_flash = WL_INVALID_HANDLE;
 
 // ---------- Function declarations
+void init_spiram();
 void pm_init();
 void motor_init();
 void encoder_init();
 void lvgl_init();
 void serial_init();
+void ble_init();
 void fatfs_init();
 
 void setup()
 {
     ESP_LOGI("Puncher_Main", "Initializing...");
 
-    scheduler = new PuncherScheduler();    
-    
+    scheduler = new PuncherScheduler();
+
     pm_init(); // Init power manager first or voltage acquire will fail
 
     scheduler->beginNVS();
 
-    serial_init();
+    // serial_init();
 
     motor_init();
 
     encoder_init();
 
-    fatfs_init();   // must before lvgl_init
+    ble_init();
+
+    fatfs_init(); // must before lvgl_init
 
     lvgl_init();
 
@@ -56,7 +62,7 @@ void pm_init()
 
     pm = new PowerManager(CTP_I2C_SCL, CTP_I2C_SDA, PCF8574_INT);
     pm->begin();
-    
+
     scheduler->attachPower(pm);
 
     ESP_LOGI("Puncher_Main", "Power initialized!");
@@ -111,6 +117,17 @@ void serial_init()
     scheduler->attachUI(usbInterface);
 
     ESP_LOGI("Puncher_Main", "USB Serial Interface initialized!");
+}
+
+void ble_init()
+{
+    ESP_LOGI("Puncher_Main", "Starting BLE Interface...");
+
+    bleInterface->begin();
+
+    scheduler->attachUI(bleInterface);
+
+    ESP_LOGI("Puncher_Main", "BLE Interface initialized!");
 }
 
 void encoder_init()

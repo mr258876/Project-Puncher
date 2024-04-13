@@ -26,6 +26,14 @@ Run `compile` in this folder to generate i18n files:
 lv_i18n compile -t 'i18n/*.yml' -o 'src/ui/i18n'
 ```
 
+### FATFS page code warning
+In `.platformio\packages\framework-espidf\components\fatfs\src\ff.c`
+Line 541
+```patch
+-541 static const BYTE Ct855[] = TBL_CT855;
++541 // static const BYTE Ct855[] = TBL_CT855;
+```
+
 ### Arduino TinyUSB Header BUG
 In `.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp`
 

@@ -42,7 +42,7 @@ static void disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *co
 static void lv_port_disp_init(void)
 {
     static lv_disp_draw_buf_t draw_buf_dsc;
-    p_disp_buf = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_DMA);
+    p_disp_buf = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT / 2 * 2, MALLOC_CAP_DMA);
     // p_disp_buf2 = heap_caps_malloc(LCD_WIDTH * LCD_BUF_HEIGHT * 2, MALLOC_CAP_SPIRAM);
 
     spi_bus_config_t buscfg = {
@@ -51,7 +51,7 @@ static void lv_port_disp_init(void)
         .miso_io_num = -1,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = LCD_WIDTH * LCD_HEIGHT * sizeof(uint16_t)};
+        .max_transfer_sz = LCD_WIDTH * LCD_HEIGHT / 2 * sizeof(uint16_t)};
     ESP_ERROR_CHECK(spi_bus_initialize(SPI_PORT, &buscfg, SPI_DMA_CH_AUTO));
 
     esp_lcd_panel_io_handle_t io_handle = NULL;
@@ -114,7 +114,7 @@ static void lv_port_disp_init(void)
         esp_lcd_panel_disp_on_off(panel_handle, true);
     }
 
-    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, NULL, LCD_WIDTH * LCD_BUF_HEIGHT);
+    lv_disp_draw_buf_init(&draw_buf_dsc, p_disp_buf, NULL, LCD_WIDTH * LCD_BUF_HEIGHT / 2);
     lv_disp_drv_init(&disp_drv);
     disp_drv.hor_res = LCD_WIDTH;
     disp_drv.ver_res = LCD_HEIGHT;

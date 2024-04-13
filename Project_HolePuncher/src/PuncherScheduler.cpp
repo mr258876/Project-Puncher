@@ -6,55 +6,87 @@ static const char *TAG = "PuncherScheduler";
 void evtHandleLoop(void *param)
 {
     PuncherScheduler *scheduler = (PuncherScheduler *)param;
-    uint32_t evt;
+    scheduler_evt_t evt;
 
     while (1)
     {
-        evt = xEventGroupWaitBits(scheduler->motor_evt_group, 0xFFFF, pdFALSE, pdFALSE, portMAX_DELAY);
+        xQueueReceive(scheduler->evt_queue, &evt, portMAX_DELAY);
 
-        if (evt & OnMotorFinish)
+        if (evt < 1)
         {
-            if (evt & OnFinishX)
+            ESP_LOGE(TAG, "Invalid event: %d", evt);
+            continue;
+        }
+
+        if (evt <= EVT_ON_MOVE_FINISH_Z)
+        {
+            switch (evt)
             {
+            case EVT_ON_MOVE_FINISH_X:
                 scheduler->onFinishX();
-                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishX);
-            }
-            if (evt & OnFinishY)
-            {
+                break;
+            case EVT_ON_MOVE_FINISH_Y:
                 scheduler->onFinishY();
-                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishY);
-            }
-            if (evt & OnFinishZ)
-            {
+                break;
+            case EVT_ON_MOVE_FINISH_Z:
                 scheduler->onFinishZ();
-                xEventGroupClearBits(scheduler->motor_evt_group, OnFinishZ);
+                break;
+            default:
+                break;
             }
             if (scheduler->status.basic_status.status_flags.is_running)
             {
                 scheduler->handleMotorFinish();
             }
+            continue;
         }
 
-        if (evt & OnZeroingFinishX)
+        if (evt <= EVT_ON_ZEROING_FINISH_Z)
         {
-            scheduler->onFinishZeroingX();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishX);
-        }
-        if (evt & OnZeroingFinishY)
-        {
-            scheduler->onFinishZeroingY();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishY);
-        }
-        if (evt & OnZeroingFinishZ)
-        {
-            scheduler->onFinishZeroingZ();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnZeroingFinishZ);
+            switch (evt)
+            {
+            case EVT_ON_ZEROING_FINISH_X:
+                scheduler->onFinishZeroingX();
+                break;
+            case EVT_ON_ZEROING_FINISH_Y:
+                scheduler->onFinishZeroingY();
+                break;
+            case EVT_ON_ZEROING_FINISH_Z:
+                scheduler->onFinishZeroingZ();
+                break;
+            default:
+                break;
+            }
+            continue;
         }
 
-        if (evt & OnPowerStatusChange)
+        if (evt <= EVT_ON_WORKLOAD_DELETE)
         {
+            switch (evt)
+            {
+            case EVT_ON_WORKLOAD_START:
+                scheduler->start_workload_cb();
+                break;
+            case EVT_ON_WORKLOAD_PAUSE:
+                scheduler->pause_workload_cb();
+                break;
+            case EVT_ON_WORKLOAD_DELETE:
+                scheduler->delete_workload_cb();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
+        switch (evt)
+        {
+        case EVT_ON_POWER_STATUS_CHANGE:
             scheduler->onPowerStatusChange();
-            xEventGroupClearBits(scheduler->motor_evt_group, OnPowerStatusChange);
+            break;
+        default:
+            ESP_LOGE(TAG, "Invalid event: %d", evt);
+            break;
         }
     }
 
@@ -208,7 +240,7 @@ void PuncherScheduler::begin()
     this->x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
     this->y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
-    this->motor_evt_group = xEventGroupCreate();
+    this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
     // this->evt_queue = xQueueCreate(128, sizeof(puncher_event_t));
     xTaskCreate(evtHandleLoop, "SchedulerEvtLoop", 6144, this, 3, NULL);
 
@@ -364,6 +396,27 @@ void PuncherScheduler::saveValue(std::string name, puncher_setting_mapping_t ite
 
 int PuncherScheduler::start_workload()
 {
+    scheduler_evt_t evt = EVT_ON_WORKLOAD_START;
+    xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    return 0;
+}
+
+int PuncherScheduler::pause_workload()
+{
+    scheduler_evt_t evt = EVT_ON_WORKLOAD_PAUSE;
+    xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    return 0;
+}
+
+int PuncherScheduler::delete_workload()
+{
+    scheduler_evt_t evt = EVT_ON_WORKLOAD_DELETE;
+    xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    return 0;
+}
+
+int PuncherScheduler::start_workload_cb()
+{
     if (status.basic_status.status_data & (~PUNCHER_STATUS_HAS_MISSION))
     {
         ESP_LOGI(TAG, "Start workload fail! Status: %u", status.basic_status.status_data);
@@ -392,14 +445,14 @@ int PuncherScheduler::start_workload()
     return 1;
 }
 
-int PuncherScheduler::pause_workload()
+int PuncherScheduler::pause_workload_cb()
 {
     // TODO
 
     return 0;
 }
 
-int PuncherScheduler::delete_workload()
+int PuncherScheduler::delete_workload_cb()
 {
     if (status.basic_status.status_data & PUNCHER_STATUS_BUSY_MASK)
     {
@@ -446,11 +499,11 @@ int PuncherScheduler::feed_paper_mode(bool feed_paper_mode)
     if (feed_paper_mode)
     {
         Zawake();
-        Z->sleep(true);     // or motor is still powered after entering feeding mode
+        Z->sleep(true); // or motor is still powered after entering feeding mode
     }
     else
     {
-        Z->sleep(false);    // or motor might not powered after entering feeding mode
+        Z->sleep(false); // or motor might not powered after entering feeding mode
         Zsleep();
         if (sensor_Z)
             sensor_Z->clearRelativePosition();
@@ -515,11 +568,11 @@ void PuncherScheduler::initMotors()
     updateZdriver();
 
     this->X->setMoveFinishCallBack([this]()
-                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishX, &xHigherPriorityTaskWoken); });
+                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
     this->Y->setMoveFinishCallBack([this]()
-                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishY, &xHigherPriorityTaskWoken); });
+                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
     this->Z->setMoveFinishCallBack([this]()
-                                   { BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnFinishZ, &xHigherPriorityTaskWoken); });
+                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Z; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
 
     Xsleep();
     Ysleep();
@@ -548,7 +601,7 @@ int PuncherScheduler::feed_paper(int gear)
         z_speed = z_speed * abs(gear) / 3;
 
         this->Zawake();
-        this->Z->sleep(false);  // force power
+        this->Z->sleep(false); // force power
         this->Z->setSpeed(calcMotorSpeedPulse(
             std::any_cast<int32_t>(this->z_lead_length),
             std::any_cast<uint16_t>(this->z_length_type),
@@ -559,7 +612,7 @@ int PuncherScheduler::feed_paper(int gear)
     else
     {
         this->Z->stop();
-        this->Z->sleep(true);   // cut power
+        this->Z->sleep(true); // cut power
         updateZspeed();
     }
 
@@ -710,7 +763,7 @@ int PuncherScheduler::start_auto_zeroing(int axis)
         this->Xawake();
         this->status.basic_status.status_flags.is_zeroing_x = 1;
         this->X->setZeroingFinishCallBack([this]()
-                                          {BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnZeroingFinishX, &xHigherPriorityTaskWoken); });
+                                          { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
         this->X->startZeroing(std::any_cast<uint8_t>(x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(x_zeroing_torch_thres));
     }
 
@@ -725,7 +778,7 @@ int PuncherScheduler::start_auto_zeroing(int axis)
         this->Yawake();
         this->status.basic_status.status_flags.is_zeroing_y = 1;
         this->Y->setZeroingFinishCallBack([this]()
-                                          {BaseType_t xHigherPriorityTaskWoken; xEventGroupSetBitsFromISR(this->motor_evt_group, OnZeroingFinishY, &xHigherPriorityTaskWoken); });
+                                          { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
         this->Y->startZeroing(std::any_cast<uint8_t>(y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(y_zeroing_torch_thres));
     }
 
@@ -867,7 +920,8 @@ int PuncherScheduler::nextHole()
         {
             x_finished = 1;
             x_target_pos = x_pos;
-            xEventGroupSetBits(motor_evt_group, OnFinishX);
+            scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
+            xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
         }
     }
     else
@@ -877,8 +931,11 @@ int PuncherScheduler::nextHole()
         y_finished = 1;
         y_target_pos = y_pos;
         y_status = 2;
-        xEventGroupSetBits(motor_evt_group, OnFinishX);
-        xEventGroupSetBits(motor_evt_group, OnFinishY);
+
+        scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X;
+        xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
+        evt = EVT_ON_ZEROING_FINISH_Y;
+        xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
 
     if (hole.z > 0)
@@ -891,7 +948,9 @@ int PuncherScheduler::nextHole()
     {
         z_finished = 1;
         z_target_pos = z_pos;
-        xEventGroupSetBits(motor_evt_group, OnFinishZ);
+
+        scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
+        xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
 
     holeList.erase(holeList.begin());

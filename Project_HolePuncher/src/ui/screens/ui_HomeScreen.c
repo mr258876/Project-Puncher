@@ -45,7 +45,7 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_align(ui_StatusPanel, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_StatusPanel, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_flex_align(ui_StatusPanel, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_clear_flag(ui_StatusPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+    // lv_obj_clear_flag(ui_StatusPanel, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_radius(ui_StatusPanel, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label4 = lv_label_create(ui_StatusPanel);
