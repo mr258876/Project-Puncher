@@ -58,13 +58,6 @@ private:
     int pause_workload_cb();
     int delete_workload_cb();
 
-    int _util_move_X_dir;
-    bool _util_move_X_zeroing_conf;
-    int util_move_X_cb();
-    int _util_move_Y_dir;
-    bool _util_move_Y_zeroing_conf;
-    int util_move_Y_cb();
-
     /* Motor related */
     MotorController *X = NULL;
     MotorController *Y = NULL;
@@ -178,6 +171,19 @@ private:
 
     void initMotors();
 
+    int _util_move_X_dir;
+    bool _util_move_X_zeroing_conf;
+    int util_move_X_cb();
+    int _util_move_Y_dir;
+    bool _util_move_Y_zeroing_conf;
+    int util_move_Y_cb();
+
+    int read_sg_result_X_cb();
+    int read_sg_result_Y_cb();
+    int read_sg_result_Z_cb();
+
+    int start_auto_zeroing_X_cb();
+    int start_auto_zeroing_Y_cb();
 
     /* init seneors */
     inline void initSensors()

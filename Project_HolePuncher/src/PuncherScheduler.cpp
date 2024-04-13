@@ -111,6 +111,44 @@ void evtHandleLoop(void *param)
             continue;
         }
 
+        if (evt <= EVT_ON_ZEROING_START_REQUEST_Z)
+        {
+            switch (evt)
+            {
+            case EVT_ON_ZEROING_START_REQUEST_X:
+                scheduler->start_auto_zeroing_X_cb();
+                break;
+            case EVT_ON_ZEROING_START_REQUEST_Y:
+                scheduler->start_auto_zeroing_Y_cb();
+                break;
+            case EVT_ON_ZEROING_START_REQUEST_Z:
+                // scheduler->start_auto_zeroing_Z_cb();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
+        if (evt <= EVT_ON_SG_RESULT_REQUEST_Z)
+        {
+            switch (evt)
+            {
+            case EVT_ON_SG_RESULT_REQUEST_X:
+                scheduler->read_sg_result_X_cb();
+                break;
+            case EVT_ON_SG_RESULT_REQUEST_Y:
+                scheduler->read_sg_result_Y_cb();
+                break;
+            case EVT_ON_SG_RESULT_REQUEST_Z:
+                scheduler->read_sg_result_Z_cb();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
         ESP_LOGE(TAG, "Invalid event: %d", evt);
     }
 
@@ -781,26 +819,53 @@ int PuncherScheduler::read_sg_result(int axis)
     if (!axis)
         axis = ~axis;
 
+    scheduler_evt_t evt;
     if (axis & 0b1)
     {
-        int res = this->X->getLoad();
-        puncher_event_setting_change_t e = {"x_sg_result", res};
-        this->notifyValueChange(&e);
+        evt = EVT_ON_SG_RESULT_REQUEST_X;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
 
     if (axis & 0b10)
     {
-        int res = this->Y->getLoad();
-        puncher_event_setting_change_t e = {"y_sg_result", res};
-        this->notifyValueChange(&e);
+        evt = EVT_ON_SG_RESULT_REQUEST_Y;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
 
     if (axis & 0b100)
     {
-        int res = this->Z->getLoad();
-        puncher_event_setting_change_t e = {"z_sg_result", res};
-        this->notifyValueChange(&e);
+        evt = EVT_ON_SG_RESULT_REQUEST_Z;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
+    return 0;
+}
+
+int PuncherScheduler::read_sg_result_X_cb()
+{
+
+    int res = this->X->getLoad();
+    puncher_event_setting_change_t e = {"x_sg_result", res};
+    this->notifyValueChange(&e);
+
+    return 0;
+}
+
+int PuncherScheduler::read_sg_result_Y_cb()
+{
+
+    int res = this->Y->getLoad();
+    puncher_event_setting_change_t e = {"y_sg_result", res};
+    this->notifyValueChange(&e);
+
+    return 0;
+}
+
+int PuncherScheduler::read_sg_result_Z_cb()
+{
+
+    int res = this->Z->getLoad();
+    puncher_event_setting_change_t e = {"z_sg_result", res};
+    this->notifyValueChange(&e);
 
     return 0;
 }
@@ -813,36 +878,51 @@ int PuncherScheduler::start_auto_zeroing(int axis)
     if (!axis)
         axis = ~axis;
 
+    scheduler_evt_t evt;
     if (axis & 0b1)
     {
-        this->X->setSpeed(calcMotorSpeedPulse(
-            std::any_cast<int32_t>(this->x_lead_length),
-            std::any_cast<uint16_t>(this->x_length_type),
-            std::any_cast<int32_t>(x_zeroing_speed),
-            MICROSTEPS_X));
-        this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
-        this->Xawake();
-        this->status.basic_status.status_flags.is_zeroing_x = 1;
-        this->X->setZeroingFinishCallBack([this]()
-                                          { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
-        this->X->startZeroing(std::any_cast<uint8_t>(x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(x_zeroing_torch_thres));
+        evt = EVT_ON_ZEROING_START_REQUEST_X;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
 
     if (axis & 0b10)
     {
-        this->Y->setSpeed(calcMotorSpeedPulse(
-            std::any_cast<int32_t>(this->y_lead_length),
-            std::any_cast<uint16_t>(this->y_length_type),
-            std::any_cast<int32_t>(y_zeroing_speed),
-            MICROSTEPS_Y));
-        this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
-        this->Yawake();
-        this->status.basic_status.status_flags.is_zeroing_y = 1;
-        this->Y->setZeroingFinishCallBack([this]()
-                                          { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
-        this->Y->startZeroing(std::any_cast<uint8_t>(y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(y_zeroing_torch_thres));
+        evt = EVT_ON_ZEROING_START_REQUEST_Y;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
 
+    return 0;
+}
+
+int PuncherScheduler::start_auto_zeroing_X_cb()
+{
+    this->X->setSpeed(calcMotorSpeedPulse(
+        std::any_cast<int32_t>(this->x_lead_length),
+        std::any_cast<uint16_t>(this->x_length_type),
+        std::any_cast<int32_t>(this->x_zeroing_speed),
+        MICROSTEPS_X));
+    this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
+    this->Xawake();
+    this->status.basic_status.status_flags.is_zeroing_x = 1;
+    this->X->setZeroingFinishCallBack([this]()
+                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
+    this->X->startZeroing(std::any_cast<uint8_t>(this->x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->x_zeroing_torch_thres));
+    return 0;
+}
+
+int PuncherScheduler::start_auto_zeroing_Y_cb()
+{
+    this->Y->setSpeed(calcMotorSpeedPulse(
+        std::any_cast<int32_t>(this->y_lead_length),
+        std::any_cast<uint16_t>(this->y_length_type),
+        std::any_cast<int32_t>(this->y_zeroing_speed),
+        MICROSTEPS_Y));
+    this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
+    this->Yawake();
+    this->status.basic_status.status_flags.is_zeroing_y = 1;
+    this->Y->setZeroingFinishCallBack([this]()
+                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
+    this->Y->startZeroing(std::any_cast<uint8_t>(this->y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->y_zeroing_torch_thres));
     return 0;
 }
 
