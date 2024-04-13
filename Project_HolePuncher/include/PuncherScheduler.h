@@ -33,20 +33,20 @@ private:
     bool z_finished = 1;
 
     /* Positions */
-    double z_pos = 0;
+    double _z_pos = 0;
     // by measurements, 14mm from base at top
     // 6.5mm from base at ready state
     // 3.5mm ftom base at full down
-    double y_pos = Y_ZEROING_POSITION;
+    double _y_pos = Y_ZEROING_POSITION;
     // Count from positioning pillar on the right
     // 20.50mm base + 0.05 tape gap - 21mm cart
     // Hence it will be 0.45mm inside the tape
     // 5.55mm from the E3 line
-    double x_pos = X_ZEROING_POSITION;
+    double _x_pos = X_ZEROING_POSITION;
 
-    double x_target_pos = 0;
-    double y_target_pos = 0;
-    double z_target_pos = 0;
+    double _x_target_pos = 0;
+    double _y_target_pos = 0;
+    double _z_target_pos = 0;
 
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
@@ -119,27 +119,9 @@ private:
         }
     }
 
-    inline void onFinishZeroingX()
-    {
-        this->status.basic_status.status_flags.is_zeroing_x = 0;
-        this->updateXspeed();
-        this->updateXdriver();
-        this->Xsleep();
-    }
-    inline void onFinishZeroingY()
-    {
-        this->status.basic_status.status_flags.is_zeroing_y = 0;
-        this->updateYspeed();
-        this->updateYdriver();
-        this->Ysleep();
-    }
-    inline void onFinishZeroingZ()
-    {
-        this->status.basic_status.status_flags.is_zeroing_z = 0;
-        this->updateZspeed();
-        this->updateZdriver();
-        this->Zsleep();
-    }
+    void onFinishZeroingX();
+    void onFinishZeroingY();
+    void onFinishZeroingZ();
 
     // Enter / Leave idle mode
     void Xsleep();

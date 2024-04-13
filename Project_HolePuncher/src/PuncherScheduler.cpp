@@ -318,8 +318,8 @@ void PuncherScheduler::begin()
     /*
         Init values
     */
-    this->x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
-    this->y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
+    this->_x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
+    this->_y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
     this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
     assert(xTaskCreate(evtHandleLoop, "SchEvtLoop", 4096, this, 3, &evt_loop) == pdPASS);
@@ -512,8 +512,8 @@ int PuncherScheduler::start_workload_cb()
         ESP_LOGI(TAG, "Workload started!");
         updateUIstatus();
 
-        z_pos = 0;
-        z_target_pos = 0;
+        _z_pos = 0;
+        _z_target_pos = 0;
         if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
         {
             sensor_Z->clearRelativePosition();
@@ -840,6 +840,31 @@ int PuncherScheduler::read_sg_result(int axis)
     return 0;
 }
 
+void PuncherScheduler::onFinishZeroingX()
+{
+    this->status.basic_status.status_flags.is_zeroing_x = 0;
+    this->_x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
+    this->updateXspeed();
+    this->updateXdriver();
+    this->Xsleep();
+}
+void PuncherScheduler::onFinishZeroingY()
+{
+    this->status.basic_status.status_flags.is_zeroing_y = 0;
+    this->_y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
+    this->updateYspeed();
+    this->updateYdriver();
+    this->Ysleep();
+}
+void PuncherScheduler::onFinishZeroingZ()
+{
+    this->status.basic_status.status_flags.is_zeroing_z = 0;
+    // this->_z_pos = std::any_cast<int32_t>(z_zeroing_position) / 100.0;
+    this->updateZspeed();
+    this->updateZdriver();
+    this->Zsleep();
+}
+
 int PuncherScheduler::read_sg_result_X_cb()
 {
 
@@ -942,7 +967,7 @@ time_t PuncherScheduler::get_ETA()
 {
     double _eta = 0;
 
-    double _lastX = x_pos;
+    double _lastX = _x_pos;
 
     for (size_t i = 0; i < holeList.size(); i++)
     {
@@ -988,8 +1013,8 @@ void PuncherScheduler::handleMotorFinish()
         {
             // Move down Y
             Yawake();
-            Y->move(calc_Y_steps(y_depth - y_pos));
-            y_target_pos = y_depth;
+            Y->move(calc_Y_steps(y_depth - _y_pos));
+            _y_target_pos = y_depth;
 
             y_status = 1;
         }
@@ -1000,7 +1025,7 @@ void PuncherScheduler::handleMotorFinish()
                 // Y movoed down, now move back
                 Yawake();
                 Y->move(calc_Y_steps(-y_depth));
-                y_target_pos -= y_depth;
+                _y_target_pos -= y_depth;
 
                 y_status = 2;
             }
@@ -1041,19 +1066,19 @@ int PuncherScheduler::nextHole()
     if (hole.x > 0)
     {
         ESP_LOGI(TAG, "Next X: %d", hole.x);
-        int32_t x_steps = calc_X_steps((30 - hole.x) * 2.0 - x_pos);
+        int32_t x_steps = calc_X_steps((30 - hole.x) * 2.0 - _x_pos);
         if (x_steps)
         {
             Xawake();
             X->move(x_steps);
-            x_target_pos = (30 - hole.x) * 2.0;
-            ESP_LOGI(TAG, "X current pos: %4f", x_pos);
-            ESP_LOGI(TAG, "X target pos: %4f", x_target_pos);
+            _x_target_pos = (30 - hole.x) * 2.0;
+            ESP_LOGI(TAG, "X current pos: %4f", _x_pos);
+            ESP_LOGI(TAG, "X target pos: %4f", _x_target_pos);
         }
         else
         {
             x_finished = 1;
-            x_target_pos = x_pos;
+            _x_target_pos = _x_pos;
             scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
             xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
         }
@@ -1061,9 +1086,9 @@ int PuncherScheduler::nextHole()
     else
     {
         x_finished = 1;
-        x_target_pos = x_pos;
+        _x_target_pos = _x_pos;
         y_finished = 1;
-        y_target_pos = y_pos;
+        _y_target_pos = _y_pos;
         y_status = 2;
 
         scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X;
@@ -1074,14 +1099,14 @@ int PuncherScheduler::nextHole()
 
     if (hole.z > 0)
     {
-        z_target_pos += hole.z;
+        _z_target_pos += hole.z;
         Zawake();
         Z->move(calc_Z_steps(hole.z));
     }
     else
     {
         z_finished = 1;
-        z_target_pos = z_pos;
+        _z_target_pos = _z_pos;
 
         scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
@@ -1100,14 +1125,14 @@ void PuncherScheduler::onFinishX()
 {
     Xsleep();
     x_finished = 1;
-    x_pos = x_target_pos;
+    _x_pos = _x_target_pos;
 }
 
 void PuncherScheduler::onFinishY()
 {
     Ysleep();
     y_finished = 1;
-    y_pos = y_target_pos;
+    _y_pos = _y_target_pos;
 }
 
 void PuncherScheduler::onFinishZ()
@@ -1115,7 +1140,7 @@ void PuncherScheduler::onFinishZ()
     if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
     {
         double pos = sensor_Z->getRelativePosition();
-        double pos_target = z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;
+        double pos_target = _z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;
         pos_target = pos_target * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
         long diff_steps = (pos_target - pos) / 2 / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS_Z;
 
@@ -1129,7 +1154,7 @@ void PuncherScheduler::onFinishZ()
 
     Zsleep();
     z_finished = 1;
-    z_pos = z_target_pos;
+    _z_pos = _z_target_pos;
 }
 
 void PuncherScheduler::Xsleep()
