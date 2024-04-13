@@ -29,7 +29,7 @@ void lvglLoop(void *param)
     while (1)
     {
         // Process Events
-        evt_bits = xEventGroupWaitBits(ui->evt_group, 0xFF, pdTRUE, pdFALSE, pdMS_TO_TICKS(5));
+        evt_bits = xEventGroupWaitBits(ui->evt_group, 0xFF, pdFALSE, pdFALSE, pdMS_TO_TICKS(5));
 
         // make sure we have done all changes before rendering
         while (evt_bits)

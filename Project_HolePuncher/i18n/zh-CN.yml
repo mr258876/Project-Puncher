@@ -71,6 +71,7 @@ zh-CN:
   Encoder Type: 编码器类型
   _encoder_type_options: "AS5600"
   _version: "固件版本\n%s"
+  _about_page_author: "@mr258876\n2023-2024\n请在 Github 上为该项目点 Star !"
   _tips_1: "提示: 您可以通过USB, 无线网络或蓝牙传输作业任务。"
   _driver_err_template: "%s 轴驱动器异常"
   _motor_err_template: "%s 轴电机异常"

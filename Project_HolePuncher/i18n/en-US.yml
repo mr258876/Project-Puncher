@@ -71,6 +71,7 @@ en-US:
   Encoder Type: ~
   _encoder_type_options: "AS5600"
   _version: "Firmware Version\n%s"
+  _about_page_author: "@mr258876\n2023-2024\nPlease star this project on Github!"
   _tips_1: "tips: You could send mission by USB, Wi-Fi or Bluetooth."
   _driver_err_template: "Driver error on axis %s"
   _motor_err_template: "Motor error on axis %s"
