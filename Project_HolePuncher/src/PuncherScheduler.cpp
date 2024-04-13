@@ -669,13 +669,15 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_speed)
     _util_move_X_zeroing_conf = use_zeroing_speed;
     scheduler_evt_t evt = EVT_ON_MANUAL_MOVE_REQUEST_X;
     xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    return 0;
 }
 int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_speed)
 {
-    _util_move_X_dir = dir;
-    _util_move_X_zeroing_conf = use_zeroing_speed;
+    _util_move_Y_dir = dir;
+    _util_move_Y_zeroing_conf = use_zeroing_speed;
     scheduler_evt_t evt = EVT_ON_MANUAL_MOVE_REQUEST_Y;
     xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    return 0;
 }
 
 int PuncherScheduler::util_move_X_cb()
