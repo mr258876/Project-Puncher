@@ -79,14 +79,57 @@ void evtHandleLoop(void *param)
             continue;
         }
 
-        switch (evt)
+        if (evt <= EVT_ON_WORKLOAD_DELETE)
         {
-        case EVT_ON_POWER_STATUS_CHANGE:
-            scheduler->onPowerStatusChange();
-            break;
-        default:
-            ESP_LOGE(TAG, "Invalid event: %d", evt);
-            break;
+            switch (evt)
+            {
+            case EVT_ON_POWER_STATUS_CHANGE:
+                scheduler->onPowerStatusChange();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
+        if (evt <= EVT_ON_MANUAL_MOVE_REQUEST_Z)
+        {
+            switch (evt)
+            {
+            case EVT_ON_MANUAL_MOVE_REQUEST_X:
+                scheduler->util_move_X_cb();
+                break;
+            case EVT_ON_MANUAL_MOVE_REQUEST_Y:
+                scheduler->util_move_Y_cb();
+                break;
+            case EVT_ON_MANUAL_MOVE_REQUEST_Z:
+                // scheduler->util_move_Z_cb();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
+        ESP_LOGE(TAG, "Invalid event: %d", evt);
+    }
+
+    vTaskDelete(NULL);
+}
+
+void settingHandleLoop(void *param)
+{
+    PuncherScheduler *scheduler = (PuncherScheduler *)param;
+    puncher_event_setting_change_t *buf = (puncher_event_setting_change_t *)malloc(sizeof(puncher_event_setting_change_t));
+
+    while (1)
+    {
+        xQueueReceive(scheduler->setting_queue, buf, portMAX_DELAY);
+        PuncherScheduler::puncher_setting_mapping_t item_mapping = scheduler->setting_mapping.at(buf->item_name);
+        if (item_mapping.call_back(buf->data))
+        {
+            scheduler->saveValue(buf->item_name, item_mapping);
+            scheduler->notifyValueChange(buf);
         }
     }
 
@@ -241,8 +284,9 @@ void PuncherScheduler::begin()
     this->y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
     this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
-    // this->evt_queue = xQueueCreate(128, sizeof(puncher_event_t));
-    xTaskCreate(evtHandleLoop, "SchedulerEvtLoop", 6144, this, 3, NULL);
+    assert(xTaskCreate(evtHandleLoop, "SchEvtLoop", 4096, this, 3, &evt_loop) == pdPASS);
+    this->setting_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
+    assert(xTaskCreate(settingHandleLoop, "SchSetLoop", 4096, this, 3, &setting_loop) == pdPASS);
 
     this->status.basic_status.status_data = 0;
     this->status.connectivity_status.status_data = 0;
@@ -619,27 +663,42 @@ int PuncherScheduler::feed_paper(int gear)
     return 0;
 }
 
-int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
+int PuncherScheduler::util_move_X(int dir, bool use_zeroing_speed)
+{
+    _util_move_X_dir = dir;
+    _util_move_X_zeroing_conf = use_zeroing_speed;
+    scheduler_evt_t evt = EVT_ON_MANUAL_MOVE_REQUEST_X;
+    xQueueSend(evt_queue, &evt, portMAX_DELAY);
+}
+int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_speed)
+{
+    _util_move_X_dir = dir;
+    _util_move_X_zeroing_conf = use_zeroing_speed;
+    scheduler_evt_t evt = EVT_ON_MANUAL_MOVE_REQUEST_Y;
+    xQueueSend(evt_queue, &evt, portMAX_DELAY);
+}
+
+int PuncherScheduler::util_move_X_cb()
 {
     if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
 
-    if (dir)
+    if (_util_move_X_dir)
     {
         int32_t x_speed;
-        if (use_zeroing_conf)
+        if (_util_move_X_zeroing_conf)
             x_speed = std::any_cast<int32_t>(this->x_zeroing_speed);
         else
             x_speed = std::any_cast<int32_t>(this->x_operational_speed);
 
-        x_speed = x_speed * abs(dir);
+        x_speed = x_speed * abs(_util_move_X_dir);
 
         if (std::any_cast<uint8_t>(this->x_reverse_axis))
-            dir = -dir;
+            _util_move_X_dir = -_util_move_X_dir;
 
         this->Xawake();
 
-        if (use_zeroing_conf)
+        if (_util_move_X_zeroing_conf)
             this->X->setCurrent(std::any_cast<int32_t>(this->x_zeroing_current));
         else
             this->X->setCurrent(std::any_cast<int32_t>(this->x_operational_current));
@@ -651,7 +710,7 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
             MICROSTEPS_X));
 
         this->status.basic_status.status_flags.is_zeroing_x = 1;
-        this->X->rotate_infinite(dir);
+        this->X->rotate_infinite(_util_move_X_dir);
     }
     else
     {
@@ -665,27 +724,27 @@ int PuncherScheduler::util_move_X(int dir, bool use_zeroing_conf)
     return 0;
 }
 
-int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
+int PuncherScheduler::util_move_Y_cb()
 {
     if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_ZEROING) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
 
-    if (dir)
+    if (_util_move_Y_dir)
     {
         int32_t y_speed;
-        if (use_zeroing_conf)
+        if (_util_move_Y_zeroing_conf)
             y_speed = std::any_cast<int32_t>(this->y_zeroing_speed);
         else
             y_speed = std::any_cast<int32_t>(this->y_operational_speed);
 
-        y_speed = y_speed * abs(dir);
+        y_speed = y_speed * abs(_util_move_Y_dir);
 
         if (std::any_cast<uint8_t>(this->y_reverse_axis))
-            dir = -dir;
+            _util_move_Y_dir = -_util_move_Y_dir;
 
         this->Yawake();
 
-        if (use_zeroing_conf)
+        if (_util_move_Y_zeroing_conf)
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_zeroing_current));
         else
             this->Y->setCurrent(std::any_cast<int32_t>(this->y_operational_current));
@@ -697,7 +756,7 @@ int PuncherScheduler::util_move_Y(int dir, bool use_zeroing_conf)
             MICROSTEPS_Y));
 
         this->status.basic_status.status_flags.is_zeroing_y = 1;
-        this->Y->rotate_infinite(dir);
+        this->Y->rotate_infinite(_util_move_Y_dir);
     }
     else
     {
@@ -819,16 +878,9 @@ time_t PuncherScheduler::get_ETA()
 
 void PuncherScheduler::set_setting_value(puncher_event_setting_change_t *evt)
 {
-    puncher_setting_mapping_t item_mapping = setting_mapping.at(evt->item_name);
-    if (item_mapping.call_back(evt->data))
-    {
-        saveValue(evt->item_name, item_mapping);
-
-        notifyValueChange(evt);
-    }
+    xQueueSend(setting_queue, evt, portMAX_DELAY);
 }
 
-/* TODO: fix mem leak */
 void PuncherScheduler::get_setting_values(void *p_ui)
 {
     PuncherUI *ui = (PuncherUI *)p_ui;

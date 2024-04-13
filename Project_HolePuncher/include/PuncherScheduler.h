@@ -58,6 +58,13 @@ private:
     int pause_workload_cb();
     int delete_workload_cb();
 
+    int _util_move_X_dir;
+    bool _util_move_X_zeroing_conf;
+    int util_move_X_cb();
+    int _util_move_Y_dir;
+    bool _util_move_Y_zeroing_conf;
+    int util_move_Y_cb();
+
     /* Motor related */
     MotorController *X = NULL;
     MotorController *Y = NULL;
@@ -283,8 +290,11 @@ private:
 
     /* event loop task & event queue */
     QueueHandle_t evt_queue;
-    // QueueHandle_t evt_queue;
+    TaskHandle_t evt_loop;
     friend void evtHandleLoop(void *param);
+    QueueHandle_t setting_queue;
+    TaskHandle_t setting_loop;
+    friend void settingHandleLoop(void *param);
 
 public:
     PuncherScheduler();
