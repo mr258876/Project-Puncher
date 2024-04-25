@@ -6,9 +6,7 @@
 
 #include <Arduino.h>
 #include "driver/ledc.h"
-#include "soc/ledc_struct.h"
 #include "driver/pcnt.h"
-#include "soc/pcnt_struct.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "hal/wdt_hal.h"
@@ -43,7 +41,8 @@ private:
     /*
      * Callback Function
      */
-    std::function<void()> finish_callback = NULL;
+    std::function<void(void*)> finish_callback = NULL;
+    void* finish_callback_arg;
 
     /*
      * Motor Configuration
@@ -219,9 +218,10 @@ public:
     /*
      * Set finish callback
      */
-    void setFinishCallBack(std::function<void()> cb)
+    void setFinishCallBack(std::function<void(void*)> cb, void* arg)
     {
         finish_callback = cb;
+        finish_callback_arg = arg;
     }
 };
 

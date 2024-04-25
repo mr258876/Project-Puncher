@@ -52,10 +52,12 @@ void ui_event_ZOperationalCurrent(lv_event_t *e);
 void ui_event_ZIdleBehavior(lv_event_t *e);
 void ui_event_ZSleepCurrent(lv_event_t *e);
 void ui_event_ZCaliTarget(lv_event_t *e);
+void ui_event_ZCaliTargetExec(lv_event_t *e);
 void ui_event_ZCaliMeasure(lv_event_t *e);
 void ui_event_ZCaliResidual(lv_event_t *e);
 void ui_event_ZEncoderSwitch(lv_event_t *e);
 void ui_event_ZEncoderType(lv_event_t *e);
+void ui_event_ZEncoderCalibrateStart(lv_event_t *e);
 
 void ui_event_VoltageDropDown(lv_event_t * e);
 

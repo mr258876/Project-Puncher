@@ -1,12 +1,15 @@
-from typing import List
-from serial import Serial
+from typing import List, Iterable, Union
+from bleak import BleakClient, BleakScanner, BLEDevice
 from tqdm import tqdm
 import mido
 import time
 import logging
+import asyncio
 
 MIDI_FILE_PATH = "d:\Domino\ミカヅキ.mid" # path to midi file
-PUNCHER_SERIAL = "COM8" # com device
+PUNCHER_GATT_SERVICES = [
+    "00003201-0000-1000-D441-30F244F2E354"
+]
 
 class HolePuncher():
     PITCH_TO_MBNUM = {93: 30, 91: 29, 89: 28, 88: 27, 87: 26, 86: 25, 85: 24, 84: 23,
@@ -17,8 +20,9 @@ class HolePuncher():
     ser = None
     noteList: List = []
 
-    def __init__(self, port: str, bps: int):
-        self.ser = Serial(port, bps, timeout=5)
+    def __init__(self, device: Union[str, BLEDevice], services: Iterable[str]):
+        self.client = BleakClient(device, services=services, timeout=5)
+        services = self.client.get_services()
 
     def readSerial(self):
         while True:
@@ -135,13 +139,29 @@ class HolePuncher():
         self.ser.write(ba)
 
 
-if __name__ == '__main__':
+async def main():
     mifiFilePath = MIDI_FILE_PATH
-    puncherSerial = PUNCHER_SERIAL   # e.g. COM3 in windows
+    puncherService = PUNCHER_GATT_SERVICES   # e.g. COM3 in windows
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
     midi = mido.MidiFile(mifiFilePath)
-    puncher = HolePuncher(puncherSerial, 115200)
+
+    logging.info("Scanning devices...")
+    devices = await BleakScanner.discover()
+    for i in range(len(devices)):
+        logging.info(f"{i}. {devices[i]}")
+    n = input("Select device:")
+    if n.isdigit():
+        n = int(n)
+    else:
+        logging.info("Quit")
+        raise SystemExit
+
+    puncher = HolePuncher(devices[n], 115200)
     puncher.punchMidi(midi, pitch=0, zoom=1.0)
-    # puncher.readSerial()
+
+
+if __name__ == '__main__':
+    l = asyncio.get_event_loop()
+    l.run_until_complete(main())

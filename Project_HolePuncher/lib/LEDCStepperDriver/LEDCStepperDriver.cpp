@@ -1,4 +1,6 @@
 #include "LEDCStepperDriver.h"
+#include "soc/ledc_struct.h"
+#include "soc/pcnt_struct.h"
 
 #if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3
 
@@ -9,57 +11,76 @@ static portMUX_TYPE driver_spinlock = portMUX_INITIALIZER_UNLOCKED;
  *  reference to pcht_ll.h & ledc_ll.h
  *
  */
+
+/*
+    @brief Pause PCNT in interrupts by setting register
+*/
 static void IRAM_ATTR __pcnt_pause(uint8_t unit)
 {
     PCNT.ctrl.val |= 1 << (2 * unit + 1); // Set counter pause bit
 }
-
+/*
+    @brief Resume PCNT in interrupts by setting register
+*/
 static void IRAM_ATTR __pcnt_resume(uint8_t unit)
 {
     PCNT.ctrl.val &= ~(1 << (2 * unit + 1)); // Clear counter pause bit
 }
-
+/*
+    @brief Clear PCNT counts in interrupts by setting register
+*/
 static void IRAM_ATTR __pcnt_clear(uint8_t unit)
 {
     PCNT.ctrl.val |= 1 << (2 * unit);    // Set counter rst bit
     PCNT.ctrl.val &= ~(1 << (2 * unit)); // Clear counter rst bit
 }
-
+/*
+    @brief Check PCNT interrupt status by reading register
+*/
 static bool IRAM_ATTR __pcnt_is_intr_active(uint8_t unit)
 {
-    return ((PCNT.int_st.val) >> (unit)&1); // Get intr status bit
+    return ((PCNT.int_st.val) >> (unit) & 1); // Get intr status bit
 }
-
+/*
+    @brief Clear PCNT interrupt status by setting register
+*/
 static void IRAM_ATTR __pcnt_clear_intr(uint8_t unit)
 {
-    PCNT.int_clr.val |= (1 << unit); // Set intr clr bit
+    PCNT.int_clr.val |= (1 << unit);  // Set intr clr bit
+    PCNT.int_clr.val &= ~(1 << unit); // Clear intr clr bit
 }
-
+/*
+    @brief Read PCNT counts by reading register
+*/
 static int16_t IRAM_ATTR __pcnt_get_count(uint8_t unit)
 {
-    #if CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32
     return PCNT.cnt_unit[unit].cnt_val;
-    #elif CONFIG_IDF_TARGET_ESP32S3
+#elif CONFIG_IDF_TARGET_ESP32S3
     return PCNT.cnt_unit[unit].pulse_cnt_un;
-    #endif
+#endif
 }
-
+/*
+    @brief Set PCNT interrupt threshold by setting register
+*/
 static void IRAM_ATTR __pcnt_set_threshold(uint8_t unit, int16_t value)
 {
-    #if CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf1.cnt_thres0 = value;
-    #elif CONFIG_IDF_TARGET_ESP32S3
+#elif CONFIG_IDF_TARGET_ESP32S3
     PCNT.conf_unit[unit].conf1.cnt_thres0_un = value;
-    #endif
+#endif
 }
-
+/*
+    @brief Set PCNT interrupt threshold enable by setting register
+*/
 static void IRAM_ATTR __pcnt_set_threshold_enable(uint8_t unit, uint8_t enable)
 {
-    #if CONFIG_IDF_TARGET_ESP32
+#if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf0.thr_thres0_en = enable;
-    #elif CONFIG_IDF_TARGET_ESP32S3
+#elif CONFIG_IDF_TARGET_ESP32S3
     PCNT.conf_unit[unit].conf0.thr_thres0_en_un = enable;
-    #endif
+#endif
 }
 
 static void IRAM_ATTR __ledc_timer_pause(uint8_t mode, uint8_t timer)
@@ -137,7 +158,7 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
             /* finish callback */
             if (driver->finish_callback)
             {
-                driver->finish_callback();
+                driver->finish_callback(driver->finish_callback_arg);
             }
         }
         else
@@ -199,11 +220,11 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
         driver_id = 0;
     }
 
-    #if SOC_LEDC_SUPPORT_HS_MODE
+#if SOC_LEDC_SUPPORT_HS_MODE
     ledc_mode_t ledc_mode = (driver_id > 3 ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE);
-    #else
+#else
     ledc_mode_t ledc_mode = LEDC_LOW_SPEED_MODE;
-    #endif
+#endif
     ledc_timer_t ledc_timer = (driver_id > 3 ? static_cast<ledc_timer_t>(driver_id - 4) : static_cast<ledc_timer_t>(driver_id));
     ledc_channel_t ledc_channel = static_cast<ledc_channel_t>(driver_id);
     pcnt_unit_t pcnt_unit = static_cast<pcnt_unit_t>(driver_id);
@@ -228,11 +249,19 @@ LEDCStepperDriver::~LEDCStepperDriver()
 {
 }
 
+/*
+    @brief Resume LEDC timer and pwm output
+    @bug LEDC might not responding when resuming pwm multiple times in a short time
+*/
 void LEDCStepperDriver::driver_pwm_start()
 {
     if (pwm_running)
         driver_pwm_stop();
 
+    /*
+        Resume after ledc_stop()
+        Reference: https://esp32.com/viewtopic.php?t=2340
+    */
     ESP_ERROR_CHECK(ledc_set_freq(ledc_mode, ledc_timer, pulse_freq));
     ESP_ERROR_CHECK(ledc_timer_resume(ledc_mode, ledc_timer));
     ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << LEDC_TIMER_4_BIT) / 2));
@@ -247,15 +276,15 @@ void LEDCStepperDriver::driver_pwm_stop()
 }
 void LEDCStepperDriver::driver_pcnt_start(long steps)
 {
-    pcnt_counter_pause(pcnt_unit);
+    ESP_ERROR_CHECK(pcnt_counter_pause(pcnt_unit));
 
     if (steps < PCNT_THRES_VAL)
-        pcnt_set_event_value(pcnt_unit, PCNT_EVT_THRES_0, steps);
+        ESP_ERROR_CHECK(pcnt_set_event_value(pcnt_unit, PCNT_EVT_THRES_0, steps));
     else
-        pcnt_set_event_value(pcnt_unit, PCNT_EVT_THRES_0, PCNT_THRES_VAL);
+        ESP_ERROR_CHECK(pcnt_set_event_value(pcnt_unit, PCNT_EVT_THRES_0, PCNT_THRES_VAL));
 
-    pcnt_counter_clear(pcnt_unit);
-    pcnt_counter_resume(pcnt_unit);
+    ESP_ERROR_CHECK(pcnt_counter_clear(pcnt_unit));
+    ESP_ERROR_CHECK(pcnt_counter_resume(pcnt_unit));
     pcnt_running = true;
 }
 
@@ -336,11 +365,11 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     /* To use LEDC and PCNT on the same pin
        See https://esp32.com/viewtopic.php?t=18115 */
     gpio_set_direction(static_cast<gpio_num_t>(step_pin), GPIO_MODE_INPUT_OUTPUT);
-    #if SOC_LEDC_SUPPORT_HS_MODE
+#if SOC_LEDC_SUPPORT_HS_MODE
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (ledc_mode == LEDC_HIGH_SPEED_MODE ? (LEDC_HS_SIG_OUT0_IDX + ledc_channel) : (LEDC_LS_SIG_OUT0_IDX + ledc_channel)), 0, 0);
-    #else
+#else
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (LEDC_LS_SIG_OUT0_IDX + ledc_channel), 0, 0);
-    #endif
+#endif
 
     setRPM(rpm);
     setMicrostep(microsteps);

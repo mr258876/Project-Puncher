@@ -61,6 +61,7 @@ en-US:
   Mcode Tickrate: ~
   Calibration: ~
   Target Beats: ~
+  Move Target Beats: "Move\nto Target"
   Measured Beats: ~
   Measured Residual (mm): "Measured\nResidual (mm)"
   Punch Depth (mm): "Punch Depth\n(mm)"
@@ -70,6 +71,7 @@ en-US:
   Use Encoder: ~
   Encoder Type: ~
   _encoder_type_options: "AS5600"
+  Auto Calibrate: "Auto\nCalibrate"
   _version: "Firmware Version\n%s"
   _about_page_author: "@mr258876\n2023-2024\nPlease star this project on Github!"
   _tips_1: "tips: You could send mission by USB, Wi-Fi or Bluetooth."

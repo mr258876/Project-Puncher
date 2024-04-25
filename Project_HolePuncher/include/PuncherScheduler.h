@@ -151,6 +151,14 @@ private:
         return (int32_t)steps;
     }
 
+    static void _X_on_finish_move_static(void* arg);
+    static void _Y_on_finish_move_static(void* arg);
+    static void _Z_on_finish_move_static(void* arg);
+
+    void _X_on_finish_move();
+    void _Y_on_finish_move();
+    void _Z_on_finish_move();
+
     void initMotors();
 
     int _util_move_X_dir;
@@ -170,11 +178,14 @@ private:
     /* init seneors */
     inline void initSensors()
     {
-        if (sensor_Z)
+        if (this->sensor_Z)
         {
-            sensor_Z_avaliable = (sensor_Z->ping() == 0);
+            sensor_Z_avaliable = (this->sensor_Z->ping() == 0);
         }
     }
+
+    int start_sensor_calibration_Z_cb();
+    void onCalibratingZ();
 
     /* user interfaces */
     std::vector<PuncherUI *> ui_list;
@@ -304,11 +315,11 @@ public:
         }
     }
 
-    inline void attachPositionSensors(PositionSensor *sensor_X, PositionSensor *sensor_Y, PositionSensor *sensor_Z)
+    inline void attachPositionSensors(PositionSensor *X, PositionSensor *Y, PositionSensor *Z)
     {
-        this->sensor_X = sensor_X;
-        this->sensor_Y = sensor_Y;
-        this->sensor_Z = sensor_Z;
+        this->sensor_X = X;
+        this->sensor_Y = Y;
+        this->sensor_Z = Z;
 
         if (has_begin)
         {
@@ -355,6 +366,7 @@ public:
     int util_move_Y(int dir, bool use_zeroing_speed);
     int read_sg_result(int axis);     // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z
     int start_auto_zeroing(int axis); // Same as above
+    int start_encoder_calibrate(int axis);
     unsigned int set_status(unsigned int status_code);
     unsigned int get_status();
     time_t get_ETA();

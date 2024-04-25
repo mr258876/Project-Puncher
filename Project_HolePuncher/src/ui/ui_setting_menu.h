@@ -65,10 +65,12 @@ extern lv_obj_t * ui_setting_z_operational_current;
 extern lv_obj_t * ui_setting_z_idle_behavior;
 extern lv_obj_t * ui_setting_z_sleep_current;
 extern lv_obj_t * ui_setting_z_cali_target;
+extern lv_obj_t * ui_setting_z_cali_start_move;
 extern lv_obj_t * ui_setting_z_cali_measure;
 extern lv_obj_t * ui_setting_z_cali_residual;
 extern lv_obj_t * ui_setting_z_encoder_switch;
 extern lv_obj_t * ui_setting_z_encoder_type;
+extern lv_obj_t * ui_setting_z_encoder_calibrate;
 
 extern lv_obj_t * ui_setting_power_voltage;
 

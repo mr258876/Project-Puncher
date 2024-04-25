@@ -63,8 +63,8 @@ public:
     /* Start Zeroing */
     virtual motor_res_t startZeroing(int dir, int thres) = 0;
 
-    /* Movement finish callback */
-    virtual motor_res_t setMoveFinishCallBack(std::function<void()> cb) = 0;
+    /* Movement finish callback, will be called in isr */
+    virtual motor_res_t setMoveFinishCallBack(std::function<void(void*)> cb, void* arg) = 0;
     /* Zeroing finish callback */
     virtual motor_res_t setZeroingFinishCallBack(std::function<void()> cb) = 0;
 };

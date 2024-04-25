@@ -1,7 +1,7 @@
 #include "PowerManager.h"
 
-#define IsrEvent            (1 << 0)    // 0b1
-#define PowerLevelSetEvent  (1 << 1)    // 0b10
+#define IsrEvent (1 << 0)           // 0b1
+#define PowerLevelSetEvent (1 << 1) // 0b10
 
 static uint8_t get_power_io(pm_votage_t votage)
 {
@@ -38,31 +38,25 @@ void TaskProcessPGood(void *pvParameters)
     {
         evt = xEventGroupWaitBits(pm->eg, 0xFF, pdTRUE, pdFALSE, portMAX_DELAY);
 
-        if (evt & PowerLevelSetEvent) evt = xEventGroupWaitBits(pm->eg, IsrEvent, pdTRUE, pdTRUE, pdMS_TO_TICKS(pm->timeout));
+        if (evt & PowerLevelSetEvent)
+            evt = xEventGroupWaitBits(pm->eg, IsrEvent, pdTRUE, pdTRUE, pdMS_TO_TICKS(pm->timeout));
 
-        if (evt & IsrEvent)
+        /*
+            Read the value no matter there is a falling edge,
+            since the voltage could already in acquired state
+         */
+        uint8_t val = 0;
+        xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
         {
-            uint8_t val = 0;
-            xSemaphoreTake(I2C1Mutex, portMAX_DELAY);
-            {
-                val = pm->io->read8();
-                pm->io->write8(val);
-            }
-            xSemaphoreGive(I2C1Mutex);
+            val = pm->io->read8();
+            pm->io->write8(val);
+        }
+        xSemaphoreGive(I2C1Mutex);
 
-            if (pm->cb)
-            {
-                pm->cb(val >> 7);    // 0 for power good
-                ESP_LOGI("PowerManager", "readings: %d", val);
-            }
-        } 
-        else
+        if (pm->cb)
         {
-            if (pm->cb)
-            {
-                pm->cb(1);    // error on timeout
-                ESP_LOGI("PowerManager", "Acquire Fail!");
-            }
+            pm->cb(val >> 7); // 0 for power good
+            ESP_LOGI("PowerManager", "readings: %d", val);
         }
     }
 }
@@ -82,7 +76,7 @@ void PowerManager::begin()
     pinMode(int_pin, INPUT_PULLUP);
     attachInterruptArg(int_pin, pm_isr, this, FALLING);
 
-    xTaskCreatePinnedToCore(TaskProcessPGood, "fTaskProcessPGood", 4096, this, 3, NULL, 1);
+    assert(xTaskCreatePinnedToCore(TaskProcessPGood, "fTaskProcessPGood", 4096, this, 3, NULL, 1) == pdPASS);
 }
 
 void PowerManager::acquire_voltage(pm_votage_t votage)

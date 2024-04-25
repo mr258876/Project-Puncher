@@ -17,7 +17,7 @@ struct __packed puncher_basic_status_t
     uint8_t has_mission : 1;
     uint8_t is_transmitting_data : 1;
     uint8_t is_feeding_paper : 1;
-    uint8_t is_running : 1;
+    uint8_t is_running : 1; // <- executing task
     uint8_t is_zeroing_x: 1;
     uint8_t is_zeroing_y: 1;
     uint8_t is_zeroing_z: 1;
@@ -31,6 +31,9 @@ struct __packed puncher_basic_status_t
     uint8_t sensor_err_y: 1;
     uint8_t sensor_err_z: 1;
     uint8_t power_err: 1;
+    uint8_t is_calibrating_x: 1;
+    uint8_t is_calibrating_y: 1;
+    uint8_t is_calibrating_z: 1;
 };
 
 #define PUNCHER_STATUS_HAS_ERROR            (1 << 0)
@@ -42,8 +45,9 @@ struct __packed puncher_basic_status_t
 #define PUNCHER_STATUS_IS_ZEROING_Y         (1 << 6)
 #define PUNCHER_STATUS_IS_ZEROING_Z         (1 << 7)
 #define PUNCHER_STATUS_BUSY_MASK            (~0b11)
-#define PUNCHER_STATUS_IS_ZEROING           (0b11100000)
-#define PUNCHER_STATUS_ERROR_CHECK          (0b111111111100000000)
+#define PUNCHER_STATUS_IS_ZEROING           (0b111 << 5)
+#define PUNCHER_STATUS_ERROR_CHECK          (0b1111111111 << 8)
+#define PUNCHER_STATUS_IS_CALIBRATING       (0b111 << 18)
 
 
 struct __packed puncher_connectivity_status_t
@@ -112,6 +116,9 @@ typedef enum {
     EVT_ON_SG_RESULT_REQUEST_X,
     EVT_ON_SG_RESULT_REQUEST_Y,
     EVT_ON_SG_RESULT_REQUEST_Z,
+    EVT_ON_ENCODER_CALI_START_REQUEST_X,
+    EVT_ON_ENCODER_CALI_START_REQUEST_Y,
+    EVT_ON_ENCODER_CALI_START_REQUEST_Z,
 
 } scheduler_evt_t;
 

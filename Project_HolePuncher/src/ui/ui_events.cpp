@@ -470,6 +470,27 @@ void ui_event_ZCaliTarget(lv_event_t *e)
         lvgl_ui->getScheduler()->set_setting_value(&evt);
     }
 }
+void ui_event_ZCaliTargetExec(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        int res = lvgl_ui->getScheduler()->data_transmit_mode(1);
+        if (res) return;
+
+        res = lvgl_ui->getScheduler()->add_hold_mcode(80, 0, 0);
+        for (size_t i = 0; i < lv_spinbox_get_value(lv_obj_get_child(ui_setting_z_cali_target, -2)); i++)
+        {
+            res = lvgl_ui->getScheduler()->add_hold_mcode(0, 0, 96);
+        }
+        res = lvgl_ui->getScheduler()->add_hold_mcode(90, 0, 0);
+
+        res = lvgl_ui->getScheduler()->data_transmit_mode(0);
+
+        res = lvgl_ui->getScheduler()->start_workload();
+    }
+}
 void ui_event_ZCaliMeasure(lv_event_t *e)
 {
     lv_obj_t *obj = e->target;
@@ -508,6 +529,15 @@ void ui_event_ZEncoderType(lv_event_t *e)
     {
         puncher_event_setting_change_t evt = {"z_encoder_type", lv_dropdown_get_selected(obj)};
         lvgl_ui->getScheduler()->set_setting_value(&evt);
+    }
+}
+void ui_event_ZEncoderCalibrateStart(lv_event_t *e)
+{
+    lv_obj_t *obj = e->target;
+
+    if (e->code == LV_EVENT_CLICKED)
+    {
+        lvgl_ui->getScheduler()->start_encoder_calibrate(0b100);
     }
 }
 

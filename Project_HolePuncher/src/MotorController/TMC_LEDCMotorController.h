@@ -80,9 +80,9 @@ public:
     motor_res_t startZeroing(int dir, int thres);
 
     /* Movement finish callback */
-    motor_res_t setMoveFinishCallBack(std::function<void()> cb);
+    motor_res_t setMoveFinishCallBack(std::function<void(void*)> cb, void* arg);    // From ISR
     /* Zeroing finish callback */
-    motor_res_t setZeroingFinishCallBack(std::function<void()> cb);
+    motor_res_t setZeroingFinishCallBack(std::function<void()> cb); // NOT from ISR
 };
 
 #endif // _TMC_LEDCMOTORCONTROLLER_H_

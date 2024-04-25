@@ -61,6 +61,7 @@ zh-CN:
   Mcode Tickrate: Mcode 每小节tick数
   Calibration: 校准
   Target Beats: 目标拍数
+  Move Target Beats: "移动至\n目标拍数"
   Measured Beats: 测量拍数
   Measured Residual (mm): 测量残差(mm)
   Punch Depth (mm): 打孔深度(mm)
@@ -70,6 +71,7 @@ zh-CN:
   Use Encoder: 启用编码器
   Encoder Type: 编码器类型
   _encoder_type_options: "AS5600"
+  Auto Calibrate: 自动校准
   _version: "固件版本\n%s"
   _about_page_author: "@mr258876\n2023-2024\n请在 Github 上为该项目点 Star !"
   _tips_1: "提示: 您可以通过USB, 无线网络或蓝牙传输作业任务。"

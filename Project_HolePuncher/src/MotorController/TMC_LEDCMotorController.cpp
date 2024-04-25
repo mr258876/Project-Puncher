@@ -33,7 +33,11 @@ void evt_loop(void *param)
                 msg.controller->driver->TCOOLTHRS(0);
             }
             xSemaphoreGive(*DUARTMutex);
-            msg.controller->zeroing_finish_callback();
+
+            if (msg.controller->zeroing_finish_callback)
+            {
+                msg.controller->zeroing_finish_callback();
+            }
             break;
 
         default:
@@ -80,7 +84,7 @@ motor_res_t TMC_LEDCMotorController::begin()
     if (!evt_loop_handler)
     {
         evt_queue = xQueueCreate(8, sizeof(TMC_LEDCMotorController_evt_msg));
-        xTaskCreatePinnedToCore(evt_loop, "TLMCevtLoop", 4096, &evt_queue, 2, &evt_loop_handler, 1);
+        xTaskCreate(evt_loop, "TLMCevtLoop", 4096, &evt_queue, 1, &evt_loop_handler);
     }
 
     /*  Notice:
@@ -104,6 +108,7 @@ motor_res_t TMC_LEDCMotorController::begin()
         driver->begin();
         driver->microsteps(micro_steps);
         driver->TCOOLTHRS(0);
+        driver->dedge(0);   // Make sure we only step on rising edge
     }
     xSemaphoreGive(*DUARTMutex);
 
@@ -265,9 +270,9 @@ motor_res_t TMC_LEDCMotorController::startZeroing(int dir, int thres)
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::setMoveFinishCallBack(std::function<void()> cb)
+motor_res_t TMC_LEDCMotorController::setMoveFinishCallBack(std::function<void(void*)> cb, void* arg)
 {
-    stepper->setFinishCallBack(cb);
+    stepper->setFinishCallBack(cb, arg);
     return MOTOR_RES_SUCCESS;
 }
 

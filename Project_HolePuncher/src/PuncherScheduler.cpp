@@ -34,6 +34,7 @@ void evtHandleLoop(void *param)
             default:
                 break;
             }
+
             if (scheduler->status.basic_status.status_flags.is_running)
             {
                 scheduler->handleMotorFinish();
@@ -142,6 +143,25 @@ void evtHandleLoop(void *param)
                 break;
             case EVT_ON_SG_RESULT_REQUEST_Z:
                 scheduler->read_sg_result_Z_cb();
+                break;
+            default:
+                break;
+            }
+            continue;
+        }
+
+        if (evt <= EVT_ON_ENCODER_CALI_START_REQUEST_Z)
+        {
+            switch (evt)
+            {
+            case EVT_ON_ENCODER_CALI_START_REQUEST_X:
+                // scheduler->start_sensor_calibration_X_cb();
+                break;
+            case EVT_ON_ENCODER_CALI_START_REQUEST_Y:
+                // scheduler->start_sensor_calibration_Y_cb();
+                break;
+            case EVT_ON_ENCODER_CALI_START_REQUEST_Z:
+                scheduler->start_sensor_calibration_Z_cb();
                 break;
             default:
                 break;
@@ -635,6 +655,29 @@ int PuncherScheduler::add_hold_mcode(int x, int y, int z)
     return res;
 }
 
+void IRAM_ATTR PuncherScheduler::_X_on_finish_move_static(void *arg) { reinterpret_cast<PuncherScheduler *>(arg)->_X_on_finish_move(); }
+void IRAM_ATTR PuncherScheduler::_Y_on_finish_move_static(void *arg) { reinterpret_cast<PuncherScheduler *>(arg)->_Y_on_finish_move(); }
+void IRAM_ATTR PuncherScheduler::_Z_on_finish_move_static(void *arg) { reinterpret_cast<PuncherScheduler *>(arg)->_Z_on_finish_move(); }
+
+void IRAM_ATTR PuncherScheduler::_X_on_finish_move()
+{
+    scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X;
+    BaseType_t xHigherPriorityTaskWoken;
+    xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken);
+}
+void IRAM_ATTR PuncherScheduler::_Y_on_finish_move()
+{
+    scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Y;
+    BaseType_t xHigherPriorityTaskWoken;
+    xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken);
+}
+void IRAM_ATTR PuncherScheduler::_Z_on_finish_move()
+{
+    scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Z;
+    BaseType_t xHigherPriorityTaskWoken;
+    xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken);
+}
+
 void PuncherScheduler::initMotors()
 {
     ESP_LOGI("PuncherScheduler", "X driver status: %d", X->pingDriver());
@@ -649,12 +692,9 @@ void PuncherScheduler::initMotors()
     updateYdriver();
     updateZdriver();
 
-    this->X->setMoveFinishCallBack([this]()
-                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
-    this->Y->setMoveFinishCallBack([this]()
-                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
-    this->Z->setMoveFinishCallBack([this]()
-                                   { scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Z; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
+    this->X->setMoveFinishCallBack(_X_on_finish_move_static, this);
+    this->Y->setMoveFinishCallBack(_Y_on_finish_move_static, this);
+    this->Z->setMoveFinishCallBack(_Z_on_finish_move_static, this);
 
     Xsleep();
     Ysleep();
@@ -930,7 +970,7 @@ int PuncherScheduler::start_auto_zeroing_X_cb()
     this->Xawake();
     this->status.basic_status.status_flags.is_zeroing_x = 1;
     this->X->setZeroingFinishCallBack([this]()
-                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
+                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; xQueueSend(this->evt_queue, &evt, portMAX_DELAY); });
     this->X->startZeroing(std::any_cast<uint8_t>(this->x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->x_zeroing_torch_thres));
     return 0;
 }
@@ -946,8 +986,38 @@ int PuncherScheduler::start_auto_zeroing_Y_cb()
     this->Yawake();
     this->status.basic_status.status_flags.is_zeroing_y = 1;
     this->Y->setZeroingFinishCallBack([this]()
-                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; BaseType_t xHigherPriorityTaskWoken; xQueueSendFromISR(this->evt_queue, &evt, &xHigherPriorityTaskWoken); });
+                                      { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; xQueueSend(this->evt_queue, &evt, portMAX_DELAY); });
     this->Y->startZeroing(std::any_cast<uint8_t>(this->y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->y_zeroing_torch_thres));
+    return 0;
+}
+
+int PuncherScheduler::start_encoder_calibrate(int axis)
+{
+    if (this->status.basic_status.status_data & PUNCHER_STATUS_BUSY_MASK)
+        return 1;
+
+    if (!axis)
+        axis = ~axis;
+
+    scheduler_evt_t evt;
+    if (axis & 0b100)
+    {
+        evt = EVT_ON_ENCODER_CALI_START_REQUEST_Z;
+        xQueueSend(evt_queue, &evt, portMAX_DELAY);
+    }
+
+    return 0;
+}
+
+int PuncherScheduler::start_sensor_calibration_Z_cb()
+{
+    sensor_Z_avaliable = false;
+    status.basic_status.status_flags.is_calibrating_z = 1;
+    this->Zawake();
+    this->Z->setSpeed(this->calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, 200, MICROSTEPS_Z));
+    this->sensor_Z->setCalibrationFinishCallBack([this]()
+                                                 { status.basic_status.status_flags.is_calibrating_z = 0; Z->setMoveFinishCallBack(this->_Z_on_finish_move_static, this); Zsleep(); });
+    this->sensor_Z->startCalibration(this->Z, MOTOR_STEPS * MICROSTEPS_Z);
     return 0;
 }
 

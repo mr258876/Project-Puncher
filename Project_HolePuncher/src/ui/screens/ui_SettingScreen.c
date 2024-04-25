@@ -65,10 +65,12 @@ lv_obj_t * ui_setting_z_operational_current;
 lv_obj_t * ui_setting_z_idle_behavior;
 lv_obj_t * ui_setting_z_sleep_current;
 lv_obj_t * ui_setting_z_cali_target;
+lv_obj_t * ui_setting_z_cali_start_move;
 lv_obj_t * ui_setting_z_cali_measure;
 lv_obj_t * ui_setting_z_cali_residual;
 lv_obj_t * ui_setting_z_encoder_switch;
 lv_obj_t * ui_setting_z_encoder_type;
+lv_obj_t * ui_setting_z_encoder_calibrate;
 
 lv_obj_t * ui_setting_power_voltage;
 
@@ -457,6 +459,7 @@ void ui_SettingScreen_screen_init(void)
     create_text(ui_setting_z_axis_page, NULL, _("Calibration"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_z_axis_page);
     ui_setting_z_cali_target = create_spinbox(section, NULL, _("Target Beats"), 1, 500, 50, 3, 0, ui_event_ZCaliTarget);
+    ui_setting_z_cali_start_move = create_btn(section, NULL, _("Move Target Beats"), NULL, _("Execute"), ui_event_ZCaliTargetExec);
     ui_setting_z_cali_measure = create_spinbox(section, NULL, _("Measured Beats"), 1, 500, 50, 3, 0, ui_event_ZCaliMeasure);
     ui_setting_z_cali_residual = create_spinbox(section, NULL, _("Measured Residual (mm)"), -8000, 8000, 0, 4, 1, ui_event_ZCaliResidual);
 
@@ -464,6 +467,7 @@ void ui_SettingScreen_screen_init(void)
     section = lv_menu_section_create(ui_setting_z_axis_page);
     ui_setting_z_encoder_switch = create_switch(section, NULL, _("Use Encoder"), false, ui_event_ZEncoderSwitch);
     ui_setting_z_encoder_type = create_dropdown(section, NULL, _("Encoder Type"), _("_encoder_type_options"), 0, ui_event_ZEncoderType);
+    ui_setting_z_encoder_calibrate = create_btn(section, NULL, _("Auto Calibrate"), NULL, _("Execute"), ui_event_ZEncoderCalibrateStart);
 
 
     /*Create power page*/
