@@ -1014,7 +1014,7 @@ int PuncherScheduler::start_sensor_calibration_Z_cb()
     sensor_Z_avaliable = false;
     status.basic_status.status_flags.is_calibrating_z = 1;
     this->Zawake();
-    this->Z->setSpeed(this->calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, 200, MICROSTEPS_Z));
+    this->Z->setSpeed(this->calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, (int32_t)200, MICROSTEPS_Z));
     this->sensor_Z->setCalibrationFinishCallBack([this]()
                                                  { status.basic_status.status_flags.is_calibrating_z = 0; Z->setMoveFinishCallBack(this->_Z_on_finish_move_static, this); Zsleep(); });
     this->sensor_Z->startCalibration(this->Z, MOTOR_STEPS * MICROSTEPS_Z);
