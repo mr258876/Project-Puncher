@@ -13,7 +13,6 @@
 #include "SerialInterface/SerialInterface.h"
 #include "BLEInterface/BLEInterface.h"
 #include "esp_vfs_fat.h"
-#include "esp_spiram.h"
 
 static PuncherScheduler *scheduler;
 static PowerManager *pm;

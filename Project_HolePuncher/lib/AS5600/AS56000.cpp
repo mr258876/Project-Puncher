@@ -66,14 +66,14 @@ AS5600_Config AS5600::getConfig()
 
   AS5600_Config config = {
     // low 8 bits
-    uint8_t(low & B00000011),      // powerMode 2 bits
-    uint8_t((low & B00001100) >> 2), // hysteresis 2 bits
-    uint8_t((low & B00110000) >> 4), // outputStage 4 bits
-    uint8_t((low & B11000000) >> 6), // pwmFrequency 2 bits
+    uint8_t(low & 0b00000011),      // powerMode 2 bits
+    uint8_t((low & 0b00001100) >> 2), // hysteresis 2 bits
+    uint8_t((low & 0b00110000) >> 4), // outputStage 4 bits
+    uint8_t((low & 0b11000000) >> 6), // pwmFrequency 2 bits
     // high 6bits
-    uint8_t(high & B00000011),     // slowFilter 2 bits 
-    uint8_t((high & B00011100) >> 2),// fast filter threshold 3 bits
-    uint8_t((high & B00100000) >> 5)// watchdog 1 bit
+    uint8_t(high & 0b00000011),     // slowFilter 2 bits 
+    uint8_t((high & 0b00011100) >> 2),// fast filter threshold 3 bits
+    (bool)uint8_t((high & 0b00100000) >> 5)// watchdog 1 bit
   };
   return config;
 }

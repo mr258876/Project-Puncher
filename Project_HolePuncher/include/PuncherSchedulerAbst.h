@@ -15,6 +15,7 @@ public:
     virtual int data_transmit_mode(bool transmit_mode) = 0;
     virtual int feed_paper_mode(bool feed_paper_mode) = 0;
     virtual int add_hole(scheduler_hole_t &h) = 0;
+    /* Note: y in mcode is actually Z axis! */
     virtual int add_hold_mcode(int x, int y, int z) = 0;
 
     virtual int feed_paper(int gear) = 0;

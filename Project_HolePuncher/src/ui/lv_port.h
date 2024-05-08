@@ -9,7 +9,7 @@ extern "C" {
 #define LCD_WIDTH       (320)
 #define LCD_HEIGHT      (240)
 
-#define LCD_BUF_HEIGHT  (240)
+#define LCD_BUF_HEIGHT  (60)
 
 #define SCLK_PIN        (12)
 #define MOSI_PIN        (11)

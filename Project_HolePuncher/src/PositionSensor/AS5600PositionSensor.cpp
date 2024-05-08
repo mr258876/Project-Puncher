@@ -267,7 +267,10 @@ void tsk_axis_cali(void *param)
     ESP_LOGI("AS5600", "%d %d %d %d %d", start_pos, start_pos_mod, start_pos_int, curr_offset, finished);
     cali_str->sensor->use_cali_profile = true;
 
-    cali_str->sensor->cal_fn_cb();
+    if (cali_str->sensor->cal_fn_cb)
+    {
+        cali_str->sensor->cal_fn_cb();
+    }
 
     vTaskResume(loop_tsk);
     vEventGroupDelete(cali_str->evt_group);

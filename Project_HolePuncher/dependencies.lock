@@ -1,9 +1,39 @@
 dependencies:
+  espressif/esp_modem:
+    component_hash: e48da33fee082dd9d9a97a354a228057e07a14ac108766b40ad84e018205410a
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.1.0
+  espressif/esp_tinyusb:
+    component_hash: 5e37c53a10518f40b288a48afec4ab549784be9e6eb74add699a30395543418a
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.0.3
+  espressif/mdns:
+    component_hash: 9ff9c578fc3a5ea3c68e807233e47f2ce6b2492a92d7a9356ae5c29ab45f0fde
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.3.0
+  espressif/tinyusb:
+    component_hash: 51f2fe138a3095c001467e63b46a77def8e4a136fb49f7cf7766533e772af820
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.15.0~8
   idf:
     component_hash: null
     source:
       type: idf
-    version: 4.4.6
-manifest_hash: 8cd46d97b03166876b58ac15526af0e01ec9bcaaaa10e1ac104e2cd73f72b2c0
+    version: 5.1.3
+  joltwallet/littlefs:
+    component_hash: 7e9b6a652f846df473870263f7ecc0decdf54e6a04189af0c6a78df9d20bda0c
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.14.4
+manifest_hash: cc88e5ede2377673c87b4dac514e345a31eef135823649380f30f6c01e84b07d
 target: esp32s3
 version: 1.0.0

@@ -81,6 +81,8 @@
         "esp32-hal-tinyusb.h": "c",
         "ui_setting_menu.h": "c",
         "ui_font_noto_sans.h": "c",
-        "ffat.h": "c"
+        "ffat.h": "c",
+        "esp_psram.h": "c",
+        "esp_system.h": "c"
     }
 }

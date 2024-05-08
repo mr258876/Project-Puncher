@@ -80,7 +80,7 @@ void evtHandleLoop(void *param)
             continue;
         }
 
-        if (evt <= EVT_ON_WORKLOAD_DELETE)
+        if (evt <= EVT_ON_POWER_STATUS_CHANGE)
         {
             switch (evt)
             {
@@ -521,7 +521,7 @@ int PuncherScheduler::start_workload_cb()
 {
     if (status.basic_status.status_data & (~PUNCHER_STATUS_HAS_MISSION))
     {
-        ESP_LOGI(TAG, "Start workload fail! Status: %u", status.basic_status.status_data);
+        ESP_LOGI(TAG, "Start workload fail! Status: %lu", status.basic_status.status_data);
         return 1;
     }
 
@@ -1147,23 +1147,20 @@ int PuncherScheduler::nextHole()
         }
         else
         {
-            x_finished = 1;
-            _x_target_pos = _x_pos;
-            scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
+            /* set finish flag in cb */
+            scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X;
             xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
         }
     }
     else
     {
-        x_finished = 1;
-        _x_target_pos = _x_pos;
-        y_finished = 1;
-        _y_target_pos = _y_pos;
-        y_status = 2;
-
-        scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X;
+        /* set finish flag in cb */
+        scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
-        evt = EVT_ON_ZEROING_FINISH_Y;
+
+        y_status = 2;
+        /* set finish flag in cb */
+        evt = EVT_ON_MOVE_FINISH_Y;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
 
@@ -1175,10 +1172,8 @@ int PuncherScheduler::nextHole()
     }
     else
     {
-        z_finished = 1;
-        _z_target_pos = _z_pos;
-
-        scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Z;
+        /* set finish flag in cb */
+        scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Z;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
 
@@ -1217,6 +1212,7 @@ void PuncherScheduler::onFinishZ()
         if (diff_steps > 2 || diff_steps < -2)
         {
             // move the extra steps
+            z_finished = 0;
             Z->move(diff_steps);
             return;
         }

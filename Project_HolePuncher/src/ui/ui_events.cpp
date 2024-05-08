@@ -482,7 +482,7 @@ void ui_event_ZCaliTargetExec(lv_event_t *e)
         res = lvgl_ui->getScheduler()->add_hold_mcode(80, 0, 0);
         for (size_t i = 0; i < lv_spinbox_get_value(lv_obj_get_child(ui_setting_z_cali_target, -2)); i++)
         {
-            res = lvgl_ui->getScheduler()->add_hold_mcode(0, 0, 96);
+            res = lvgl_ui->getScheduler()->add_hold_mcode(0, 96, 0);
         }
         res = lvgl_ui->getScheduler()->add_hold_mcode(90, 0, 0);
 

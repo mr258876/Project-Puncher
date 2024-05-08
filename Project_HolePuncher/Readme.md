@@ -27,7 +27,7 @@ lv_i18n compile -t 'i18n/*.yml' -o 'src/ui/i18n'
 ```
 
 ### FATFS page code warning
-In `.platformio\packages\framework-espidf\components\fatfs\src\ff.c`
+In `.platformio/packages/framework-espidf/components/fatfs/src/ff.c`
 Line 541
 ```patch
 -541 static const BYTE Ct855[] = TBL_CT855;
@@ -37,10 +37,35 @@ Line 541
 ### Arduino TinyUSB Header BUG
 In `.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp`
 
-Line 14-15
+Line 18-19
 ```patch
--14 #include "USB.h"
--15 #if CONFIG_TINYUSB_CDC_ENABLED
-+14 #include "USB.h"
-+15 #if CONFIG_TINYUSB_CDC_ENABLED && CONFIG_TINYUSB_ENABLED
+-18 #include "USB.h"
+-19 #if CONFIG_TINYUSB_CDC_ENABLED
++18 #include "USB.h"
++19 #if CONFIG_TINYUSB_CDC_ENABLED && CONFIG_TINYUSB_ENABLED
+```
+
+### stringop-truncation warning
+In `.platformio/packages/framework-arduinoespressif32/cores/esp32/MacAddress.cpp`
+
+Line 74-76
+```patch
++74 #pragma GCC diagnostic push
++   #pragma GCC diagnostic ignored "-Wstringop-truncation"
+ 75 strncpy(cs, buf, sizeof(cs));  //strtok modifies the buffer: copy to working buffer.
++76 #pragma GCC diagnostic pop
+
++93 #pragma GCC diagnostic push
++   #pragma GCC diagnostic ignored "-Wstringop-truncation"
+ 94 strncpy(cs, buf, sizeof(cs));  //strtok modifies the buffer: copy to working buffer.
++95 #pragma GCC diagnostic pop
+```
+
+### printf format warning
+In `.pio/libdeps/esp32s3/NimBLE-Arduino/src/nimble/nimble/host/src/ble_gap.c`
+ 
+Line 318
+```patch
+-318 BLE_HS_LOG(INFO, "duration=%dms", duration_ms);
++318 BLE_HS_LOG(INFO, "duration=%ldms", duration_ms);
 ```

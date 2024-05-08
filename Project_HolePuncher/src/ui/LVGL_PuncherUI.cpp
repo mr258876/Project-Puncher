@@ -99,8 +99,7 @@ void LVGLPuncherUI::begin()
 
     LV_LOG_INFO("LVGL Booted.");
 
-    ledcSetup(LCD_LEDC_CHANNEL, 48000, 8);
-    ledcAttachPin(BL_PIN, LCD_LEDC_CHANNEL);
+    ledcAttachChannel(BL_PIN, 48000, 8, LCD_LEDC_CHANNEL);
     this->setBrightness(1);
 }
 
@@ -128,7 +127,7 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
     xSemaphoreTake(LVGLMutex, portMAX_DELAY);
     if (msg->basic_status.status_flags.is_running)
     {
-        lv_label_set_text_fmt(ui_Label5, "%d/%d", msg->finished_length, msg->task_length);
+        lv_label_set_text_fmt(ui_Label5, "%lu/%lu", msg->finished_length, msg->task_length);
 
         lv_obj_add_flag(ui_FeedButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_SettingButton, LV_OBJ_FLAG_HIDDEN);
@@ -195,7 +194,7 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
         lv_obj_clear_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_Home_TipsLabel, LV_OBJ_FLAG_HIDDEN);
 
-        lv_label_set_text_fmt(ui_Label7, "%02ld:%02ld:%02ld", msg->ETA / 3600, msg->ETA % 3600 / 60, msg->ETA % 60);
+        lv_label_set_text_fmt(ui_Label7, "%02Ld:%02Ld:%02Ld", msg->ETA / 3600, msg->ETA % 3600 / 60, msg->ETA % 60);
         time_t *timer_eta = (time_t *)ui_ETA_timer->user_data;
         *timer_eta = msg->ETA;
         lv_timer_reset(ui_ETA_timer);
@@ -220,7 +219,7 @@ void LVGLPuncherUI::handleSettingValueChange(puncher_event_setting_change_t *msg
 
 void LVGLPuncherUI::setBrightness(int brightness)
 {
-    ledcWrite(LCD_LEDC_CHANNEL, brightness);
+    ledcWrite(BL_PIN, brightness);
 }
 
 void LVGLPuncherUI::setLanguage(uint16_t lang_id)

@@ -366,10 +366,18 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
        See https://esp32.com/viewtopic.php?t=18115 */
     gpio_set_direction(static_cast<gpio_num_t>(step_pin), GPIO_MODE_INPUT_OUTPUT);
 #if SOC_LEDC_SUPPORT_HS_MODE
+#if ESP_IDF_VERSION_MAJOR < 5
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (ledc_mode == LEDC_HIGH_SPEED_MODE ? (LEDC_HS_SIG_OUT0_IDX + ledc_channel) : (LEDC_LS_SIG_OUT0_IDX + ledc_channel)), 0, 0);
 #else
+    esp_rom_gpio_connect_out_signal(static_cast<gpio_num_t>(step_pin), (ledc_mode == LEDC_HIGH_SPEED_MODE ? (LEDC_HS_SIG_OUT0_IDX + ledc_channel) : (LEDC_LS_SIG_OUT0_IDX + ledc_channel)), 0, 0);
+#endif  // ESP_IDF_VERSION_MAJOR < 5
+#else
+#if ESP_IDF_VERSION_MAJOR < 5
     gpio_matrix_out(static_cast<gpio_num_t>(step_pin), (LEDC_LS_SIG_OUT0_IDX + ledc_channel), 0, 0);
-#endif
+#else
+    esp_rom_gpio_connect_out_signal(static_cast<gpio_num_t>(step_pin), (LEDC_LS_SIG_OUT0_IDX + ledc_channel), 0, 0);
+#endif  // ESP_IDF_VERSION_MAJOR < 5
+#endif  // SOC_LEDC_SUPPORT_HS_MODE
 
     setRPM(rpm);
     setMicrostep(microsteps);
