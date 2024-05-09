@@ -1,5 +1,5 @@
 from typing import List, Iterable, Union
-from bleak import BleakClient, BleakScanner, BLEDevice
+from bleak import BleakClient, BleakScanner, BLEDevice, BleakGATTServiceCollection
 from tqdm import tqdm
 import mido
 import time
@@ -7,8 +7,10 @@ import logging
 import asyncio
 
 MIDI_FILE_PATH = "d:\Domino\ミカヅキ.mid" # path to midi file
+MCODE_SERVICE_UUID = "00003200-0000-1000-D441-30F244F2E354"
+MCODE_CHAR_UUID = "00003201-0000-1000-D441-30F244F2E354"
 PUNCHER_GATT_SERVICES = [
-    "00003201-0000-1000-D441-30F244F2E354"
+    MCODE_SERVICE_UUID
 ]
 
 class HolePuncher():
@@ -17,19 +19,17 @@ class HolePuncher():
                     75: 14, 74: 13, 73: 12, 72: 11, 71: 10, 70: 9, 69: 8, 67: 7,
                     65: 6, 64: 5, 62: 4, 60: 3, 55: 2, 53: 1}
 
-    ser = None
+    client: BleakClient = None
+    services: BleakGATTServiceCollection = None
     noteList: List = []
 
     def __init__(self, device: Union[str, BLEDevice], services: Iterable[str]):
         self.client = BleakClient(device, services=services, timeout=5)
-        services = self.client.get_services()
-
-    def readSerial(self):
-        while True:
-            if self.ser.in_waiting:
-                data = self.ser.read_all().decode("ASCII")
-                print(data)
-            time.sleep(0.5)
+    
+    async def begin(self):
+        await self.client.connect()
+        # await self.client.pair()
+        self.services = self.client.services
 
     def _phraseMidi(self, midi, pitch=0) -> List:
         ticks_per_beat = midi.ticks_per_beat
@@ -103,7 +103,7 @@ class HolePuncher():
         resultList = resultList + tempList
         return resultList
 
-    def punchMidi(self, midi, pitch=0, zoom=1):
+    async def punchMidi(self, midi, pitch=0, zoom=1):
         logging.info("Punch mission started.")
 
         logging.info("Midi file processment started.")
@@ -119,10 +119,9 @@ class HolePuncher():
         pbar = tqdm(range(len(self.noteList)))
         pbar.set_description("Sending data...")
 
-        self.ser.read_all()
         # 传输数据
         ba = bytearray("M80 Y96 P0".encode("ASCII"))
-        self.ser.write(ba)
+        await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
 
         last_tick = 0
         for note in self.noteList:
@@ -132,11 +131,14 @@ class HolePuncher():
 
             ba = bytearray(comm)
 
-            self.ser.write(ba)
+            await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
             pbar.update(1)
         
         ba = bytearray("M90 Y96 P0".encode("ASCII"))
-        self.ser.write(ba)
+        await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
+    
+    async def end(self):
+        await self.client.disconnect()
 
 
 async def main():
@@ -158,8 +160,10 @@ async def main():
         logging.info("Quit")
         raise SystemExit
 
-    puncher = HolePuncher(devices[n], 115200)
-    puncher.punchMidi(midi, pitch=0, zoom=1.0)
+    puncher = HolePuncher(devices[n], puncherService)
+    await puncher.begin()
+    await puncher.punchMidi(midi, pitch=0, zoom=1.0)
+    await puncher.end()
 
 
 if __name__ == '__main__':
