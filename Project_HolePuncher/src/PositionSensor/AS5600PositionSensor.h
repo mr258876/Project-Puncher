@@ -8,7 +8,7 @@
 class AS5600PositionSensor : public PositionSensor
 {
 private:
-    int last_raw_angle;
+    int16_t last_raw_angle;
     int64_t raw_relative_pos;
 
     AS5600 *sensor;
@@ -35,7 +35,7 @@ public:
     /* in RAD */
     inline double getAngle() { return last_raw_angle * 1.0 / 4096; };
     /* uint16_t */
-    inline int rawReading() { return last_raw_angle; };
+    inline int16_t rawReading() { return last_raw_angle; };
     /* set current position to zero */
     void clearRelativePosition();
     /* degree since last setZero() */

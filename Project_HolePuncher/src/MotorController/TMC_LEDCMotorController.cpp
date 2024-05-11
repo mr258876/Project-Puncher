@@ -115,7 +115,7 @@ motor_res_t TMC_LEDCMotorController::begin()
     return MOTOR_RES_SUCCESS;
 }
 
-motor_res_t TMC_LEDCMotorController::move(long steps)
+motor_res_t TMC_LEDCMotorController::move(int32_t steps)
 {
     stepper->startMove(reverse ? -steps : steps);
     return MOTOR_RES_SUCCESS;
@@ -127,12 +127,12 @@ motor_res_t TMC_LEDCMotorController::rotate_infinite(int dir)
     return MOTOR_RES_SUCCESS;
 }
 
-long TMC_LEDCMotorController::stop()
+int32_t TMC_LEDCMotorController::stop()
 {
     return stepper->stop();
 }
 
-long TMC_LEDCMotorController::getPosition()
+int32_t TMC_LEDCMotorController::getPosition()
 {
     return stepper->getPosition();
 }
@@ -245,9 +245,9 @@ motor_res_t TMC_LEDCMotorController::pingMotor()
     return MOTOR_RES_SUCCESS;
 }
 
-int TMC_LEDCMotorController::getLoad()
+int32_t TMC_LEDCMotorController::getLoad()
 {
-    int res = -1;
+    int32_t res = -1;
     xSemaphoreTake(*DUARTMutex, portMAX_DELAY);
     {
         res = driver->SG_RESULT();

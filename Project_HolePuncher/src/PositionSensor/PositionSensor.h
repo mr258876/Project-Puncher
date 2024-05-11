@@ -19,7 +19,7 @@ public:
     /* in RAD */
     virtual double getAngle() = 0;
     /* unsigned */
-    virtual int rawReading() = 0;
+    virtual int16_t rawReading() = 0;
     /* set current position to zero */
     virtual void clearRelativePosition() = 0;
     /* degree since last setZero() */

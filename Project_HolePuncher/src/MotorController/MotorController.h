@@ -29,15 +29,15 @@ public:
     /* Begin function */
     virtual motor_res_t begin() = 0;
     /* Move steps */
-    virtual motor_res_t move(long steps) = 0;
+    virtual motor_res_t move(int32_t steps) = 0;
     /* Rotate in a direction */
     virtual motor_res_t rotate_infinite(int dir) = 0;
     /* Stop and return steps remains */
-    virtual long stop() = 0;
+    virtual int32_t stop() = 0;
     /* Get motor status */
     virtual motor_status_t getStatus() = 0;
     /* Get motor position (steps) */
-    virtual long getPosition() = 0;
+    virtual int32_t getPosition() = 0;
     /* Set motor in sleep state */
     virtual motor_res_t sleep(bool sleep) = 0;
     /* Set motor sleep io active behavior */
@@ -58,7 +58,7 @@ public:
     virtual motor_res_t pingMotor() = 0;
 
     /* Load monitor */
-    virtual int getLoad() = 0;
+    virtual int32_t getLoad() = 0;
     
     /* Start Zeroing */
     virtual motor_res_t startZeroing(int dir, int thres) = 0;

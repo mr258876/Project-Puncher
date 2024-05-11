@@ -194,7 +194,7 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
         lv_obj_clear_flag(ui_Label7, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_Home_TipsLabel, LV_OBJ_FLAG_HIDDEN);
 
-        lv_label_set_text_fmt(ui_Label7, "%02Ld:%02Ld:%02Ld", msg->ETA / 3600, msg->ETA % 3600 / 60, msg->ETA % 60);
+        lv_label_set_text_fmt(ui_Label7, "%02lld:%02lld:%02lld", (msg->ETA / 3600), (msg->ETA % 3600) / 60, (msg->ETA % 60));
         time_t *timer_eta = (time_t *)ui_ETA_timer->user_data;
         *timer_eta = msg->ETA;
         lv_timer_reset(ui_ETA_timer);

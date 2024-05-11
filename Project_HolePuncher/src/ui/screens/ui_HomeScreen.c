@@ -197,5 +197,5 @@ static void ui_cb_ETA_timer(lv_timer_t *timer)
 {
     time_t *eta = (time_t *)timer->user_data;
     *eta -= 1;
-    lv_label_set_text_fmt(ui_Label7, "%02Ld:%02Ld:%02Ld", *eta / 3600, *eta % 3600 / 60, *eta % 60);
+    lv_label_set_text_fmt(ui_Label7, "%02lld:%02lld:%02lld", *eta / 3600, *eta % 3600 / 60, *eta % 60);
 }

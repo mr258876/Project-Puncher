@@ -48,7 +48,7 @@ void AS5600PositionSensor::begin()
     }
     xSemaphoreGive(*port_mutex);
 
-    getAngle();
+    _getAngle();
     clearRelativePosition();
 
     if (!loop_tsk)
@@ -56,6 +56,9 @@ void AS5600PositionSensor::begin()
         assert(xTaskCreate(as5600loop, "AS5600 Loop", 4096, &sensor_list, 2, &loop_tsk) == pdPASS);
     }
     sensor_list.push_back(this);
+
+    cal_fn_cb = []() {};
+
 }
 
 /* in RAD */
@@ -267,10 +270,7 @@ void tsk_axis_cali(void *param)
     ESP_LOGI("AS5600", "%d %d %d %d %d", start_pos, start_pos_mod, start_pos_int, curr_offset, finished);
     cali_str->sensor->use_cali_profile = true;
 
-    if (cali_str->sensor->cal_fn_cb)
-    {
-        cali_str->sensor->cal_fn_cb();
-    }
+    cali_str->sensor->cal_fn_cb();
 
     vTaskResume(loop_tsk);
     vEventGroupDelete(cali_str->evt_group);
@@ -303,6 +303,10 @@ position_res_t AS5600PositionSensor::startCalibration(MotorController *axis, uin
 
 position_res_t AS5600PositionSensor::setCalibrationFinishCallBack(std::function<void()> cb)
 {
-    this->cal_fn_cb = cb;
-    return POSITION_RES_SUCCESS;
+    if (cb)
+    {
+        this->cal_fn_cb = cb;
+        return POSITION_RES_SUCCESS;
+    }
+    return POSITION_RES_FAIL;
 }

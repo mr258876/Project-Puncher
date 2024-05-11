@@ -45,15 +45,15 @@ public:
     /* Begin function */
     motor_res_t begin();
     /* Move steps */
-    motor_res_t move(long steps);
+    motor_res_t move(int32_t steps);
     /* Rotate in a direction */
     motor_res_t rotate_infinite(int dir);
     /* Stop and return steps remains */
-    long stop();
+    int32_t stop();
     /* Get motor status */
     motor_status_t getStatus();
     /* Get motor position (steps) */
-    long getPosition();
+    int32_t getPosition();
     /* Set motor in sleep state */
     motor_res_t sleep(bool sleep);
     /* Set motor sleep io active behavior */
@@ -74,7 +74,7 @@ public:
     motor_res_t pingMotor();
 
     /* Load monitor */
-    int getLoad();
+    int32_t getLoad();
 
     /* Start Zeroing */
     motor_res_t startZeroing(int dir, int thres);
