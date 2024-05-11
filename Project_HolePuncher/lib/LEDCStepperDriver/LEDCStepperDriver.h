@@ -2,11 +2,19 @@
 #ifndef _LEDCSTEPPERDRIVER_H_
 #define _LEDCSTEPPERDRIVER_H_
 
-#if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3
+#if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3 || IDF_TARGET == ESP32C6 || IDF_TARGET == ESP32H2 || IDF_TARGET == ESP32P4
 
 #include <Arduino.h>
 #include "driver/ledc.h"
+
+#if ESP_IDF_VERSION_MAJOR < 5
 #include "driver/pcnt.h"
+#else
+#define CONFIG_PCNT_CTRL_FUNC_IN_IRAM 1
+#define CONFIG_PCNT_ISR_IRAM_SAFE 1
+#include "driver/pulse_cnt.h"
+#endif  // ESP_IDF_VERSION_MAJOR < 5
+
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "hal/wdt_hal.h"
@@ -27,15 +35,26 @@ private:
     ledc_mode_t ledc_mode;
     ledc_timer_t ledc_timer;
     ledc_channel_t ledc_channel;
+#if ESP_IDF_VERSION_MAJOR < 5
     pcnt_unit_t pcnt_unit;
     pcnt_channel_t pcnt_channel;
     pcnt_isr_handle_t pcnt_isr_handle;
+#else
+    pcnt_unit_handle_t pcnt_unit;
+    pcnt_channel_handle_t pcnt_channel;
+    pcnt_event_callbacks_t pcnt_isr_handle;
+#endif  // ESP_IDF_VERSION_MAJOR < 5
     bool count_falling_edge;
 
     void driver_pwm_start();
     void driver_pwm_stop();
     void driver_pcnt_start(long steps);
+#if ESP_IDF_VERSION_MAJOR < 5
     friend void driver_pcnt_intr_handler(void *arg);
+#else
+    friend bool driver_pcnt_intr_handler(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *arg);
+    int32_t second_watch_point = 0;
+#endif  // ESP_IDF_VERSION_MAJOR >= 5
     // friend void driver_pcnt_task(void *arg);
 
     /*
@@ -83,7 +102,11 @@ private:
 
 public:
     LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, int driver_id);
+#if ESP_IDF_VERSION_MAJOR < 5
     LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, ledc_mode_t ledc_mode, ledc_timer_t ledc_timer, ledc_channel_t ledc_channel, pcnt_unit_t pcnt_unit, pcnt_channel_t pcnt_channel = PCNT_CHANNEL_0, bool count_falling_edge = false);
+#else
+    LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, ledc_mode_t ledc_mode, ledc_timer_t ledc_timer, ledc_channel_t ledc_channel, bool count_falling_edge = false);
+#endif  // ESP_IDF_VERSION_MAJOR < 5
     ~LEDCStepperDriver();
 
     void begin(float rpm = 60, short micro_steps = 1);

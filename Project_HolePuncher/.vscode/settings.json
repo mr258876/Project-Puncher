@@ -83,6 +83,7 @@
         "ui_font_noto_sans.h": "c",
         "ffat.h": "c",
         "esp_psram.h": "c",
-        "esp_system.h": "c"
+        "esp_system.h": "c",
+        "compare": "cpp"
     }
 }
