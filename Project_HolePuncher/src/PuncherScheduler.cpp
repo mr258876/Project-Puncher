@@ -11,7 +11,7 @@ void evtHandleLoop(void *param)
     while (1)
     {
         xQueueReceive(scheduler->evt_queue, &evt, portMAX_DELAY);
-
+        ESP_LOGI(TAG, "Event received: %d", evt);
         if (evt < 1)
         {
             ESP_LOGE(TAG, "Invalid event: %d", evt);
@@ -312,6 +312,11 @@ PuncherScheduler::PuncherScheduler()
                                                                                  { return this->setMcodeDefaultTickRate(val); }));
 
     ESP_LOGI(TAG, "Values len: %d", setting_mapping.size());
+
+    this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
+    assert(xTaskCreate(evtHandleLoop, "SchEvtLoop", 4096, this, 3, &evt_loop) == pdPASS);
+    this->setting_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
+    assert(xTaskCreate(settingHandleLoop, "SchSetLoop", 4096, this, 3, &setting_loop) == pdPASS);
 }
 
 PuncherScheduler::~PuncherScheduler()
@@ -341,10 +346,10 @@ void PuncherScheduler::begin()
     this->_x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
     this->_y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
 
-    this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
-    assert(xTaskCreate(evtHandleLoop, "SchEvtLoop", 4096, this, 3, &evt_loop) == pdPASS);
-    this->setting_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
-    assert(xTaskCreate(settingHandleLoop, "SchSetLoop", 4096, this, 3, &setting_loop) == pdPASS);
+    // this->evt_queue = xQueueCreate(16, sizeof(scheduler_evt_t));
+    // assert(xTaskCreate(evtHandleLoop, "SchEvtLoop", 4096, this, 3, &evt_loop) == pdPASS);
+    // this->setting_queue = xQueueCreate(16, sizeof(puncher_event_setting_change_t));
+    // assert(xTaskCreate(settingHandleLoop, "SchSetLoop", 4096, this, 3, &setting_loop) == pdPASS);
 
     this->status.basic_status.status_data = 0;
     this->status.connectivity_status.status_data = 0;
@@ -366,6 +371,8 @@ void PuncherScheduler::begin()
         Init Motors
     */
     initMotors();
+    if (std::any_cast<uint8_t>(x_auto_zreoing)) start_auto_zeroing(0b1);
+    if (std::any_cast<uint8_t>(y_auto_zreoing)) start_auto_zeroing(0b10);
 
     /*
         Init Sensors
@@ -887,6 +894,8 @@ void PuncherScheduler::onFinishZeroingX()
     this->updateXspeed();
     this->updateXdriver();
     this->Xsleep();
+
+    this->X->setZeroingFinishCallBack([](){});
 }
 void PuncherScheduler::onFinishZeroingY()
 {
@@ -895,6 +904,8 @@ void PuncherScheduler::onFinishZeroingY()
     this->updateYspeed();
     this->updateYdriver();
     this->Ysleep();
+
+    this->Y->setZeroingFinishCallBack([](){});
 }
 void PuncherScheduler::onFinishZeroingZ()
 {
@@ -903,12 +914,14 @@ void PuncherScheduler::onFinishZeroingZ()
     this->updateZspeed();
     this->updateZdriver();
     this->Zsleep();
+
+    this->Z->setZeroingFinishCallBack([](){});
 }
 
 int PuncherScheduler::read_sg_result_X_cb()
 {
 
-    int res = this->X->getLoad();
+    int32_t res = this->X->getLoad();
     puncher_event_setting_change_t e = {"x_sg_result", res};
     this->notifyValueChange(&e);
 
@@ -918,7 +931,7 @@ int PuncherScheduler::read_sg_result_X_cb()
 int PuncherScheduler::read_sg_result_Y_cb()
 {
 
-    int res = this->Y->getLoad();
+    int32_t res = this->Y->getLoad();
     puncher_event_setting_change_t e = {"y_sg_result", res};
     this->notifyValueChange(&e);
 
@@ -928,7 +941,7 @@ int PuncherScheduler::read_sg_result_Y_cb()
 int PuncherScheduler::read_sg_result_Z_cb()
 {
 
-    int res = this->Z->getLoad();
+    int32_t res = this->Z->getLoad();
     puncher_event_setting_change_t e = {"z_sg_result", res};
     this->notifyValueChange(&e);
 
@@ -944,13 +957,13 @@ int PuncherScheduler::start_auto_zeroing(int axis)
         axis = ~axis;
 
     scheduler_evt_t evt;
-    if (axis & 0b1)
+    if (axis & 0b1 && !this->status.basic_status.status_flags.is_calibrating_x)
     {
         evt = EVT_ON_ZEROING_START_REQUEST_X;
         xQueueSend(evt_queue, &evt, portMAX_DELAY);
     }
 
-    if (axis & 0b10)
+    if (axis & 0b10 && !this->status.basic_status.status_flags.is_calibrating_y)
     {
         evt = EVT_ON_ZEROING_START_REQUEST_Y;
         xQueueSend(evt_queue, &evt, portMAX_DELAY);
@@ -1050,7 +1063,8 @@ time_t PuncherScheduler::get_ETA()
         }
     }
 
-    return (long)_eta;
+    time_t res = (time_t)_eta;
+    return res;
 }
 
 void PuncherScheduler::set_setting_value(puncher_event_setting_change_t *evt)
@@ -1155,11 +1169,13 @@ int PuncherScheduler::nextHole()
     else
     {
         /* set finish flag in cb */
+        _x_target_pos = _x_pos;
         scheduler_evt_t evt = EVT_ON_MOVE_FINISH_X;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
 
         y_status = 2;
         /* set finish flag in cb */
+        _y_target_pos = _y_pos;
         evt = EVT_ON_MOVE_FINISH_Y;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
@@ -1173,6 +1189,7 @@ int PuncherScheduler::nextHole()
     else
     {
         /* set finish flag in cb */
+        _z_target_pos = _z_pos;
         scheduler_evt_t evt = EVT_ON_MOVE_FINISH_Z;
         xQueueSend(this->evt_queue, &evt, portMAX_DELAY);
     }
@@ -1205,9 +1222,10 @@ void PuncherScheduler::onFinishZ()
     if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
     {
         double pos = sensor_Z->getRelativePosition();
+        ESP_LOGI(TAG, "Pos %lf", pos);
         double pos_target = _z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;
         pos_target = pos_target * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
-        long diff_steps = (pos_target - pos) / 2 / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS_Z;
+        int32_t diff_steps = (int32_t)((pos_target - pos) / 2 / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS_Z);
 
         if (diff_steps > 2 || diff_steps < -2)
         {
