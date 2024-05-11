@@ -371,8 +371,10 @@ void PuncherScheduler::begin()
         Init Motors
     */
     initMotors();
-    if (std::any_cast<uint8_t>(x_auto_zreoing)) start_auto_zeroing(0b1);
-    if (std::any_cast<uint8_t>(y_auto_zreoing)) start_auto_zeroing(0b10);
+    if (std::any_cast<uint8_t>(x_auto_zreoing))
+        start_auto_zeroing(0b1);
+    if (std::any_cast<uint8_t>(y_auto_zreoing))
+        start_auto_zeroing(0b10);
 
     /*
         Init Sensors
@@ -895,7 +897,7 @@ void PuncherScheduler::onFinishZeroingX()
     this->updateXdriver();
     this->Xsleep();
 
-    this->X->setZeroingFinishCallBack([](){});
+    this->X->setZeroingFinishCallBack([]() {});
 }
 void PuncherScheduler::onFinishZeroingY()
 {
@@ -905,7 +907,7 @@ void PuncherScheduler::onFinishZeroingY()
     this->updateYdriver();
     this->Ysleep();
 
-    this->Y->setZeroingFinishCallBack([](){});
+    this->Y->setZeroingFinishCallBack([]() {});
 }
 void PuncherScheduler::onFinishZeroingZ()
 {
@@ -915,7 +917,7 @@ void PuncherScheduler::onFinishZeroingZ()
     this->updateZdriver();
     this->Zsleep();
 
-    this->Z->setZeroingFinishCallBack([](){});
+    this->Z->setZeroingFinishCallBack([]() {});
 }
 
 int PuncherScheduler::read_sg_result_X_cb()
@@ -1029,7 +1031,7 @@ int PuncherScheduler::start_sensor_calibration_Z_cb()
     this->Zawake();
     this->Z->setSpeed(this->calcMotorSpeedPulse(this->z_lead_length, this->z_length_type, (int32_t)200, MICROSTEPS_Z));
     this->sensor_Z->setCalibrationFinishCallBack([this]()
-                                                 { status.basic_status.status_flags.is_calibrating_z = 0; Z->setMoveFinishCallBack(this->_Z_on_finish_move_static, this); Zsleep(); });
+                                                 { status.basic_status.status_flags.is_calibrating_z = 0; Z->setMoveFinishCallBack(this->_Z_on_finish_move_static, this); Zsleep(); sensor_Z_avaliable = true; });
     this->sensor_Z->startCalibration(this->Z, MOTOR_STEPS * MICROSTEPS_Z);
     return 0;
 }
@@ -1232,13 +1234,20 @@ void PuncherScheduler::onFinishZ()
             // move the extra steps
             z_finished = 0;
             Z->move(diff_steps);
+            vTaskDelay(pdMS_TO_TICKS(1));
             return;
         }
-    }
 
-    Zsleep();
-    z_finished = 1;
-    _z_pos = _z_target_pos;
+        Zsleep();
+        z_finished = 1;
+        _z_pos = _z_target_pos;
+    }
+    else
+    {
+        Zsleep();
+        z_finished = 1;
+        _z_pos = _z_target_pos;
+    }
 }
 
 void PuncherScheduler::Xsleep()
