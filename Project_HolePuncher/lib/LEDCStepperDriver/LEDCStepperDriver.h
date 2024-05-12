@@ -34,6 +34,7 @@ private:
      */
     ledc_mode_t ledc_mode;
     ledc_timer_t ledc_timer;
+    ledc_timer_bit_t ledc_timer_resolution;
     ledc_channel_t ledc_channel;
 #if ESP_IDF_VERSION_MAJOR < 5
     pcnt_unit_t pcnt_unit;
@@ -48,6 +49,7 @@ private:
 
     void driver_pwm_start();
     void driver_pwm_stop();
+    void driver_ledc_auto_resolution();
     void driver_pcnt_start(long steps);
 #if ESP_IDF_VERSION_MAJOR < 5
     friend void driver_pcnt_intr_handler(void *arg);

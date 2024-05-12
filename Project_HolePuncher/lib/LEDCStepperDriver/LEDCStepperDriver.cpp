@@ -209,7 +209,6 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
             __ledc_timer_resume(driver->ledc_mode, driver->ledc_timer);
         }
     }
-
 }
 #else
 bool IRAM_ATTR driver_pcnt_intr_handler(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *arg)
@@ -364,6 +363,7 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
     this->enable_pin = enable_pin;
     this->ledc_mode = ledc_mode;
     this->ledc_timer = ledc_timer;
+    this->ledc_timer_resolution = LEDC_TIMER_4_BIT;
     this->ledc_channel = ledc_channel;
     this->pcnt_unit = pcnt_unit;
     this->pcnt_channel = pcnt_channel;
@@ -378,6 +378,7 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
     this->enable_pin = enable_pin;
     this->ledc_mode = ledc_mode;
     this->ledc_timer = ledc_timer;
+    this->ledc_timer_resolution = LEDC_TIMER_4_BIT;
     this->ledc_channel = ledc_channel;
     this->count_falling_edge = count_falling_edge;
 }
@@ -396,13 +397,15 @@ void LEDCStepperDriver::driver_pwm_start()
     if (pwm_running)
         driver_pwm_stop();
 
+    /* Ckeck duty resolution and adjust if needed */
+
     /*
         Resume after ledc_stop()
         Reference: https://esp32.com/viewtopic.php?t=2340
     */
     ESP_ERROR_CHECK(ledc_set_freq(ledc_mode, ledc_timer, pulse_freq));
     ESP_ERROR_CHECK(ledc_timer_resume(ledc_mode, ledc_timer));
-    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << LEDC_TIMER_4_BIT) / 2));
+    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << ledc_timer_resolution) / 2));
     ESP_ERROR_CHECK(ledc_update_duty(ledc_mode, ledc_channel));
     pwm_running = true;
 }
@@ -442,6 +445,35 @@ void LEDCStepperDriver::driver_pcnt_start(long steps)
 #endif // ESP_IDF_VERSION_MAJOR < 5
 }
 
+/*
+    @brief Calc and set ledc timer duty resolution
+*/
+void LEDCStepperDriver::driver_ledc_auto_resolution()
+{
+    /*
+        Calc timer resolution
+        Refer: https://www.espressif.com.cn/sites/default/files/documentation/esp32_technical_reference_manual_cn.pdf#ledpwm
+     */
+    for (int i = 1; i < LEDC_TIMER_BIT_MAX; i++)
+    {
+        int32_t a = pow(2, i);
+        int32_t clk_div = 80000000L * 1.0 / pulse_freq / a; // Use APB_CLK
+        if (clk_div > 1 && clk_div < 1024)
+        {
+            ledc_timer_resolution = static_cast<ledc_timer_bit_t>(i);
+            break;
+        }
+    }
+
+    ledc_timer_config_t config_ledc_timer;
+    config_ledc_timer.speed_mode = ledc_mode;
+    config_ledc_timer.timer_num = ledc_timer;
+    config_ledc_timer.duty_resolution = ledc_timer_resolution;
+    config_ledc_timer.freq_hz = pulse_freq;
+    config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
+    ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
+}
+
 void LEDCStepperDriver::begin(float rpm, short microsteps)
 {
     pinMode(dir_pin, GPIO_MODE_OUTPUT);
@@ -459,7 +491,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     ledc_timer_config_t config_ledc_timer;
     config_ledc_timer.speed_mode = ledc_mode;
     config_ledc_timer.timer_num = ledc_timer;
-    config_ledc_timer.duty_resolution = LEDC_TIMER_4_BIT;
+    config_ledc_timer.duty_resolution = ledc_timer_resolution;
     config_ledc_timer.freq_hz = 256000;
     config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
@@ -593,6 +625,8 @@ void LEDCStepperDriver::setRPM(float rpm)
     this->rpm = rpm;
     this->pulse_freq = long(rpm * motor_steps * microsteps / 60.0);
 
+    driver_ledc_auto_resolution();
+
     if (pwm_running)
         driver_pwm_start();
 }
@@ -600,6 +634,8 @@ void LEDCStepperDriver::setPulseFreq(long freq)
 {
     this->pulse_freq = freq;
     this->rpm = freq * 60.0 / motor_steps / microsteps;
+
+    driver_ledc_auto_resolution();
 
     if (pwm_running)
         driver_pwm_start();
