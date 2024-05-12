@@ -558,7 +558,21 @@ int PuncherScheduler::start_workload_cb()
 
 int PuncherScheduler::pause_workload_cb()
 {
-    // TODO
+    if (status.basic_status.status_flags.is_running)
+    {
+        this->X->stop();
+        this->Y->stop();
+        this->Z->stop();
+    }
+
+    return 0;
+}
+
+int PuncherScheduler::resume_workload_cb()
+{
+    if (status.basic_status.status_flags.is_running)
+    {
+    }
 
     return 0;
 }
@@ -721,7 +735,7 @@ void PuncherScheduler::onPowerStatusChange()
     }
 }
 
-int PuncherScheduler::feed_paper(int gear)
+int PuncherScheduler::feed_paper(int gear, bool slow_mode)
 {
     if (this->status.basic_status.status_data & (~PUNCHER_STATUS_IS_FEEDING_PAPER) & PUNCHER_STATUS_BUSY_MASK)
         return 1;
@@ -729,7 +743,7 @@ int PuncherScheduler::feed_paper(int gear)
     if (gear)
     {
         int32_t z_speed = std::any_cast<int32_t>(this->z_operational_speed);
-        z_speed = z_speed * abs(gear) / 3;
+        z_speed = (int32_t)(z_speed * abs(gear) / 3 * (slow_mode ? 0.2 : 1));
 
         this->Zawake();
         this->Z->sleep(false); // force power

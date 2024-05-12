@@ -49,6 +49,7 @@ lv_obj_t *ui_FeedPanel;
 void ui_event_FeedStopButton(lv_event_t *e);
 lv_obj_t *ui_FeedStopButton;
 lv_obj_t *ui_FeedStopButtonLabel;
+lv_obj_t *ui_FeedSlowCheckBox;
 lv_obj_t *ui_FeedSpeedPanel;
 void ui_event_FeedPlusButton(lv_event_t *e);
 lv_obj_t *ui_FeedPlusButton;
@@ -100,6 +101,15 @@ void ui_event_FeedStopButton(lv_event_t *e)
     if (event_code == LV_EVENT_CLICKED)
     {
         _ui_roller_set_property(ui_FeedRoller, _UI_ROLLER_PROPERTY_SELECTED_WITH_ANIM, 4);
+        lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
+    }
+}
+void ui_event_FeedSlowCheckBox(lv_event_t *e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t *target = lv_event_get_target(e);
+    if (event_code == LV_EVENT_CLICKED)
+    {
         lv_event_send(ui_FeedRoller, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }

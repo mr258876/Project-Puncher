@@ -74,6 +74,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Status", "状态"},
     {"ETA", "预计剩余时间"},
     {"Feed", "进纸"},
+    {"Slow", "慢速"},
     {"Setting", "设置"},
     {"Info", "信息"},
     {"Warning", "警告"},

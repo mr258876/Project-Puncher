@@ -61,6 +61,11 @@ public:
     /* Set motor to run in opposite direction */
     motor_res_t setReverse(bool reverse);
 
+    /* Get steps remaining */
+    int32_t getStepsRemaining();
+    /* Get last move direction */
+    int32_t getDirection();
+
     /* Set motor speed */
     motor_res_t setSpeed(uint32_t s);
     /* Set motor current */

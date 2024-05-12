@@ -68,7 +68,7 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_set_align(ui_FeedStopButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_FeedStopButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
     lv_obj_clear_flag(ui_FeedStopButton, LV_OBJ_FLAG_SCROLLABLE);    /// Flags
-    lv_obj_set_style_bg_color(ui_FeedStopButton, lv_color_hex(0xD20A0A), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(ui_FeedStopButton, lv_color_hex(0xD20A0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_FeedStopButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_FeedStopButtonLabel = lv_label_create(ui_FeedStopButton);
@@ -77,6 +77,13 @@ void ui_FeedScreen_screen_init(void)
     lv_obj_set_align(ui_FeedStopButtonLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_FeedStopButtonLabel, _("STOP"));
     lv_obj_set_style_text_font(ui_FeedStopButtonLabel, ui_font_noto_sans_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_FeedSlowCheckBox = lv_checkbox_create(ui_FeedPanel);
+    lv_checkbox_set_text(ui_FeedSlowCheckBox, _("Slow"));
+    lv_obj_set_width(ui_FeedSlowCheckBox, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_FeedSlowCheckBox, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_align(ui_FeedSlowCheckBox, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_FeedSlowCheckBox, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
 
     ui_FeedSpeedPanel = lv_obj_create(ui_FeedPanel);
     lv_obj_set_width(ui_FeedSpeedPanel, lv_pct(50));
@@ -128,6 +135,7 @@ void ui_FeedScreen_screen_init(void)
 
     lv_obj_add_event_cb(ui_FeedBackButton, ui_event_FeedBackButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedStopButton, ui_event_FeedStopButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_FeedSlowCheckBox, ui_event_FeedSlowCheckBox, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedPlusButton, ui_event_FeedPlusButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedMinusButton, ui_event_FeedMinusButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_FeedScreen, ui_event_FeedScreen, LV_EVENT_ALL, NULL);

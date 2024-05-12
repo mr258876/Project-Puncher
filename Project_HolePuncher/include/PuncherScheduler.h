@@ -56,6 +56,7 @@ private:
 
     int start_workload_cb();
     int pause_workload_cb();
+    int resume_workload_cb();
     int delete_workload_cb();
 
     /* Motor related */
@@ -361,7 +362,7 @@ public:
     int feed_paper_mode(bool feed_paper_mode);
     int add_hole(scheduler_hole_t &h);
     int add_hold_mcode(int x, int y, int z);
-    int feed_paper(int gear);
+    int feed_paper(int gear, bool slow_mode);
     int util_move_X(int dir, bool use_zeroing_speed);
     int util_move_Y(int dir, bool use_zeroing_speed);
     int read_sg_result(int axis);     // 0 -> All axis; 0b1 -> X; 0b10 -> Y; 0b100 -> Z

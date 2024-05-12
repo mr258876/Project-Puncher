@@ -579,6 +579,6 @@ void ui_event_FeedRoller(lv_event_t *e)
 
     if (e->code == LV_EVENT_VALUE_CHANGED)
     {
-        lvgl_ui->getScheduler()->feed_paper(4 - lv_roller_get_selected(roller));
+        lvgl_ui->getScheduler()->feed_paper(4 - lv_roller_get_selected(roller), lv_obj_has_state(ui_FeedSlowCheckBox, LV_STATE_CHECKED));
     }
 }

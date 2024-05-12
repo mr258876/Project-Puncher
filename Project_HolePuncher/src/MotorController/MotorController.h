@@ -45,6 +45,11 @@ public:
     /* Set motor to run in opposite direction */
     virtual motor_res_t setReverse(bool reverse) = 0;
 
+    /* Get steps remaining */
+    virtual int32_t getStepsRemaining() = 0;
+    /* Get last move direction */
+    virtual int32_t getDirection() = 0;
+
     /* Set motor speed */
     virtual motor_res_t setSpeed(uint32_t s) = 0;
     /* Set motor current */

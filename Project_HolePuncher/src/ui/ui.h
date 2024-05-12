@@ -68,6 +68,8 @@ extern lv_obj_t *ui_FeedPanel;
 void ui_event_FeedStopButton( lv_event_t * e);
 extern lv_obj_t *ui_FeedStopButton;
 extern lv_obj_t *ui_FeedStopButtonLabel;
+void ui_event_FeedSlowCheckBox( lv_event_t * e);
+extern lv_obj_t *ui_FeedSlowCheckBox;
 extern lv_obj_t *ui_FeedSpeedPanel;
 void ui_event_FeedPlusButton( lv_event_t * e);
 extern lv_obj_t *ui_FeedPlusButton;

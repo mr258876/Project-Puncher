@@ -163,6 +163,17 @@ motor_res_t TMC_LEDCMotorController::sleep(bool sleep)
     return MOTOR_RES_SUCCESS;
 }
 
+int32_t TMC_LEDCMotorController::getStepsRemaining()
+{
+    return stepper->getStepsRemaining();
+}
+
+int32_t TMC_LEDCMotorController::getDirection()
+{
+    int dir = stepper->getDirection();
+    return reverse ? -dir : dir;
+}
+
 motor_res_t TMC_LEDCMotorController::setSpeed(uint32_t stepsPerSec)
 {
     stepper->setPulseFreq(stepsPerSec);
