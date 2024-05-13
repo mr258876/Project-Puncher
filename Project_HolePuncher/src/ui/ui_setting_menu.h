@@ -7,6 +7,7 @@ extern lv_obj_t * ui_setting_root_page;
 extern lv_obj_t * ui_setting_wifi_page;
 extern lv_obj_t * ui_setting_ble_page;
 extern lv_obj_t * ui_setting_usb_page;
+extern lv_obj_t * ui_setting_mcode_page;
 extern lv_obj_t * ui_setting_x_axis_page;
 extern lv_obj_t * ui_setting_y_axis_page;
 extern lv_obj_t * ui_setting_z_axis_page;
@@ -15,6 +16,10 @@ extern lv_obj_t * ui_setting_display_page;
 extern lv_obj_t * ui_setting_about_page;
 
 extern lv_obj_t * ui_setting_wifi_switch;
+
+extern lv_obj_t * ui_setting_ble_switch;
+
+extern lv_obj_t * ui_setting_usb_switch;
 
 extern lv_obj_t * ui_setting_usb_mcode_tick_rate;
 

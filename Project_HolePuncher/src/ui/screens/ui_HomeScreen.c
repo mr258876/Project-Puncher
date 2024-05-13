@@ -108,7 +108,7 @@ void ui_HomeScreen_screen_init(void)
     lv_obj_set_width(ui_FeedButtonLabel, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height(ui_FeedButtonLabel, LV_SIZE_CONTENT); /// 1
     lv_obj_set_align(ui_FeedButtonLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_FeedButtonLabel, LV_SYMBOL_DRIVE);
+    lv_label_set_text(ui_FeedButtonLabel, LV_SYMBOL_UPLOAD);
 
     ui_StartButton = lv_btn_create(ui_OperationPanel);
     lv_obj_set_width(ui_StartButton, lv_pct(100));

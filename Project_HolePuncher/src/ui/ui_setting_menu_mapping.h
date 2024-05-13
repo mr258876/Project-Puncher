@@ -40,6 +40,10 @@ void ui_menu_ptr_update()
 {
     ui_setting_mapping.emplace("wifi_switch", ui_setting_menu_mapping_t(ui_setting_wifi_switch, _ui_menu_switch_set_value, NULL));
 
+    ui_setting_mapping.emplace("ble_switch", ui_setting_menu_mapping_t(ui_setting_ble_switch, _ui_menu_switch_set_value, NULL));
+
+    ui_setting_mapping.emplace("USB_switch", ui_setting_menu_mapping_t(ui_setting_usb_switch, _ui_menu_switch_set_value, NULL));
+
     ui_setting_mapping.emplace("x_lead_length", ui_setting_menu_mapping_t(ui_setting_x_lead_length, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("x_operational_speed", ui_setting_menu_mapping_t(ui_setting_x_operational_speed, _ui_menu_spinbox_set_value, NULL));
     ui_setting_mapping.emplace("x_length_type", ui_setting_menu_mapping_t(ui_setting_x_length_type, _ui_menu_dropdown_set_value, NULL));

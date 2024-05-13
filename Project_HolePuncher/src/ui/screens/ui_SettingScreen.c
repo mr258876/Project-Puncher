@@ -5,8 +5,7 @@ lv_obj_t * ui_setting_root_page;
 lv_obj_t * ui_setting_wifi_page;
 lv_obj_t * ui_setting_ble_page;
 lv_obj_t * ui_setting_usb_page;
-lv_obj_t * ui_setting_ble_page;
-lv_obj_t * ui_setting_usb_page;
+lv_obj_t * ui_setting_mcode_page;
 lv_obj_t * ui_setting_x_axis_page;
 lv_obj_t * ui_setting_y_axis_page;
 lv_obj_t * ui_setting_z_axis_page;
@@ -15,6 +14,10 @@ lv_obj_t * ui_setting_display_page;
 lv_obj_t * ui_setting_about_page;
 
 lv_obj_t * ui_setting_wifi_switch;
+
+lv_obj_t * ui_setting_ble_switch;
+
+lv_obj_t * ui_setting_usb_switch;
 
 lv_obj_t * ui_setting_usb_mcode_tick_rate;
 
@@ -320,12 +323,20 @@ void ui_SettingScreen_screen_init(void)
     lv_obj_set_style_pad_hor(ui_setting_ble_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
     lv_menu_separator_create(ui_setting_ble_page);
     section = lv_menu_section_create(ui_setting_ble_page);
+    ui_setting_ble_switch = create_switch(section, LV_SYMBOL_BLUETOOTH, _("BLE"), false, NULL);
 
     /*Create usb page*/
     ui_setting_usb_page = lv_menu_page_create(menu, _("USB"));
     lv_obj_set_style_pad_hor(ui_setting_usb_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
     lv_menu_separator_create(ui_setting_usb_page);
     section = lv_menu_section_create(ui_setting_usb_page);
+    ui_setting_usb_switch = create_switch(section, LV_SYMBOL_USB, _("USB"), false, NULL);
+
+    /*Create mcode page*/
+    ui_setting_mcode_page = lv_menu_page_create(menu, _("Mcode"));
+    lv_obj_set_style_pad_hor(ui_setting_mcode_page, lv_obj_get_style_pad_left(lv_menu_get_main_header(menu), 0), 0);
+    lv_menu_separator_create(ui_setting_mcode_page);
+    section = lv_menu_section_create(ui_setting_mcode_page);
     ui_setting_usb_mcode_tick_rate = create_spinbox(section, NULL, _("Mcode Tickrate"), 1, 256, 96, 3, 0, ui_event_mcodeTickRate);
 
     /*Create x axis page*/
@@ -513,6 +524,8 @@ void ui_SettingScreen_screen_init(void)
     lv_menu_set_load_page_event(menu, cont, ui_setting_ble_page);
     cont = create_text(section, LV_SYMBOL_USB, _("USB"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     lv_menu_set_load_page_event(menu, cont, ui_setting_usb_page);
+    cont = create_text(section, NULL, _("Mcode"), LV_MENU_ITEM_BUILDER_VARIANT_1);
+    lv_menu_set_load_page_event(menu, cont, ui_setting_mcode_page);
 
     create_text(ui_setting_root_page, NULL, _("Motors"), LV_MENU_ITEM_BUILDER_VARIANT_1);
     section = lv_menu_section_create(ui_setting_root_page);
