@@ -141,6 +141,10 @@ void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
         lv_label_set_text(ui_Label5, _("Ready"));
         lv_obj_clear_flag(ui_StartButton, LV_OBJ_FLAG_HIDDEN);
     }
+    else if (msg->basic_status.status_flags.is_transmitting_data)
+    {
+        lv_label_set_text(ui_Label5, _("Receiving Data"));
+    }
     else
     {
         lv_label_set_text(ui_Label5, _("Idle"));
