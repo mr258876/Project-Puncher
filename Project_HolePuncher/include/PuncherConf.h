@@ -34,6 +34,7 @@
 #define Y_ZEROING_POSITION      -7.00+0.5+1
 #define Y_PUNCH_MOVEMENT_LENGTH 4.50+1
 
+#define LCD_LEDC_TIMER 3
 #define LCD_LEDC_CHANNEL 7
 
 #define I2C0_SDA    38

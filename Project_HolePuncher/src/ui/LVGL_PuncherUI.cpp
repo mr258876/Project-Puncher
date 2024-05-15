@@ -7,6 +7,8 @@
 #include "ui/lv_port_indev_ctp.h"
 #include "PuncherSemaphore.h"
 
+#include "driver/ledc.h"
+
 #include <Arduino.h>
 
 #include <any>
@@ -99,8 +101,23 @@ void LVGLPuncherUI::begin()
 
     LV_LOG_INFO("LVGL Booted.");
 
-    ledcAttachChannel(BL_PIN, 48000, 8, LCD_LEDC_CHANNEL);
-    this->setBrightness(1);
+    //----------设置LEDC PWM----------
+    ledc_timer_config_t config_ledc_timer;
+    config_ledc_timer.speed_mode = LEDC_LOW_SPEED_MODE;
+    config_ledc_timer.timer_num = static_cast<ledc_timer_t>(LCD_LEDC_TIMER);
+    config_ledc_timer.duty_resolution = static_cast<ledc_timer_bit_t>(8);
+    config_ledc_timer.freq_hz = 48000;
+    config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
+    ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
+
+    ledc_channel_config_t config_ledc_channel;
+    config_ledc_channel.speed_mode = LEDC_LOW_SPEED_MODE;
+    config_ledc_channel.channel = static_cast<ledc_channel_t>(LCD_LEDC_CHANNEL);
+    config_ledc_channel.timer_sel = static_cast<ledc_timer_t>(LCD_LEDC_TIMER);
+    config_ledc_channel.intr_type = LEDC_INTR_DISABLE;
+    config_ledc_channel.gpio_num = BL_PIN;
+    ESP_ERROR_CHECK(ledc_channel_config(&config_ledc_channel));
+    this->setBrightness(64);
 }
 
 void LVGLPuncherUI::onStatusCode(puncher_status_t *msg)
@@ -223,7 +240,9 @@ void LVGLPuncherUI::handleSettingValueChange(puncher_event_setting_change_t *msg
 
 void LVGLPuncherUI::setBrightness(int brightness)
 {
-    ledcWrite(BL_PIN, brightness);
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, static_cast<ledc_channel_t>(LCD_LEDC_CHANNEL), brightness));
+    ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, static_cast<ledc_channel_t>(LCD_LEDC_CHANNEL)));
+
 }
 
 void LVGLPuncherUI::setLanguage(uint16_t lang_id)
