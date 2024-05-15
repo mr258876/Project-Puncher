@@ -538,6 +538,10 @@ int PuncherScheduler::start_workload_cb()
     {
         status.basic_status.status_flags.is_running = 1;
 
+        updateXspeed();
+        updateYspeed();
+        updateZspeed();
+
         ESP_LOGI(TAG, "Workload started!");
         updateUIstatus();
 
@@ -1165,15 +1169,12 @@ int PuncherScheduler::nextHole()
 
     if (hole.x > 0)
     {
-        ESP_LOGI(TAG, "Next X: %d", hole.x);
         int32_t x_steps = calc_X_steps((30 - hole.x) * 2.0 - _x_pos);
         if (x_steps)
         {
             Xawake();
             X->move(x_steps);
             _x_target_pos = (30 - hole.x) * 2.0;
-            ESP_LOGI(TAG, "X current pos: %4f", _x_pos);
-            ESP_LOGI(TAG, "X target pos: %4f", _x_target_pos);
         }
         else
         {
@@ -1246,6 +1247,7 @@ void PuncherScheduler::onFinishZ()
         if (diff_steps > 2 || diff_steps < -2)
         {
             // move the extra steps
+            ESP_LOGI(TAG, "Adjusting z: %ld", diff_steps);
             z_finished = 0;
             Z->move(diff_steps);
             vTaskDelay(pdMS_TO_TICKS(1));

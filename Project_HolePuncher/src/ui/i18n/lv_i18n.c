@@ -135,6 +135,7 @@ static lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Punch Depth (mm)", "打孔深度(mm)"},
     {"Idle", "空闲"},
     {"Ready", "就绪"},
+    {"Receiving Data", "正在接收数据"},
     {"Encoder", "编码器"},
     {"Use Encoder", "启用编码器"},
     {"Encoder Type", "编码器类型"},
