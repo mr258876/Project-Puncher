@@ -5,6 +5,7 @@
 #if IDF_TARGET == ESP32 || IDF_TARGET == ESP32S2 || IDF_TARGET == ESP32S3 || IDF_TARGET == ESP32C6 || IDF_TARGET == ESP32H2 || IDF_TARGET == ESP32P4
 
 static portMUX_TYPE driver_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static const char* TAG = "LEDCStepperDriver";
 
 /*
  *  Helper Functions
@@ -405,7 +406,7 @@ void LEDCStepperDriver::driver_pwm_start()
     */
     ESP_ERROR_CHECK(ledc_set_freq(ledc_mode, ledc_timer, pulse_freq));
     ESP_ERROR_CHECK(ledc_timer_resume(ledc_mode, ledc_timer));
-    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << ledc_timer_resolution) / 2));
+    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << (ledc_timer_resolution - 1)) - 1));
     ESP_ERROR_CHECK(ledc_update_duty(ledc_mode, ledc_channel));
     pwm_running = true;
 }
@@ -454,7 +455,7 @@ void LEDCStepperDriver::driver_ledc_auto_resolution()
         Calc timer resolution
         Refer: https://www.espressif.com.cn/sites/default/files/documentation/esp32_technical_reference_manual_cn.pdf#ledpwm
      */
-    for (int i = 1; i < LEDC_TIMER_BIT_MAX; i++)
+    for (int i = LEDC_TIMER_BIT_MAX - 1; i > 0; i--)
     {
         int32_t a = pow(2, i);
         int32_t clk_div = 80000000L * 1.0 / pulse_freq / a; // Use APB_CLK
@@ -471,6 +472,7 @@ void LEDCStepperDriver::driver_ledc_auto_resolution()
     config_ledc_timer.duty_resolution = ledc_timer_resolution;
     config_ledc_timer.freq_hz = pulse_freq;
     config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
+    ESP_ERROR_CHECK(ledc_timer_rst(ledc_mode, ledc_timer));
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
 }
 
@@ -702,7 +704,7 @@ void LEDCStepperDriver::startMove(long steps)
     steps_remaining = steps;
     enable();
     driver_pcnt_start(steps);
-    ESP_LOGD("LEDCStepperDriver", "start move steps:%ld", steps);
+    ESP_LOGD(TAG, "start move steps:%ld", steps);
 
     digitalWrite(dir_pin, dir_state);
     driver_pwm_start();
