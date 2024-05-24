@@ -18,28 +18,22 @@ static const char* TAG = "LEDCStepperDriver";
 */
 static void IRAM_ATTR __pcnt_pause(uint8_t unit)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     PCNT.ctrl.val |= 1 << (2 * unit + 1); // Set counter pause bit
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 /*
     @brief Resume PCNT in interrupts by setting register
 */
 static void IRAM_ATTR __pcnt_resume(uint8_t unit)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     PCNT.ctrl.val &= ~(1 << (2 * unit + 1)); // Clear counter pause bit
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 /*
     @brief Clear PCNT counts in interrupts by setting register
 */
 static void IRAM_ATTR __pcnt_clear(uint8_t unit)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     PCNT.ctrl.val |= 1 << (2 * unit);    // Set counter rst bit
     PCNT.ctrl.val &= ~(1 << (2 * unit)); // Clear counter rst bit
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 /*
     @brief Check PCNT interrupt status by reading register
@@ -53,10 +47,8 @@ static bool IRAM_ATTR __pcnt_is_intr_active(uint8_t unit)
 */
 static void IRAM_ATTR __pcnt_clear_intr(uint8_t unit)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     PCNT.int_clr.val |= (1 << unit);  // Set intr clr bit
     PCNT.int_clr.val &= ~(1 << unit); // Clear intr clr bit
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 /*
     @brief Read PCNT counts by reading register
@@ -74,69 +66,59 @@ static int16_t IRAM_ATTR __pcnt_get_count(uint8_t unit)
 */
 static void IRAM_ATTR __pcnt_set_threshold(uint8_t unit, int16_t value)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
 #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf1.cnt_thres0 = value;
 #elif CONFIG_IDF_TARGET_ESP32S3
     PCNT.conf_unit[unit].conf1.cnt_thres0_un = value;
 #endif
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 /*
     @brief Set PCNT interrupt threshold enable by setting register
 */
 static void IRAM_ATTR __pcnt_set_threshold_enable(uint8_t unit, uint8_t enable)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
 #if CONFIG_IDF_TARGET_ESP32
     PCNT.conf_unit[unit].conf0.thr_thres0_en = enable;
 #elif CONFIG_IDF_TARGET_ESP32S3
     PCNT.conf_unit[unit].conf0.thr_thres0_en_un = enable;
 #endif
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 #endif // ESP_IDF_VERSION_MAJOR < 5
 
 static void IRAM_ATTR __ledc_timer_pause(uint8_t mode, uint8_t timer)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.timer_group[mode].timer[timer].conf.pause = 1;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 
 static void IRAM_ATTR __ledc_timer_resume(uint8_t mode, uint8_t timer)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.timer_group[mode].timer[timer].conf.pause = 0;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
+}
+
+static void IRAM_ATTR __ledc_timer_rst(uint8_t mode, uint8_t timer)
+{
+    LEDC.timer_group[mode].timer[timer].conf.rst = 1;
+    LEDC.timer_group[mode].timer[timer].conf.rst = 0;
 }
 
 static void IRAM_ATTR __ledc_set_idle_level(uint8_t mode, uint8_t channel, uint8_t idle_level)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.channel_group[mode].channel[channel].conf0.idle_lv = idle_level & 0x1;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 
 static void IRAM_ATTR __ledc_set_sig_out_en(uint8_t mode, uint8_t channel, uint8_t sig_out_en)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.channel_group[mode].channel[channel].conf0.sig_out_en = sig_out_en;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 
 static void IRAM_ATTR __ledc_set_duty_start(uint8_t mode, uint8_t channel, uint8_t duty_start)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.channel_group[mode].channel[channel].conf1.duty_start = duty_start;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 
 static void IRAM_ATTR __ledc_set_channel_low_speed(uint8_t mode, uint8_t channel)
 {
-    portENTER_CRITICAL_SAFE(&driver_spinlock);
     LEDC.channel_group[mode].channel[channel].conf0.low_speed_update = 1;
-    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 
 static void IRAM_ATTR __ledc_stop(uint8_t mode, uint8_t channel, uint8_t idle_level)
@@ -144,6 +126,14 @@ static void IRAM_ATTR __ledc_stop(uint8_t mode, uint8_t channel, uint8_t idle_le
     __ledc_set_idle_level(mode, channel, idle_level);
     __ledc_set_sig_out_en(mode, channel, false);
     __ledc_set_duty_start(mode, channel, false);
+    if (mode == LEDC_LOW_SPEED_MODE)
+        __ledc_set_channel_low_speed(mode, channel);
+}
+
+static void IRAM_ATTR __ledc_resume(uint8_t mode, uint8_t channel)
+{
+    __ledc_set_duty_start(mode, channel, true);
+    __ledc_set_sig_out_en(mode, channel, true);
     if (mode == LEDC_LOW_SPEED_MODE)
         __ledc_set_channel_low_speed(mode, channel);
 }
@@ -157,6 +147,7 @@ static void IRAM_ATTR __ledc_stop(uint8_t mode, uint8_t channel, uint8_t idle_le
 void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
 {
     LEDCStepperDriver *driver = (LEDCStepperDriver *)arg;
+    portENTER_CRITICAL_SAFE(&driver_spinlock);
     if (__pcnt_is_intr_active(driver->pcnt_unit))
     {
         __ledc_timer_pause(driver->ledc_mode, driver->ledc_timer);
@@ -210,12 +201,13 @@ void IRAM_ATTR driver_pcnt_intr_handler(void *arg)
             __ledc_timer_resume(driver->ledc_mode, driver->ledc_timer);
         }
     }
+    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 }
 #else
 bool IRAM_ATTR driver_pcnt_intr_handler(pcnt_unit_handle_t unit, const pcnt_watch_event_data_t *edata, void *arg)
 {
     LEDCStepperDriver *driver = (LEDCStepperDriver *)arg;
-
+    portENTER_CRITICAL_SAFE(&driver_spinlock);
     __ledc_timer_pause(driver->ledc_mode, driver->ledc_timer);
     pcnt_unit_stop(unit);
     int count;
@@ -275,13 +267,15 @@ bool IRAM_ATTR driver_pcnt_intr_handler(pcnt_unit_handle_t unit, const pcnt_watc
         pcnt_unit_start(unit);
         __ledc_timer_resume(driver->ledc_mode, driver->ledc_timer);
     }
-
+    portEXIT_CRITICAL_SAFE(&driver_spinlock);
     return false; // return whether a high priority task has been waken up by this function
 }
 #endif // ESP_IDF_VERSION_MAJOR < 5
 
 void IRAM_ATTR LEDCStepperDriver::__stop_from_int()
 {
+    portENTER_CRITICAL_SAFE(&driver_spinlock);
+
 #if ESP_IDF_VERSION_MAJOR < 5
     __ledc_timer_pause(ledc_mode, ledc_timer);
     __pcnt_pause(pcnt_unit);
@@ -328,6 +322,7 @@ void IRAM_ATTR LEDCStepperDriver::__stop_from_int()
             digitalWrite(enable_pin, (enable_active_state == HIGH) ? LOW : HIGH);
         }
     }
+    portEXIT_CRITICAL_SAFE(&driver_spinlock);
 
 #endif // ESP_IDF_VERSION_MAJOR < 5
 }
@@ -404,16 +399,20 @@ void LEDCStepperDriver::driver_pwm_start()
         Resume after ledc_stop()
         Reference: https://esp32.com/viewtopic.php?t=2340
     */
-    ESP_ERROR_CHECK(ledc_set_freq(ledc_mode, ledc_timer, pulse_freq));
-    ESP_ERROR_CHECK(ledc_timer_resume(ledc_mode, ledc_timer));
-    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << (ledc_timer_resolution - 1)) - 1));
-    ESP_ERROR_CHECK(ledc_update_duty(ledc_mode, ledc_channel));
+    portENTER_CRITICAL_SAFE(&driver_spinlock);
+    __ledc_timer_rst(ledc_mode, ledc_timer);
+    __ledc_timer_resume(ledc_mode, ledc_timer);
+    __ledc_resume(ledc_mode, ledc_channel);
+    portEXIT_CRITICAL_SAFE(&driver_spinlock);
+    ESP_LOGI(TAG, "Driver pwm started, id %d", ledc_channel);
     pwm_running = true;
 }
 void LEDCStepperDriver::driver_pwm_stop()
 {
-    ESP_ERROR_CHECK(ledc_stop(ledc_mode, ledc_channel, LOW));
-    ESP_ERROR_CHECK(ledc_timer_pause(ledc_mode, ledc_timer));
+    portENTER_CRITICAL_SAFE(&driver_spinlock);
+    __ledc_stop(ledc_mode, ledc_channel, LOW);
+    __ledc_timer_pause(ledc_mode, ledc_timer);
+    portEXIT_CRITICAL_SAFE(&driver_spinlock);
     pwm_running = false;
 }
 void LEDCStepperDriver::driver_pcnt_start(long steps)
@@ -474,6 +473,7 @@ void LEDCStepperDriver::driver_ledc_auto_resolution()
     config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ESP_ERROR_CHECK(ledc_timer_rst(ledc_mode, ledc_timer));
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
+    ESP_ERROR_CHECK(ledc_set_duty(ledc_mode, ledc_channel, (1 << (ledc_timer_resolution - 1)) - 1));
 }
 
 void LEDCStepperDriver::begin(float rpm, short microsteps)
@@ -508,8 +508,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
 
     /* 初始化timer及channel后停止输出并暂停计数器
        使用 ledc_timer_resume(ledc_mode, ledc_timer) 及 ledc_update_duty(ledc_mode, ledc_channel) 恢复输出 */
-    // ledc_stop(ledc_mode, ledc_channel, LOW);
-    // ledc_timer_pause(ledc_mode, ledc_timer);
+    driver_ledc_auto_resolution();
     driver_pwm_stop();
     pwm_running = false;
 
