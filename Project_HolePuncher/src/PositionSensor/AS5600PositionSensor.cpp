@@ -53,7 +53,7 @@ void AS5600PositionSensor::begin()
 
     if (!loop_tsk)
     {
-        assert(xTaskCreate(as5600loop, "AS5600 Loop", 4096, &sensor_list, 2, &loop_tsk) == pdPASS);
+        assert(xTaskCreate(as5600loop, "AS5600 Loop", 2048, &sensor_list, 2, &loop_tsk) == pdPASS);
     }
     sensor_list.push_back(this);
 
