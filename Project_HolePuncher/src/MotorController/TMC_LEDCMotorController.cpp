@@ -57,6 +57,7 @@ void IRAM_ATTR driver_diag_intr_handler(void *arg)
         controller->stepper->__stop_from_int();
         TMC_LEDCMotorController_evt_msg msg = {controller, MC_EVT_ZEROING_DONE};
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        controller->is_zeroing = false;
         xQueueSendFromISR(evt_queue, &msg, &xHigherPriorityTaskWoken);
     }
 }
