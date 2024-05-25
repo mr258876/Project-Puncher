@@ -11,7 +11,7 @@ void evtHandleLoop(void *param)
     while (1)
     {
         xQueueReceive(scheduler->evt_queue, &evt, portMAX_DELAY);
-        ESP_LOGI(TAG, "Event received: %d", evt);
+        // ESP_LOGI(TAG, "Event received: %d", evt);
         if (evt < 1)
         {
             ESP_LOGE(TAG, "Invalid event: %d", evt);
@@ -1239,7 +1239,7 @@ void PuncherScheduler::onFinishZ()
     if (sensor_Z_avaliable && std::any_cast<uint8_t>(z_encoder_enable))
     {
         double pos = sensor_Z->getRelativePosition();
-        ESP_LOGI(TAG, "Pos %lf", pos);
+        // ESP_LOGI(TAG, "Pos %lf", pos);
         double pos_target = _z_target_pos / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * 2 * 3.14159265358979;
         pos_target = pos_target * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
         int32_t diff_steps = (int32_t)((pos_target - pos) / 2 / 3.14159265358979 * MOTOR_STEPS * MICROSTEPS_Z);
@@ -1247,7 +1247,7 @@ void PuncherScheduler::onFinishZ()
         if (diff_steps > 2 || diff_steps < -2)
         {
             // move the extra steps
-            ESP_LOGI(TAG, "Adjusting z: %ld", diff_steps);
+            // ESP_LOGI(TAG, "Adjusting z: %ld", diff_steps);
             z_finished = 0;
             Z->move(diff_steps);
             vTaskDelay(pdMS_TO_TICKS(1));
