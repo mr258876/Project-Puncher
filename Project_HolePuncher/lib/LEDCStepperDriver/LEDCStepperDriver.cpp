@@ -132,8 +132,8 @@ static void IRAM_ATTR __ledc_stop(uint8_t mode, uint8_t channel, uint8_t idle_le
 
 static void IRAM_ATTR __ledc_resume(uint8_t mode, uint8_t channel)
 {
-    __ledc_set_duty_start(mode, channel, true);
     __ledc_set_sig_out_en(mode, channel, true);
+    __ledc_set_duty_start(mode, channel, true);
     if (mode == LEDC_LOW_SPEED_MODE)
         __ledc_set_channel_low_speed(mode, channel);
 }
@@ -364,6 +364,7 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
     this->pcnt_unit = pcnt_unit;
     this->pcnt_channel = pcnt_channel;
     this->count_falling_edge = count_falling_edge;
+    this->pulse_freq = 256000;
 }
 #else
 LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin, int enable_pin, ledc_mode_t ledc_mode, ledc_timer_t ledc_timer, ledc_channel_t ledc_channel, bool count_falling_edge)
@@ -377,6 +378,7 @@ LEDCStepperDriver::LEDCStepperDriver(int motor_steps, int dir_pin, int step_pin,
     this->ledc_timer_resolution = LEDC_TIMER_4_BIT;
     this->ledc_channel = ledc_channel;
     this->count_falling_edge = count_falling_edge;
+    this->pulse_freq = 256000;
 }
 #endif // ESP_IDF_VERSION_MAJOR < 5
 
@@ -388,7 +390,7 @@ LEDCStepperDriver::~LEDCStepperDriver()
     @brief Resume LEDC timer and pwm output
     @bug LEDC might not responding when resuming pwm multiple times in a short time
 */
-void LEDCStepperDriver::driver_pwm_start()
+void IRAM_ATTR LEDCStepperDriver::driver_pwm_start()
 {
     if (pwm_running)
         driver_pwm_stop();
@@ -400,18 +402,17 @@ void LEDCStepperDriver::driver_pwm_start()
         Reference: https://esp32.com/viewtopic.php?t=2340
     */
     portENTER_CRITICAL_SAFE(&driver_spinlock);
-    __ledc_timer_rst(ledc_mode, ledc_timer);
-    __ledc_timer_resume(ledc_mode, ledc_timer);
-    __ledc_resume(ledc_mode, ledc_channel);
+    ESP_ERROR_CHECK(ledc_timer_rst(ledc_mode, ledc_timer));
+    ESP_ERROR_CHECK(ledc_timer_resume(ledc_mode, ledc_timer));
+    ESP_ERROR_CHECK(ledc_update_duty(ledc_mode, ledc_channel));
     portEXIT_CRITICAL_SAFE(&driver_spinlock);
-    ESP_LOGI(TAG, "Driver pwm started, id %d", ledc_channel);
     pwm_running = true;
 }
 void LEDCStepperDriver::driver_pwm_stop()
 {
     portENTER_CRITICAL_SAFE(&driver_spinlock);
-    __ledc_stop(ledc_mode, ledc_channel, LOW);
-    __ledc_timer_pause(ledc_mode, ledc_timer);
+    ESP_ERROR_CHECK(ledc_timer_pause(ledc_mode, ledc_timer));
+    ESP_ERROR_CHECK(ledc_stop(ledc_mode, ledc_channel, LOW));
     portEXIT_CRITICAL_SAFE(&driver_spinlock);
     pwm_running = false;
 }
@@ -494,7 +495,7 @@ void LEDCStepperDriver::begin(float rpm, short microsteps)
     config_ledc_timer.speed_mode = ledc_mode;
     config_ledc_timer.timer_num = ledc_timer;
     config_ledc_timer.duty_resolution = ledc_timer_resolution;
-    config_ledc_timer.freq_hz = 256000;
+    config_ledc_timer.freq_hz = pulse_freq;
     config_ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ESP_ERROR_CHECK(ledc_timer_config(&config_ledc_timer));
 
