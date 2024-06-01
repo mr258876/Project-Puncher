@@ -918,6 +918,8 @@ void PuncherScheduler::onFinishZeroingX()
     this->Xsleep();
 
     this->X->setZeroingFinishCallBack([]() {});
+
+    updateUIstatus();
 }
 void PuncherScheduler::onFinishZeroingY()
 {
@@ -929,6 +931,8 @@ void PuncherScheduler::onFinishZeroingY()
     this->Ysleep();
 
     this->Y->setZeroingFinishCallBack([]() {});
+
+    updateUIstatus();
 }
 void PuncherScheduler::onFinishZeroingZ()
 {
@@ -940,6 +944,8 @@ void PuncherScheduler::onFinishZeroingZ()
     this->Zsleep();
 
     this->Z->setZeroingFinishCallBack([]() {});
+
+    updateUIstatus();
 }
 
 int PuncherScheduler::read_sg_result_X_cb()
