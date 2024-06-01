@@ -1009,6 +1009,8 @@ int PuncherScheduler::start_auto_zeroing_X_cb()
     this->X->setZeroingFinishCallBack([this]()
                                       { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_X; xQueueSend(this->evt_queue, &evt, portMAX_DELAY); });
     this->X->startZeroing(std::any_cast<uint8_t>(this->x_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->x_zeroing_torch_thres));
+
+    updateUIstatus();
     return 0;
 }
 
@@ -1025,6 +1027,8 @@ int PuncherScheduler::start_auto_zeroing_Y_cb()
     this->Y->setZeroingFinishCallBack([this]()
                                       { scheduler_evt_t evt = EVT_ON_ZEROING_FINISH_Y; xQueueSend(this->evt_queue, &evt, portMAX_DELAY); });
     this->Y->startZeroing(std::any_cast<uint8_t>(this->y_zeroing_reverse_dir) ? -1 : 1, std::any_cast<int32_t>(this->y_zeroing_torch_thres));
+
+    updateUIstatus();
     return 0;
 }
 

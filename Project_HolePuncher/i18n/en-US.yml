@@ -72,6 +72,9 @@ en-US:
   Encoder: ~
   Use Encoder: ~
   Encoder Type: ~
+  Please Wait: ~
+  Axis Zeroing...: ~
+  Transmitting Data...: ~
   _encoder_type_options: "AS5600"
   Auto Calibrate: "Auto\nCalibrate"
   _version: "Firmware Version\n%s"

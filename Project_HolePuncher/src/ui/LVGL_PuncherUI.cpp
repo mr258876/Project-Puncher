@@ -138,10 +138,49 @@ void LVGLPuncherUI::attachScheduler(PuncherSchedulerInterface *p_scheduler)
     p_scheduler->get_setting_values(this);
 }
 
+// put msg boxes here temporarily
+static lv_obj_t *zeroing_msgbox = NULL;
+static lv_obj_t *transmitting_msgbox = NULL;
 void LVGLPuncherUI::handleEventCodeChange(puncher_status_t *msg)
 {
     ESP_LOGI(TAG, "Scheduler status update!");
     xSemaphoreTake(LVGLMutex, portMAX_DELAY);
+
+    if (msg->basic_status.status_data & PUNCHER_STATUS_IS_ZEROING)
+    {
+        if (!zeroing_msgbox)
+        {
+            zeroing_msgbox = lv_msgbox_create(NULL, _("Please Wait"), _("Axis Zeroing..."), NULL, false);
+            lv_obj_center(zeroing_msgbox);
+        }
+    }
+    else
+    {
+        if (zeroing_msgbox)
+        {
+            lv_msgbox_close(zeroing_msgbox);
+            zeroing_msgbox = NULL;
+        }
+    }
+
+    if (msg->basic_status.status_flags.is_transmitting_data)
+    {
+        ESP_LOGI(TAG, "Transmitting data");
+        if (!transmitting_msgbox)
+        {
+            transmitting_msgbox = lv_msgbox_create(NULL, _("Please Wait"), _("Transmitting Data..."), NULL, false);
+            lv_obj_center(transmitting_msgbox);
+        }
+    }
+    else
+    {
+        if (transmitting_msgbox)
+        {
+            lv_msgbox_close(transmitting_msgbox);
+            transmitting_msgbox = NULL;
+        }
+    }
+
     if (msg->basic_status.status_flags.is_running)
     {
         lv_label_set_text_fmt(ui_Label5, "%lu/%lu", msg->finished_length, msg->task_length);
@@ -238,7 +277,6 @@ void LVGLPuncherUI::setBrightness(int brightness)
 {
     ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, static_cast<ledc_channel_t>(LCD_LEDC_CHANNEL), brightness));
     ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, static_cast<ledc_channel_t>(LCD_LEDC_CHANNEL)));
-
 }
 
 void LVGLPuncherUI::setLanguage(uint16_t lang_id)
