@@ -1,11 +1,12 @@
-from typing import List, Iterable, Union
-from bleak import BleakClient, BleakScanner, BLEDevice, BleakGATTServiceCollection
+from typing import List, Iterable, Union, Dict, Tuple
+from bleak import BleakClient, BleakScanner, BLEDevice, BleakGATTServiceCollection, AdvertisementData
 from tqdm import tqdm
 import mido
 import time
 import logging
 import asyncio
 
+# MIDI_FILE_PATH = "d:\Domino\puncher_test.mid" # path to midi file
 MIDI_FILE_PATH = "d:\Domino\ミカヅキ.mid" # path to midi file
 MCODE_SERVICE_UUID = "00003200-0000-1000-D441-30F244F2E354"
 MCODE_CHAR_UUID = "00003201-0000-1000-D441-30F244F2E354"
@@ -120,7 +121,7 @@ class HolePuncher():
         pbar.set_description("Sending data...")
 
         # 传输数据
-        ba = bytearray("M80 Y96 P0".encode("ASCII"))
+        ba = bytearray("M80 Y0 P0".encode("ASCII"))
         await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
 
         last_tick = 0
@@ -134,7 +135,7 @@ class HolePuncher():
             await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
             pbar.update(1)
         
-        ba = bytearray("M90 Y96 P0".encode("ASCII"))
+        ba = bytearray("M90 Y0 P0".encode("ASCII"))
         await self.client.write_gatt_char(self.services.get_characteristic(MCODE_CHAR_UUID), ba)
     
     async def end(self):
@@ -150,7 +151,13 @@ async def main():
     midi = mido.MidiFile(mifiFilePath)
 
     logging.info("Scanning devices...")
-    devices = await BleakScanner.discover()
+    # Note: service_uuids is not working in Windows as far as v0.22.1, or May 24 2024.
+    # Wait for further update. Bug had been reported as issue #1576
+    scanner = BleakScanner(service_uuids=PUNCHER_GATT_SERVICES)
+    await scanner.start()
+    await asyncio.sleep(5)
+    await scanner.stop()
+    devices = scanner.discovered_devices
     for i in range(len(devices)):
         logging.info(f"{i}. {devices[i]}")
     n = input("Select device:")
@@ -162,7 +169,8 @@ async def main():
 
     puncher = HolePuncher(devices[n], puncherService)
     await puncher.begin()
-    await puncher.punchMidi(midi, pitch=0, zoom=1.0)
+    # await puncher.punchMidi(midi, pitch=0, zoom=0.5)
+    await puncher.punchMidi(midi, pitch=18, zoom=1.0)
     await puncher.end()
 
 

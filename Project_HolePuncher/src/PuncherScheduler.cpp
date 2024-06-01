@@ -371,10 +371,6 @@ void PuncherScheduler::begin()
         Init Motors
     */
     initMotors();
-    if (std::any_cast<uint8_t>(x_auto_zreoing))
-        start_auto_zeroing(0b1);
-    if (std::any_cast<uint8_t>(y_auto_zreoing))
-        start_auto_zeroing(0b10);
 
     /*
         Init Sensors
@@ -730,12 +726,17 @@ void PuncherScheduler::initMotors()
 
 void PuncherScheduler::onPowerStatusChange()
 {
-    ESP_LOGI(TAG, "onPowerStatusChange");
-    status.basic_status.status_flags.has_error = status_has_error();
+    bool hasError = status_has_error();
+    status.basic_status.status_flags.has_error = hasError;
+    updateUIstatus();
 
-    for (auto ui : ui_list)
+    if (!hasError)
     {
-        ui->onStatusCode(&status);
+        // start autozeroing on PGOOD
+        if (!x_zeroed && std::any_cast<uint8_t>(x_auto_zreoing))
+            start_auto_zeroing(0b1);
+        if (!y_zeroed && std::any_cast<uint8_t>(y_auto_zreoing))
+            start_auto_zeroing(0b10);
     }
 }
 
@@ -910,6 +911,7 @@ int PuncherScheduler::read_sg_result(int axis)
 void PuncherScheduler::onFinishZeroingX()
 {
     this->status.basic_status.status_flags.is_zeroing_x = 0;
+    this->x_zeroed = 1;
     this->_x_pos = std::any_cast<int32_t>(x_zeroing_position) / 100.0;
     this->updateXspeed();
     this->updateXdriver();
@@ -920,6 +922,7 @@ void PuncherScheduler::onFinishZeroingX()
 void PuncherScheduler::onFinishZeroingY()
 {
     this->status.basic_status.status_flags.is_zeroing_y = 0;
+    this->y_zeroed = 1;
     this->_y_pos = std::any_cast<int32_t>(y_zeroing_position) / 100.0;
     this->updateYspeed();
     this->updateYdriver();
@@ -930,6 +933,7 @@ void PuncherScheduler::onFinishZeroingY()
 void PuncherScheduler::onFinishZeroingZ()
 {
     this->status.basic_status.status_flags.is_zeroing_z = 0;
+    this->z_zeroed = 1;
     // this->_z_pos = std::any_cast<int32_t>(z_zeroing_position) / 100.0;
     this->updateZspeed();
     this->updateZdriver();
@@ -1028,6 +1032,9 @@ int PuncherScheduler::start_encoder_calibrate(int axis)
 {
     if (this->status.basic_status.status_data & PUNCHER_STATUS_BUSY_MASK)
         return 1;
+
+    if (!this->sensor_Z_avaliable)
+        return 2;
 
     if (!axis)
         axis = ~axis;
@@ -1246,11 +1253,11 @@ void PuncherScheduler::onFinishZ()
 
         if (diff_steps > 2 || diff_steps < -2)
         {
+            vTaskDelay(pdMS_TO_TICKS(1));
             // move the extra steps
             // ESP_LOGI(TAG, "Adjusting z: %ld", diff_steps);
             z_finished = 0;
             Z->move(diff_steps);
-            vTaskDelay(pdMS_TO_TICKS(1));
             return;
         }
 

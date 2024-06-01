@@ -390,7 +390,7 @@ LEDCStepperDriver::~LEDCStepperDriver()
     @brief Resume LEDC timer and pwm output
     @bug LEDC might not responding when resuming pwm multiple times in a short time
 */
-void IRAM_ATTR LEDCStepperDriver::driver_pwm_start()
+void LEDCStepperDriver::driver_pwm_start()
 {
     if (pwm_running)
         driver_pwm_stop();
@@ -704,7 +704,7 @@ void LEDCStepperDriver::startMove(long steps)
     steps_remaining = steps;
     enable();
     driver_pcnt_start(steps);
-    ESP_LOGD(TAG, "start move steps:%ld", steps);
+    // ESP_LOGI(TAG, "start move steps:%ld", steps);
 
     digitalWrite(dir_pin, dir_state);
     driver_pwm_start();

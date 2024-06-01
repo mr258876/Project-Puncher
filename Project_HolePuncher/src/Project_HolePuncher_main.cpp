@@ -133,22 +133,18 @@ void encoder_init()
 {
     ESP_LOGI("Puncher_Main", "Encoder initializing...");
 
-    if (scheduler->getZencoderEnabled())
+    switch (scheduler->getZencoderType())
     {
-        switch (scheduler->getZencoderType())
-        {
-        case 0:
-            Wire.begin(I2C0_SDA, I2C0_SCL, 400000U);
+    case 0:
+        Wire.begin(I2C0_SDA, I2C0_SCL, 400000U);
 
-            sensor_Z = new AS5600PositionSensor(&Wire, &I2C0Mutex);
-            sensor_Z->begin();
+        sensor_Z = new AS5600PositionSensor(&Wire, &I2C0Mutex);
 
-            scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
-            break;
+        scheduler->attachPositionSensors(NULL, NULL, sensor_Z);
+        break;
 
-        default:
-            break;
-        }
+    default:
+        break;
     }
 
     ESP_LOGI("Puncher_Main", "Encoder initialized!");

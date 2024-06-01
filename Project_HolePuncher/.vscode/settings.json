@@ -84,6 +84,9 @@
         "ffat.h": "c",
         "esp_psram.h": "c",
         "esp_system.h": "c",
-        "compare": "cpp"
+        "compare": "cpp",
+        "bit": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp"
     }
 }

@@ -48,6 +48,10 @@ private:
     double _y_target_pos = 0;
     double _z_target_pos = 0;
 
+    bool x_zeroed = false;
+    bool y_zeroed = false;
+    bool z_zeroed = false;
+
     /* Task storage */
     std::vector<scheduler_hole_t> holeList;
     SemaphoreHandle_t holeListHandle;
@@ -71,6 +75,10 @@ private:
     bool sensor_X_avaliable = false;
     bool sensor_Y_avaliable = false;
     bool sensor_Z_avaliable = false;
+
+    bool sensor_X_initialized = false;
+    bool sensor_Y_initialized = false;
+    bool sensor_Z_initialized = false;
 
     uint32_t calcMotorSpeedPulse(int32_t length10UM, uint16_t length_type, int32_t speed10UMpS, int32_t microSteps);
     uint32_t calcMotorSpeedPulse(std::any length10UM, std::any length_type, std::any speed10UMpS, std::any microSteps);
@@ -135,26 +143,35 @@ private:
     inline int32_t calc_X_steps(double mm)
     {
         double steps = mm / (std::any_cast<int32_t>(x_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(x_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_X;
-        steps += 0.5;
+        if (mm > 0)
+            steps += 0.5;
+        else if (mm < 0)
+            steps -= 0.5;
         return (int32_t)steps;
     }
     inline int32_t calc_Y_steps(double mm)
     {
         double steps = mm / (std::any_cast<int32_t>(y_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(y_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_Y;
-        steps += 0.5;
+        if (mm > 0)
+            steps += 0.5;
+        else if (mm < 0)
+            steps -= 0.5;
         return (int32_t)steps;
     }
     inline int32_t calc_Z_steps(double mm)
     {
         double steps = mm / (std::any_cast<int32_t>(z_lead_length) * 1.0 / 100) / (std::any_cast<uint16_t>(z_length_type) ? 1 : 3.14159265358979) * MOTOR_STEPS * MICROSTEPS_Z;
         steps = steps * (std::any_cast<int32_t>(z_cali_target_bar) * 8.0 / (std::any_cast<int32_t>(z_cali_measure_bar) * 8.0 + std::any_cast<int32_t>(z_cali_residual) / 1000.0));
-        steps += 0.5;
+        if (mm > 0)
+            steps += 0.5;
+        else if (mm < 0)
+            steps -= 0.5;
         return (int32_t)steps;
     }
 
-    static void _X_on_finish_move_static(void* arg);
-    static void _Y_on_finish_move_static(void* arg);
-    static void _Z_on_finish_move_static(void* arg);
+    static void _X_on_finish_move_static(void *arg);
+    static void _Y_on_finish_move_static(void *arg);
+    static void _Z_on_finish_move_static(void *arg);
 
     void _X_on_finish_move();
     void _Y_on_finish_move();
@@ -177,12 +194,21 @@ private:
     int start_auto_zeroing_Y_cb();
 
     /* init seneors */
-    inline void initSensors()
+    inline void _initSensorZ()
     {
         if (this->sensor_Z)
         {
+            if (!this->sensor_Z_initialized)
+            {
+                this->sensor_Z->begin();
+                this->sensor_Z_initialized = true;
+            }
             sensor_Z_avaliable = (this->sensor_Z->ping() == 0);
         }
+    }
+    inline void initSensors()
+    {
+        _initSensorZ();
     }
 
     int start_sensor_calibration_Z_cb();

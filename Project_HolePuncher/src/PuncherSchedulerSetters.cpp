@@ -319,6 +319,10 @@ bool PuncherScheduler::setZEncoderEnable(std::any val)
         return false;
 
     this->z_encoder_enable = val;
+    if (std::any_cast<uint8_t>(val) && !this->sensor_Z_initialized)
+    {
+        _initSensorZ();
+    }
     return true;
 }
 bool PuncherScheduler::setZEncoderType(std::any val)
