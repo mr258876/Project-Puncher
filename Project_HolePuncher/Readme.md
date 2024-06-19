@@ -11,7 +11,7 @@
 
 ## 支持库 / Libraries Used
 ### 3rd party libraries:
-- [lvgl/lvgl@^8.3.9](https://github.com/lvgl/lvgl)
+- [lvgl/lvgl@^8.4.0](https://github.com/lvgl/lvgl)
 - [teemuatlut/TMCStepper@^0.7.3](https://github.com/teemuatlut/TMCStepper)
 - [robtillaart/PCF8574@^0.3.9](https://github.com/robtillaart/PCF8574)
 ### Modified & Distributed under MIT license:

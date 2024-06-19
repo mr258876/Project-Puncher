@@ -17,7 +17,7 @@ static inline uint32_t op_w(uint32_t val) { UNUSED(val); return 0; }
 static inline uint32_t op_f(uint32_t val) { UNUSED(val); return 0; }
 static inline uint32_t op_t(uint32_t val) { UNUSED(val); return 0; }
 
-static lv_i18n_phrase_t en_us_singulars[] = {
+static const lv_i18n_phrase_t en_us_singulars[] = {
     {"Operational Speed (mm/s)", "Operational\nSpeed (mm/s)"},
     {"_length_type_options", "Diameter\nPerimeter"},
     {"Operational Current (mA)", "Operational\nCurrent (mA)"},
@@ -70,7 +70,7 @@ static const lv_i18n_lang_t en_us_lang = {
     .locale_plural_fn = en_us_plural_fn
 };
 
-static lv_i18n_phrase_t zh_cn_singulars[] = {
+static const lv_i18n_phrase_t zh_cn_singulars[] = {
     {"Status", "状态"},
     {"ETA", "预计剩余时间"},
     {"Feed", "进纸"},
