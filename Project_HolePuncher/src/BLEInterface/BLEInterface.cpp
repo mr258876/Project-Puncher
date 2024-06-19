@@ -47,9 +47,8 @@ void BLEInterface::start()
     NimBLEDevice::setSecurityRespKey(BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID);
 
     // Enable pairing & RPA
-    NimBLEDevice::setOwnAddrType(BLE_OWN_ADDR_PUBLIC, false);
+    NimBLEDevice::setOwnAddrType(BLE_OWN_ADDR_RANDOM, false);
     NimBLEDevice::setSecurityAuth(true, true, true);
-    // NimBLEDevice::setSecurityAuth(true, false, true);   // disable mitm for Bleak
 
     pBLEServer = NimBLEDevice::createServer();
 

@@ -55,8 +55,7 @@ void BLEInterface::mcode_setup()
     NimBLEService *pMcodeService = pBLEServer->createService(BLE_MCODE_SERVICE_UUID);
     NimBLECharacteristic *pMcodeCharacteristic = pMcodeService->createCharacteristic(
         BLE_MCODE_CHAR_UUID,
-        // NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY // Only allow paired devices to write
-        NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY // Only allow paired devices to write
+        NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY // Only allow paired devices to write
     );
     pMcodeCharacteristic->setCallbacks(new McodeInCharacteristicCallbacks());
     pMcodeService->start();
